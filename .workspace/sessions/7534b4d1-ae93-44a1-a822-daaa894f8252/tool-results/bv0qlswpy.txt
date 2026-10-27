@@ -1,0 +1,244 @@
+.github/workflows/bump-cask.yml:20: TAG=$(curl -sf https://api.github.com/repos/diffusionstudio/editor/releases/latest | jq -r .tag_name)
+.github/workflows/bump-cask.yml:29: curl -sfL --retry 10 --retry-delay 30 --retry-all-errors -o app.dmg "https://github.com/diffusionstudio/editor/releases/download/${TAG}/Diffusion-Studio-arm64.dmg"
+.github/workflows/bump-cask.yml:39: git clone "https://x-access-token:${GH_TOKEN}@github.com/diffusionstudio/homebrew-tap.git" tap
+.github/workflows/bump-winget.yml:38: TAG=$(curl -sf https://api.github.com/repos/diffusionstudio/editor/releases/latest | jq -r .tag_name)
+.github/workflows/bump-winget.yml:45: URL="https://github.com/diffusionstudio/editor/releases/download/${TAG}/Diffusion-Studio-x64-Setup.exe"
+.github/workflows/bump-winget.yml:54: curl -sfL -o komac.tar.gz "https://github.com/russellbanks/Komac/releases/download/v${KOMAC_VERSION}/komac-${KOMAC_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+.github/workflows/bump-winget.yml:71: --release-notes-url "https://github.com/diffusionstudio/editor/releases/tag/${TAG}" \
+.gitignore:24: .DS_Store
+README.md:2: <a href="https://diffusion.studio">
+README.md:10: <a href="https://www.diffusion.studio/download"><img src="https://img.shields.io/badge/Download-macOS%20%7C%20Windows-161616?style=flat&labelColor=000000" alt="Download for macOS o
+README.md:11: <a href="https://discord.com/invite/zPQJrNGuFB"><img src="https://img.shields.io/discord/1115673443141156924?style=flat&logo=discord&logoColor=F8F8F8&label=Discord&labelColor=00000
+README.md:12: <a href="https://x.com/diffusionhq"><img src="https://img.shields.io/badge/Follow%20for-Updates-161616?style=flat&logo=x&logoColor=F8F8F8&labelColor=000000" alt="Follow on X" /></a
+README.md:13: <a href="https://www.ycombinator.com/companies/diffusion-studio"><img src="https://img.shields.io/badge/Combinator-F24-161616?style=flat&logo=ycombinator&logoColor=F8F8F8&labelColo
+README.md:23: <a href="https://app.diffusion.studio">
+README.md:59: <a href="https://www.diffusion.studio/download"><img src="https://img.shields.io/badge/Download-Diffusion%20Studio-161616?style=for-the-badge&labelColor=000000" alt="Download Diffu
+README.md:69: Create a polished, 20-second SaaS product promo video for https://typesafe.ai/. Use the website’s branding and highlight the product’s main benefit with animated UI mockups, concis
+README.md:73: Recreate the 3blue1brown animation from https://youtu.be/HEfHFsfGXjs, closely matching its visual style, pacing, framing, colors, labels, and transitions. Use the exact collision m
+README.md:95: Can you pull the best 30-second moment from https://youtu.be/MtQ0qxyf-Ds and make a vertical version for social?
+README.md:99: Make a 15-second version of this launch video. https://x.com/claudeai/status/2045156267690213649
+README.md:108: In three bullets, explain what starts the conflict. Include timestamps. https://youtu.be/aqz-KE-bpKQ
+README.md:112: Name three recurring locations and give one visual cue that distinguishes each. https://youtu.be/dQw4w9WgXcQ
+README.md:119: Both were created by prompting. The compositions are published in [diffusionstudio/open-projects](https://github.com/diffusionstudio/open-projects):
+README.md:121: | [Launch video](https://github.com/diffusionstudio/open-projects/tree/main/launch-video) | [Raise announcement](https://github.com/diffusionstudio/open-projects/tree/main/raise-an
+README.md:127: Diffusion Studio uses [SolidJS](https://www.solidjs.com) modules as the document source. Think IDE, but it renders a video canvas instead of text.
+README.md:232: git clone https://github.com/diffusionstudio/editor.git
+apps/desktop/forge.config.ts:69: iconUrl: 'https://raw.githubusercontent.com/diffusionstudio/editor/main/apps/desktop/assets/icon.ico',
+apps/desktop/forge.config.ts:128: timestampServer: 'http://timestamp.acs.microsoft.com',
+apps/desktop/package.json:8: "url": "https://github.com/diffusionstudio/editor.git"
+apps/desktop/scripts/stage-docs.mjs:23: filter: (path) => !path.endsWith(".DS_Store") && !path.endsWith(".gitkeep"),
+apps/desktop/src/agent-chat.ts:13: const DEV_ORIGIN = "http://localhost:5173";
+apps/desktop/src/analytics.ts:62: * install is recorded once, guarded by a marker file in `userData`; its age
+apps/desktop/src/analytics.ts:71: const marker = join(app.getPath("userData"), "install-tracked");
+apps/desktop/src/dapi/handlers/report.ts:15: "gh (GitHub CLI) is not installed, so the issue cannot be filed. Install it from https://cli.github.com, run `gh auth login`, then retry.";
+apps/desktop/src/dapi/http.test.ts:77: const elsewhere = await fetch(`http://127.0.0.1:${PORT}/other`);
+apps/desktop/src/dapi/http.ts:66: return `http://${this.deps.host}:${this.deps.port}${this.deps.path}`;
+apps/desktop/src/dapi/present.test.ts:98: const file = (filename: string) => ({ url: `https://files.test/${filename}`, filename, mimeType: "image/png", size: 8 });
+apps/desktop/src/dapi/server.ts:20: * shows the tools under: `mcp__diffusion__<tool>`. The same word as our URL
+apps/desktop/src/main-channels.ts:340: response: FsEntry[];
+apps/desktop/src/main-channels.ts:370: export type FsEntry = {
+apps/desktop/src/main.ts:60: const DEV_URL = "http://localhost:5173";
+apps/desktop/src/main.ts:346: app.setAsDefaultProtocolClient(AUTH_PROTOCOL, process.execPath, [
+apps/desktop/src/main.ts:350: app.setAsDefaultProtocolClient(AUTH_PROTOCOL);
+apps/desktop/src/main.ts:533: dataDir: join(app.getPath("userData"), "agent-chat"),
+apps/desktop/src/mcp-config.test.ts:18: url: "http://127.0.0.1:3274/mcp",
+apps/desktop/src/mcp-config.test.ts:127: expect(after).toBe('model = "o3"\n\n[mcp_servers.other]\ncommand = "x"\n\n[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps/desktop/src/mcp-config.test.ts:135: expect(after).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n[mcp_servers.other]\ncommand = "x"\n');
+apps/desktop/src/mcp-config.test.ts:141: expect(text).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps/desktop/src/mcp-config.ts:20: * namespace an agent shows us under: `mcp__diffusion__<tool>` and
+apps/desktop/src/mcp-config.ts:112: return "command" in target.entry({ url: "http://x", command: "x", args: [] });
+apps/desktop/src/mcp-install.ts:68: return join(app.getPath("appData"), location.path);
+apps/desktop/src/native/corner_radius.m:68: static NSImage* ds_cornerMask(id self, SEL _cmd) {
+apps/desktop/src/native/corner_radius.m:79: static CGFloat ds_radius(id self, SEL _cmd) {
+apps/desktop/src/native/corner_radius.m:97: if (class_getMethodImplementation(cls, sel) != (IMP)ds_radius) {
+apps/desktop/src/native/corner_radius.m:98: class_replaceMethod(cls, sel, (IMP)ds_radius, "d@:");
+apps/desktop/src/native/corner_radius.m:154: if (class_getMethodImplementation(realCls, @selector(_cornerMask)) != (IMP)ds_cornerMask) {
+apps/desktop/src/native/corner_radius.m:155: class_replaceMethod(realCls, @selector(_cornerMask), (IMP)ds_cornerMask, "@@:");
+apps/desktop/src/native/corner_radius.m:240: if ([sub.name isEqualToString:@"ds-tint"]) tint = sub;
+apps/desktop/src/native/corner_radius.m:245: tint.name = @"ds-tint";
+apps/desktop/src/projects.drafts.test.ts:14: let userData = "";
+apps/desktop/src/projects.drafts.test.ts:17: app: { isPackaged: false, getPath: (name: string) => (name === "userData" ? userData : tmpdir()) },
+apps/desktop/src/projects.drafts.test.ts:30: userData = join(root, "userData");
+apps/desktop/src/projects.ts:27: import type { CompileResult, FsEntry, FsStat, ProjectInfo, SourceEdit, WriteResult } from "./main-channels";
+apps/desktop/src/projects.ts:180: const base = local ? join(local, basename(app.getPath("userData"))) : app.getPath("userData");
+apps/desktop/src/projects.ts:200: const dir = join(app.getPath("videos"), "Diffusion Studio");
+apps/desktop/src/projects.ts:276: defaultPath: app.getPath("videos"),
+apps/desktop/src/projects.ts:377: const cloud = join(app.getPath("home"), "Library", "Mobile Documents", "com~apple~CloudDocs");
+apps/desktop/src/projects.ts:384: const home = app.getPath("home");
+apps/desktop/src/projects.ts:397: const root = await resolveDeepest(app.getPath(name));
+apps/desktop/src/projects.ts:620: a plain npm package whose entry file is a [Solid](https://www.solidjs.com)
+apps/desktop/src/projects.ts:720: - [JSX reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/jsx/README.md): elements, timing, paints, captions
+apps/desktop/src/projects.ts:721: - [Tool reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/tools/README.md): every tool and command, its options and its output
+apps/desktop/src/projects.ts:722: - [Examples](https://github.com/diffusionstudio/editor/tree/main/docs/examples): runnable compositions to read
+apps/desktop/src/projects.ts:1199: export async function listEntries(dir: string, source: string): Promise<FsEntry[]> {
+apps/desktop/src/projects.ts:1207: const entries = await Promise.all(names.map(async (entry): Promise<FsEntry | null> => {
+apps/desktop/src/projects.ts:1227: return entries.filter((entry): entry is FsEntry => entry !== null);
+apps/desktop/src/window-host.ts:147: this.holds--;
+apps/web/.env.example:1: VITE_SUPABASE_URL=https://mpvhvyxuqfcemfnwiaiq.supabase.co
+apps/web/.env.example:4: VITE_API_URL=https://api.diffusion.studio
+apps/web/index.html:21: var stored = localStorage.getItem("kb-color-mode");
+apps/web/index.html:23: else localStorage.setItem("kb-color-mode", apply("dark"));
+apps/web/index.html:64: <meta name="twitter:card" content="summary_large_image" />
+apps/web/index.html:65: <meta name="twitter:title" content="Diffusion Studio — The creative platform for video and motion graphics." />
+apps/web/index.html:66: <meta name="twitter:description" content="The video editor built on an infinite canvas. Create and edit videos with design-tool freedom and export up to 4K. Multi-track timeline, A
+apps/web/index.html:67: <meta name="twitter:image" content="/og-default.png" />
+apps/web/package.json:27: "@sentry/solid": "^10.51.0",
+apps/web/src/agent-chat/attachments.tsx:54: const entry = item.webkitGetAsEntry?.();
+apps/web/src/agent-chat/stick-to-bottom.ts:3: * use-stick-to-bottom (https://github.com/stackblitz-labs/use-stick-to-bottom).
+apps/web/src/agent-chat/stick-to-bottom.ts:14: * (https://github.com/stackblitz-labs/use-stick-to-bottom), created by StackBlitz and
+apps/web/src/components/dashboard/billing-info-view.tsx:88: <a href="https://cal.com/konstantinpaulus" target="_blank" class="cursor-pointer text-primary hover:underline ml-0.5">
+apps/web/src/components/dashboard/help-view.tsx:79: href="https://www.diffusion.studio/updates"
+apps/web/src/components/dashboard/help-view.tsx:82: label="Discord community"
+apps/web/src/components/dashboard/help-view.tsx:83: href="https://discord.gg/AYySWDhgNK"
+apps/web/src/components/dashboard/help-view.tsx:95: href="mailto:support@diffusion.studio"
+apps/web/src/components/dashboard/help-view.tsx:99: href="https://discord.gg/AYySWDhgNK"
+apps/web/src/components/dashboard/home-view.tsx:92: "Can you pull the best 30-second moment from https://youtu.be/MtQ0qxyf-Ds and make a vertical version for social?",
+apps/web/src/components/dashboard/home-view.tsx:93: "Name three recurring locations and give one visual cue that distinguishes each. https://youtu.be/dQw4w9WgXcQ",
+apps/web/src/components/dashboard/mcp-view.tsx:33: const MCP_DOCS_URL = "https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers";
+apps/web/src/components/dashboard/plans-view.tsx:230: <a href="https://cal.com/konstantinpaulus" target="_blank" class="text-primary hover:underline">
+apps/web/src/components/genai/config.ts:99: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/CwhRBWXzGAHq8TQ4Fs17/58ee3ff5-f6f2-4628-93b8-e38eb31806b0.mp3",
+apps/web/src/components/genai/config.ts:106: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/EXAVITQu4vr4xnSDxMaL/01a3e33c-6e99-4ee7-8543-ff2216a32186.mp3",
+apps/web/src/components/genai/config.ts:113: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/FGY2WhTYpPnrIDTdsKH5/67341759-ad08-41a5-be6e-de12fe448618.mp3",
+apps/web/src/components/genai/config.ts:120: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/IKne3meq5aSn9XLyUdCD/102de6f2-22ed-43e0-a1f1-111fa75c5481.mp3",
+apps/web/src/components/genai/config.ts:127: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/JBFqnCBsd6RMkjVDRZzb/e6206d1a-0721-4787-aafb-06a6e705cac5.mp3",
+apps/web/src/components/genai/config.ts:134: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/N2lVS1w4EtoT3dr4eOWO/ac833bd8-ffda-4938-9ebc-b0f99ca25481.mp3",
+apps/web/src/components/genai/config.ts:141: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/SAz9YHcvj6GT2YYXdXww/e6c95f0b-2227-491a-b3d7-2249240decb7.mp3",
+apps/web/src/components/genai/config.ts:148: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/SOYHLrjzK2X1ezoPC6cr/86d178f6-f4b6-4e0e-85be-3de19f490794.mp3",
+apps/web/src/components/genai/config.ts:155: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/TX3LPaxmHKxFdv7VOQHJ/63148076-6363-42db-aea8-31424308b92c.mp3",
+apps/web/src/components/genai/config.ts:162: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/Xb7hH8MSUJpSbSDYk0k2/d10f7534-11f6-41fe-a012-2de1e482d336.mp3",
+apps/web/src/components/genai/config.ts:169: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/XrExE9yKIg1WjnnlVkGX/b930e18d-6b4d-466e-bab2-0ae97c6d8535.mp3",
+apps/web/src/components/genai/config.ts:176: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/bIHbv24MWmeRgasZH58o/8caf8f3d-ad29-4980-af41-53f20c72d7a4.mp3",
+apps/web/src/components/genai/config.ts:183: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/cgSgspJ2msm6clMCkdW9/56a97bf8-b69b-448f-846c-c3a11683d45a.mp3",
+apps/web/src/components/genai/config.ts:190: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/cjVigY5qzO86Huf0OWal/d098fda0-6456-4030-b3d8-63aa048c9070.mp3",
+apps/web/src/components/genai/config.ts:197: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/hpp4J3VqNfWAUOO0d1Us/dab0f5ba-3aa4-48a8-9fad-f138fea1126d.mp3",
+apps/web/src/components/genai/config.ts:204: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/iP95p4xoKVk53GoZ742B/3f4bde72-cc48-40dd-829f-57fbf906f4d7.mp3",
+apps/web/src/components/genai/config.ts:211: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/nPczCjzI2devNBz1zQrb/2dd3e72c-4fd3-42f1-93ea-abc5d4e5aa1d.mp3",
+apps/web/src/components/genai/config.ts:218: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/onwK4e9ZLuTAKqWW03F9/7eee0236-1a72-4b86-b303-5dcadc007ba9.mp3",
+apps/web/src/components/genai/config.ts:225: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pFZP5JQG7iQjIQuC4Bku/89b68b35-b3dd-4348-a84a-a3c13a3c2b30.mp3",
+apps/web/src/components/genai/config.ts:232: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pNInz6obpgDQGcFmaJgB/d6905d7a-dd26-4187-bfff-1bd3a5ea7cac.mp3",
+apps/web/src/components/genai/config.ts:239: previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pqHfZKP75CvOlQylNhV4/d782b3ff-84ba-4029-848c-acf01285524d.mp3",
+apps/web/src/components/genai/config.ts:246: previewUrl: "https://storage.googleapis.com/eleven-public-prod/database/workspace/1b0aef06ad1848988df4847a8d377baf/voices/wBXNqKUATyqu0RtYt25i/92f83238-5f85-4793-ba6b-dc2cdc482735.
+apps/web/src/components/genai/config.ts:253: previewUrl: "https://storage.googleapis.com/eleven-public-prod/a6rzPVLi6gZYAP7IeBh5vjiIy2m2/voices/j7glXIoxefnytpNmZKtl/6dda088e-7fbd-44b0-a26b-60cf4618dbf6.mp3",
+apps/web/src/components/genai/config.ts:296: previewUrl: `https://www.gstatic.com/aistudio/voices/samples/${name}.wav`,
+apps/web/src/components/sidebar-left/folder-item.tsx:24: export const ASSET_DRAG_TYPE = "application/x-asset-id";
+apps/web/src/components/sidebar-left/folder-item.tsx:25: export const FOLDER_DRAG_TYPE = "application/x-folder-path";
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:31: <DropdownMenuItem as="a" href="https://www.diffusion.studio/updates" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:34: <DropdownMenuItem as="a" href="https://discord.gg/AYySWDhgNK" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:35: Discord community
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:42: <DropdownMenuItem as="a" href="mailto:support@diffusion.studio" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:46: <DropdownMenuItem as="a" href="https://discord.gg/AYySWDhgNK" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/preferences-menu.tsx:17: import { COLOR_MODE_STORAGE_KEY, useColorMode } from "@kobalte/core";
+apps/web/src/components/sidebar-left/project-menu/preferences-menu.tsx:25: const stored = window.localStorage.getItem(COLOR_MODE_STORAGE_KEY);
+apps/web/src/components/ui/alert-dialog.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/alert-dialog
+apps/web/src/components/ui/alert.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/alert
+apps/web/src/components/ui/badge.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/badge
+apps/web/src/components/ui/button.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/button
+apps/web/src/components/ui/card.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/card
+apps/web/src/components/ui/checkbox.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/checkbox
+apps/web/src/components/ui/combobox.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/combobox
+apps/web/src/components/ui/command.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/command
+apps/web/src/components/ui/context-menu.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/context-menu
+apps/web/src/components/ui/dialog.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/dialog
+apps/web/src/components/ui/dropdown-menu.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/dropdown-menu
+apps/web/src/components/ui/hover-card.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/hover-card
+apps/web/src/components/ui/kbd.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/kbd
+apps/web/src/components/ui/menubar.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/menubar
+apps/web/src/components/ui/popover.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/popover
+apps/web/src/components/ui/progress.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/progress
+apps/web/src/components/ui/radio-group.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/radio-group
+apps/web/src/components/ui/segmented-control.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/segmented-control
+apps/web/src/components/ui/select.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/select
+apps/web/src/components/ui/separator.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/separator
+apps/web/src/components/ui/slider.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/slider
+apps/web/src/components/ui/sonner.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/sonner
+apps/web/src/components/ui/switch.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/switch
+apps/web/src/components/ui/tabs.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/tabs
+apps/web/src/components/ui/text-field.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/text-field
+apps/web/src/components/ui/toggle-button.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/toggle-button
+apps/web/src/components/ui/toggle-group.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/toggle-group
+apps/web/src/components/ui/tooltip.tsx:5: // Copied from https://shadcn-solid.netlify.app/docs/components/tooltip
+apps/web/src/context/auth.tsx:57: const ELECTRON_AUTH_REDIRECT = 'https://app.diffusion.studio/auth/electron-callback.html';
+apps/web/src/dapi/local/sam.ts:40: const SECONDS_PER_FRAME: Record<Sam2ModelId, number> = { tiny: 0.25, small: 2, "base-plus": 2.6, large: 4.5 };
+apps/web/src/dapi/local/sam.ts:105: const work = request.preview ? PREVIEW_SECONDS : request.count * SECONDS_PER_FRAME[request.model];
+apps/web/src/engine/input/interactions.ts:41: buildSnapCandidatesFromCorners, buildSnapCandidatesFromQuad, findSnapTarget,
+apps/web/src/engine/input/interactions.ts:380: const dragged = buildSnapCandidatesFromCorners(handleVertices(handle, proposed));
+apps/web/src/engine/input/interactions.ts:396: const xSnap = findSnapTarget(dragged.x, candidates.x, threshold, 'x');
+apps/web/src/engine/input/interactions.ts:397: const ySnap = findSnapTarget(dragged.y, candidates.y, threshold, 'y');
+apps/web/src/engine/input/interactions.ts:416: const xSnap = factor.x !== 0 ? findSnapTarget(dragged.x, candidates.x, threshold, 'x') : null;
+apps/web/src/engine/input/interactions.ts:417: const ySnap = factor.y !== 0 ? findSnapTarget(dragged.y, candidates.y, threshold, 'y') : null;
+apps/web/src/engine/input/interactions.ts:658: const moved = buildSnapCandidatesFromQuad(proposed);
+apps/web/src/engine/input/interactions.ts:660: const xSnap = findSnapTarget(moved.x, candidates.x, threshold, 'x');
+apps/web/src/engine/input/interactions.ts:661: const ySnap = findSnapTarget(moved.y, candidates.y, threshold, 'y');
+apps/web/src/engine/input/snapping.ts:109: const node = buildSnapCandidatesFromQuad(quad);
+apps/web/src/engine/input/snapping.ts:146: export function buildSnapCandidatesFromQuad(quad: Quad): SnapCandidates {
+apps/web/src/engine/input/snapping.ts:147: return buildSnapCandidatesFromCorners([...quad, quadCenter(quad)]);
+apps/web/src/engine/input/snapping.ts:150: export function buildSnapCandidatesFromCorners(points: Point[]): SnapCandidates {
+apps/web/src/engine/input/snapping.ts:169: export function findSnapTarget(
+apps/web/src/engine/timeline/drag.ts:36: import { findSnapDelta, findSnapFrame } from './snapping';
+apps/web/src/engine/timeline/drag.ts:134: const snap = findSnapDelta(world, resolution, offset);
+apps/web/src/engine/timeline/drag.ts:209: const snapped = findSnapFrame(world, resolution, wanted);
+apps/web/src/engine/timeline/snapping.ts:79: export function findSnapDelta(world: World, resolution: number, offsetFrames: number): { delta: number; frame: number } | null {
+apps/web/src/engine/timeline/snapping.ts:96: export function findSnapFrame(world: World, resolution: number, frame: number): number | null {
+apps/web/src/hooks/use-mobile.ts:5: // https://github.com/solidjs-community/solid-primitives/blob/main/packages/media/src/index.ts
+apps/web/src/index.tsx:6: import * as Sentry from '@sentry/solid'
+apps/web/src/index.tsx:14: Sentry.init({
+apps/web/src/index.tsx:15: dsn: 'https://5786931d60606166d379cd2405683cb1@o4511326229889024.ingest.us.sentry.io/4511326232903680',
+apps/web/src/lib/call-handler.ts:5: // https://github.com/kobaltedev/kobalte/blob/main/packages/utils/src/assertion.ts
+apps/web/src/lib/call-handler.ts:6: // https://github.com/kobaltedev/kobalte/blob/main/packages/utils/src/events.ts
+apps/web/src/lib/checkout.ts:80: "https://app.diffusion.studio/checkout/electron-callback.html";
+apps/web/src/lib/combine-style.ts:5: // https://github.com/solidjs-community/solid-primitives/blob/main/packages/props/src/combineProps.ts
+apps/web/src/lib/db.ts:67: const DB_NAME = 'diffusion-studio-idb';
+apps/web/src/lib/db.ts:70: const dbPromise = openDB<GlobalDBSchema>(DB_NAME, DB_VERSION, {
+apps/web/src/lib/desktop-app.ts:14: const RELEASES = "https://github.com/diffusionstudio/editor/releases/latest/download/";
+apps/web/src/lib/layout-presets.ts:47: { label: "Twitter / X post", width: 1200, height: 675 },
+apps/web/src/lib/store/store.ts:13: public constructor(namespace?: string, storageEngine = localStorage) {
+apps/web/src/pages/login.tsx:184: href="https://www.diffusion.studio/legal/privacy-policy"
+apps/web/src/pages/login.tsx:193: href="https://www.diffusion.studio/legal/terms-of-service"
+apps/web/src/projects/host.ts:26: // saved. One localStorage value, read synchronously. Kept under the key the
+apps/web/src/projects/host.ts:30: const SAVE_FOLDER_STORAGE_KEY = 'diffusion-studio:projects-root';
+apps/web/src/projects/host.ts:34: return window.localStorage.getItem(SAVE_FOLDER_STORAGE_KEY);
+apps/web/src/projects/host.ts:73: window.localStorage.setItem(SAVE_FOLDER_STORAGE_KEY, folder);
+apps/web/src/utils/media.ts:63: 'application/x-subrip': '.srt',
+apps/web/vite.config.ts:43: target: 'http://localhost:3000',
+docs/examples/01-basics.tsx:18: const VIDEOS = "https://mdn.github.io/shared-assets/videos";
+docs/examples/01-basics.tsx:19: const MUSIC = "https://mdn.github.io/webaudio-examples/audio-basics/outfoxing.mp3";
+docs/examples/01-basics.tsx:20: const STILL = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg";
+docs/examples/06-three.tsx:32: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb";
+docs/examples/08-shader-paint.tsx:16: const VIDEOS = "https://mdn.github.io/shared-assets/videos";
+docs/examples/README.md:24: | [11-redraw.tsx](11-redraw.tsx) | [Redraw](https://redraw.dev) on a `<surface>`: the docs' Hello World write-on stroke, a vendored-tarball package driven by composition time; the 
+docs/examples/README.md:30: ([Redraw is in technical preview](https://redraw.dev/docs/installation)).
+docs/guides/walkthroughs/podcast-clip.md:11: Download the audio track alone with [yt-dlp](https://github.com/yt-dlp/yt-dlp). It is a fraction of the bytes, and the best moments are found without visuals:
+docs/skills/editor.md:50: - For motion graphics, overlays and UI-heavy graphics, the `<html>` tag driven by a paused [anime.js](https://animejs.com) timeline
+docs/skills/watch.md:11: The media tools (`probe`, `grab`, `transcribe`, `filmstrip`, `waveform`, `listen`) take a path or a direct media URL. Footage behind a page URL (YouTube, TikTok, Instagram, …) is d
+packages/agent-chat/src/host/harness.ts:134: /** `mcp__diffusion__capture` → "capture"; anything else stays. */
+packages/agent-chat/src/host/index.ts:28: /** default: file://, null, http://localhost:5173 */
+packages/agent-chat/src/host/server.ts:31: export const DEFAULT_ORIGINS = ["file://", "null", "http://localhost:5173"];
+packages/agent-chat/src/host/server.ts:57: const url = new URL(req.url ?? "/", `http://${options.host}`);
+packages/agent-chat/test/e2e.test.ts:37: mcp: { name: "diffusion", url: "http://127.0.0.1:3274/mcp?client=chat" },
+packages/agent-chat/test/e2e.test.ts:126: const socket = new WebSocket(host.url, { origin: "http://evil.example" });
+packages/assets/src/fs.ts:15: export interface FsEntry {
+packages/assets/src/fs.ts:34: list(source: string): Promise<FsEntry[]>;
+packages/assets/src/library.ts:16: import type { FsEntry, ProjectFS } from './fs';
+packages/assets/src/library.ts:648: private async describeSequence(source: string, frames: FsEntry[], meta: DescribeMeta): Promise<SequenceAsset> {
+packages/assets/src/mask.ts:35: export const MASK_MIME_TYPE = 'application/x-diffusionstudio-mask';
+packages/assets/src/probe.ts:29: const TRANSCRIPT_TYPES = new Set(['application/json', 'application/x-subrip', 'text/vtt']);
+packages/assets/src/probe.ts:43: if (/\.srt$/i.test(name) || mimeType === 'application/x-subrip') return 'application/x-subrip';
+packages/dapi/src/mcp.ts:13: export const MCP_URL = `http://${MCP_HOST}:${MCP_PORT}${MCP_PATH}`;
+packages/dapi/src/tools/tools.test.ts:205: const fields = { prompt: "a fox", images: [{ path: "./ref.png" }, { kind: "url", url: "https://x.test/a.png" }], duration: 99, anything: { at: "all" } };
+packages/jsx/README.md:10: See [reference/jsx](https://github.com/diffusionstudio/editor/blob/main/reference/jsx/README.md)
+packages/koota-solid/README.md:3: Solid bindings for [koota](https://github.com/pmndrs/koota): a port of `@koota/react`. The API mirrors `@koota/react` one to one, adapted to Solid's reactivity model.
+packages/runtime/README.md:3: Headless editor runtime built on [koota](https://github.com/pmndrs/koota): traits, world creation and serialization, actions, deterministic systems, media decoding, and capture.
+packages/runtime/scripts/google-fonts.mjs:13: const METADATA = 'https://fonts.google.com/metadata/fonts';
+packages/runtime/src/fonts/google.ts:75: const CSS_API = 'https://fonts.googleapis.com/css2';
+packages/runtime/src/media/caption/utils.ts:157: if (asset.mimeType === 'application/x-subrip' || asset.mimeType === 'text/vtt') {
+packages/runtime/src/systems/render.ts:305: // html-in-canvas (https://github.com/WICG/html-in-canvas). Chromium only,
+packages/sam2/src/constants.ts:32: repo: 'https://huggingface.co/diffusionstudio/sam2.1-tiny-video-onnx-fp16/resolve/66673b5db39371b7dd7847f4d3bc0d4f4179b79e',
+packages/sam2/src/constants.ts:46: repo: 'https://huggingface.co/diffusionstudio/sam2.1-small-video-onnx-fp16/resolve/927ecec6e6ae2727d0af7720eefdb07f2efe4689',
+packages/sam2/src/constants.ts:60: repo: 'https://huggingface.co/diffusionstudio/sam2.1-base-plus-video-onnx-fp16/resolve/386b83e09a774fe2782d86fd1b8cb5aaf718aa9d',
+packages/sam2/src/constants.ts:74: repo: 'https://huggingface.co/diffusionstudio/sam2.1-large-video-onnx-fp16/resolve/98dbd222d9b3f75d15fe63a5c2a22b0b0029eea1',
+packages/sam2/src/tracker.ts:227: return isPlausible(mask) ? mask : clearMask(mask);
+packages/sam2/src/tracker.ts:304: const PLAUSIBLE_IOU = 0.15;
+packages/sam2/src/tracker.ts:346: function isPlausible(mask: Sam2Mask): boolean {
+packages/sam2/src/tracker.ts:347: return mask.iou >= PLAUSIBLE_IOU;
+packages/sam2/src/weights.ts:201: /** A model revision's folder: `https://huggingface.co/<org>/<repo>/resolve/<commit>` as `<org>--<repo>@<commit>`. */
+scripts/dev-desktop.mjs:22: const DEV_URL = `http://localhost:${DEV_PORT}`;

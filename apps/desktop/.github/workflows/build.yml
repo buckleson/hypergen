@@ -1,0 +1,79 @@
+name: Build
+
+# Unsigned installers for Windows, macOS (Apple Silicon) and Linux on every
+# push to main and on pull requests. A `v*` tag also publishes them as a
+# GitHub Release.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+
+  make:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            out: squirrel.windows
+          - os: macos-14
+            out: "*"
+          - os: ubuntu-latest
+            out: "*"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Linux packaging tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y dpkg fakeroot
+      - run: npm ci
+      - name: Build and make the installers
+        shell: bash
+        env:
+          SKIP_SIGN: "1"
+        run: npm run make --workspace=@hypergen/desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hypergen-${{ runner.os }}-${{ runner.arch }}
+          path: apps/desktop/out/make/**
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: make
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*.exe
+            dist/**/*.nupkg
+            dist/**/RELEASES
+            dist/**/*.dmg
+            dist/**/*.zip
+            dist/**/*.deb

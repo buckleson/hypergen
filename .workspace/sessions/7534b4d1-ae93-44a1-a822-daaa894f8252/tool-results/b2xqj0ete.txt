@@ -1,0 +1,371 @@
+apps/desktop/src/main.ts:62: const AUTH_PROTOCOL = "diffusion";
+apps/desktop/src/main.ts:80: app.setName("Diffusion Studio");
+apps/desktop/src/main.ts:130: repo: "diffusionstudio/editor",
+apps/desktop/src/main.ts:179: // The MCP server agents and the diffusion CLI talk to. Started once the app is
+apps/desktop/src/main.ts:181: const dapi = new DapiServer({
+apps/desktop/src/main.ts:221: // diffusion://auth/callback → auth, diffusion://checkout/callback → checkout.
+apps/desktop/src/main.ts:529: dapi.start();
+apps/desktop/src/main.ts:531: dapi.mcpUrl().then((url) =>
+apps/desktop/src/main.ts:552: dapi.stop();
+apps/desktop/src/mcp-config.test.ts:19: command: "/Applications/Diffusion Studio.app/Contents/Resources/cli/bin/dapi",
+apps/desktop/src/mcp-config.test.ts:48: expect(JSON.parse(text)).toEqual({ mcpServers: { diffusion: { type: "http", url: spec.url } } });
+apps/desktop/src/mcp-config.test.ts:54: expect(JSON.parse(text)).toEqual({ servers: { diffusion: { type: "http", url: spec.url } } });
+apps/desktop/src/mcp-config.test.ts:62: expect(JSON.parse(text)).toEqual({ mcp: { diffusion: { type: "remote", enabled: true, url: spec.url } } });
+apps/desktop/src/mcp-config.test.ts:76: expect(after.mcpServers.diffusion).toEqual({ url: spec.url });
+apps/desktop/src/mcp-config.test.ts:80: const before = upsertServer(null, "mcpServers", { command: "/old/dapi", args: ["mcp"] });
+apps/desktop/src/mcp-config.test.ts:81: expect(readServer(before, "mcpServers")).toEqual({ command: "/old/dapi", args: ["mcp"] });
+apps/desktop/src/mcp-config.test.ts:84: expect(JSON.parse(after).mcpServers.diffusion.command).toBeUndefined();
+apps/desktop/src/mcp-config.test.ts:101: expect(JSON.parse(upsertServer("  \n", "mcpServers", { url: spec.url }))).toEqual({ mcpServers: { diffusion: { url: spec.url } } });
+apps/desktop/src/mcp-config.test.ts:107: mcpServers: { other: { command: "x", args: [] }, diffusion: { type: "http", url: spec.url } },
+apps/desktop/src/mcp-config.test.ts:127: expect(after).toBe('model = "o3"\n\n[mcp_servers.other]\ncommand = "x"\n\n[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps/desktop/src/mcp-config.test.ts:132: const before = '[mcp_servers.diffusion]\ncommand = "/old/dapi"\nargs = ["mcp"]\n\n[mcp_servers.other]\ncommand = "x"\n';
+apps/desktop/src/mcp-config.test.ts:133: expect(readServer(before, "toml")).toEqual({ command: "/old/dapi", args: ["mcp"] });
+apps/desktop/src/mcp-config.test.ts:135: expect(after).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n[mcp_servers.other]\ncommand = "x"\n');
+apps/desktop/src/mcp-config.test.ts:141: expect(text).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps/desktop/src/mcp-config.test.ts:145: const odd = { command: 'C:\\Apps\\"Diffusion"\\dapi', args: ["mcp"] };
+apps/desktop/src/mcp-config.test.ts:147: expect(text).toContain('command = "C:\\\\Apps\\\\\\"Diffusion\\"\\\\dapi"');
+apps/desktop/src/mcp-config.test.ts:163: const before = 'model = "o3"\n\n[mcp_servers.diffusion]\nurl = "u"\n\n[mcp_servers.other]\ncommand = "x"\n';
+apps/desktop/src/mcp-config.test.ts:173: const shim = "C:\\Users\\me\\AppData\\Local\\DiffusionStudio\\bin\\dapi.cmd";
+apps/desktop/src/mcp-config.test.ts:192: expect(runsOurProxy({ command: "/private/var/folders/x/AppTranslocation/y/d/cli/bin/dapi" })).toBe(true);
+apps/desktop/src/mcp-config.test.ts:195: expect(runsOurProxy({ command: "/opt/homebrew/bin/dapi", args: ["mcp"] })).toBe(false);
+apps/desktop/src/mcp-config.ts:11: * URL, which is the same on every machine; the rest get the bundled `dapi`
+apps/desktop/src/mcp-config.ts:20: * namespace an agent shows us under: `mcp__diffusion__<tool>` and
+apps/desktop/src/mcp-config.ts:21: * `/diffusion:<prompt>`. The same word as our URL scheme and the CLI's
+apps/desktop/src/mcp-config.ts:22: * primary name (`dapi` still works there too, as an alias).
+apps/desktop/src/mcp-config.ts:24: export const SERVER_NAME = "diffusion";
+apps/desktop/src/mcp-config.ts:110: /** Whether the agent runs our entry over stdio, and so needs the `dapi` binary. */
+apps/desktop/src/mcp-config.ts:156: const OUR_PATHS = ["Diffusion Studio", "/AppTranslocation/", "\\DiffusionStudio\\"];
+apps/desktop/src/mcp-install.ts:7: // that speak HTTP, the bundled `dapi mcp` proxy for the rest. No PATH
+apps/desktop/src/mcp-install.ts:9: // type `diffusion` (or its `dapi` alias).
+apps/desktop/src/mcp-install.ts:33: const DEV_BINARY = "/opt/homebrew/bin/dapi";
+apps/desktop/src/mcp-install.ts:36: * The bundled `dapi` binary, or null when none is available (an unstaged dev
+apps/desktop/src/mcp-install.ts:46: const command = app.isPackaged ? join(process.resourcesPath, "cli", "bin", "dapi") : DEV_BINARY;
+apps/desktop/src/mcp-install.ts:87: * Only the stdio agents have reasons: a build without the `diffusion` binary has
+apps/desktop/src/mcp-install.ts:94: if (current.command === "") return "Needs the diffusion command line tool, which this build does not include.";
+apps/desktop/src/mcp-install.ts:96: return "Move Diffusion Studio to the Applications folder and relaunch it first.";
+apps/desktop/src/preload.ts:11: const ALLOWED_RENDERER_TO_MAIN: ReadonlySet<string> = new Set([MAIN_WIRE.REQUEST, DAPI_WIRE.REPLY]);
+apps/desktop/src/preload.ts:16: DAPI_WIRE.CALL,
+apps/desktop/src/preload.ts:17: DAPI_WIRE.CANCEL,
+apps/desktop/src/projects.ts:34: const RUNTIME_MODULE = "@diffusionstudio/jsx";
+apps/desktop/src/projects.ts:105: // by. Top level rather than inside `diffusion`, which `writeConfig` replaces
+apps/desktop/src/projects.ts:200: const dir = join(app.getPath("videos"), "Diffusion Studio");
+apps/desktop/src/projects.ts:530: return cleaned || "diffusion-project";
+apps/desktop/src/projects.ts:538: * The diffusion surface as npm scripts: the CLI is how a project is inspected and
+apps/desktop/src/projects.ts:544: open: "diffusion open .",
+apps/desktop/src/projects.ts:545: context: "diffusion context",
+apps/desktop/src/projects.ts:546: capture: "diffusion capture",
+apps/desktop/src/projects.ts:547: probe: "diffusion probe",
+apps/desktop/src/projects.ts:548: transcribe: "diffusion transcribe",
+apps/desktop/src/projects.ts:549: grab: "diffusion grab",
+apps/desktop/src/projects.ts:550: filmstrip: "diffusion filmstrip",
+apps/desktop/src/projects.ts:551: waveform: "diffusion waveform",
+apps/desktop/src/projects.ts:552: listen: "diffusion listen",
+apps/desktop/src/projects.ts:553: fonts: "diffusion fonts",
+apps/desktop/src/projects.ts:554: logs: "diffusion logs",
+apps/desktop/src/projects.ts:555: screenshot: "diffusion screenshot",
+apps/desktop/src/projects.ts:556: report: "diffusion report",
+apps/desktop/src/projects.ts:580: "jsxImportSource": "@diffusionstudio/jsx",
+apps/desktop/src/projects.ts:592: .diffusion/
+apps/desktop/src/projects.ts:619: A Diffusion Studio project: a video composition authored as code. The folder is
+apps/desktop/src/projects.ts:626: Everything an agent needs is in the app's MCP server (\`diffusion\`): its tools
+apps/desktop/src/projects.ts:637: | \`package.json\` | The project record: \`projectId\` (its identity, kept across renames), \`displayName\` (the name shown in the app), \`main\` (the entry), \`diffusion\` (how each scene is exported
+apps/desktop/src/projects.ts:698: Every diffusion command is a script here: \`npm run\` lists them, and
+apps/desktop/src/projects.ts:704: | \`open\` | \`diffusion open .\` | Launch the app with this project open. |
+apps/desktop/src/projects.ts:705: | \`context\` | \`diffusion context\` | Which project the app has open, where its playhead sits, its fonts, its background mask tracks. |
+apps/desktop/src/projects.ts:706: | \`capture\` | \`diffusion capture <id>\` | Render frames of a scene, as an export would, to labelled PNG contact sheets. |
+apps/desktop/src/projects.ts:707: | \`probe\` | \`diffusion probe <id\\|path>\` | Container and per-track metadata, without decoding. |
+apps/desktop/src/projects.ts:708: | \`transcribe\` | \`diffusion transcribe <id\\|path>\` | Timed speech transcript, word by word. |
+apps/desktop/src/projects.ts:709: | \`grab\` | \`diffusion grab <id\\|path>\` | Decode frames of a video to labelled PNG contact sheets. |
+apps/desktop/src/projects.ts:710: | \`filmstrip\` | \`diffusion filmstrip <id\\|path>\` | Thumbnail grid across a window of a video. |
+apps/desktop/src/projects.ts:711: | \`waveform\` | \`diffusion waveform <id\\|path>\` | Loudness over time, with the silences marked. |
+apps/desktop/src/projects.ts:712: | \`listen\` | \`diffusion listen <id\\|path>\` | Ask a multimodal model what is in an audio track. |
+apps/desktop/src/projects.ts:713: | \`fonts\` | \`diffusion fonts\` | Google Fonts and local font families, valid as \`fontFamily\`. |
+apps/desktop/src/projects.ts:714: | \`logs\` | \`diffusion logs\` | Recent console output from the app. |
+apps/desktop/src/projects.ts:715: | \`screenshot\` | \`diffusion screenshot\` | The whole app window as a PNG. |
+apps/desktop/src/projects.ts:716: | \`report\` | \`diffusion report <title>\` | File a bug against the editor, with diagnostics attached. |
+apps/desktop/src/projects.ts:720: - [JSX reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/jsx/README.md): elements, timing, paints, captions
+apps/desktop/src/projects.ts:721: - [Tool reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/tools/README.md): every tool and command, its options and its output
+apps/desktop/src/projects.ts:722: - [Examples](https://github.com/diffusionstudio/editor/tree/main/docs/examples): runnable compositions to read
+apps/desktop/src/projects.ts:733: const APP_DIR = ".diffusion";
+apps/desktop/src/projects.ts:754: // scripts is left with them, one with none is given the diffusion surface.
+apps/desktop/src/projects.ts:769: * from @diffusionstudio/jsx (jsxImportSource), installed by the project.
+apps/desktop/src/projects.ts:809: * `diffusion open <path>` opens a folder.
+apps/desktop/src/projects.ts:1144: const text = `# Diffusion Studio asset library. Edited by the app; hand edits are read on the next load.
+apps/desktop/src/projects.ts:1157: const CONFIG_FIELD = "diffusion";
+apps/desktop/src/projects.ts:1159: /** The project's config (package.json `diffusion`), or null when there is none. */
+apps/desktop/src/source.ts:117: types.importDeclaration(specifiers, types.stringLiteral("@diffusionstudio/jsx")),
+apps/desktop/src/source.ts:128: const INSPECT_MODULE = "@diffusionstudio/jsx";
+apps/desktop/src/squirrel.test.ts:15: const exe = "C:\\Users\\me\\AppData\\Local\\DiffusionStudio\\app-1.0.0\\Diffusion Studio.exe";
+apps/desktop/src/squirrel.test.ts:28: expect(squirrelEvent([exe, "diffusion://auth?x=1"], "win32")).toBeNull();
+apps/desktop/src/squirrel.test.ts:32: expect(squirrelEvent(["/Applications/Diffusion Studio.app/Contents/MacOS/Diffusion Studio", "--squirrel-install"], "darwin")).toBeNull();
+apps/desktop/src/squirrel.ts:9: // folder up from the versioned app folder), where the `diffusion`/`dapi`
+apps/web/.env.example:4: VITE_API_URL=https://api.diffusion.studio
+apps/web/index.html:56: <title>Diffusion Studio</title>
+apps/web/index.html:60: <meta property="og:title" content="Diffusion Studio — The creative platform for video and motion graphics." />
+apps/web/index.html:65: <meta name="twitter:title" content="Diffusion Studio — The creative platform for video and motion graphics." />
+apps/web/package.json:2: "name": "@diffusionstudio/web",
+apps/web/public/auth/electron-callback.html:7: <title>Returning to Diffusion Studio…</title>
+apps/web/public/auth/electron-callback.html:28: <h1>Returning you to Diffusion Studio…</h1>
+apps/web/public/auth/electron-callback.html:39: var target = "diffusion://auth/callback?" + merged.toString();
+apps/web/public/checkout/electron-callback.html:7: <title>Returning to Diffusion Studio…</title>
+apps/web/public/checkout/electron-callback.html:28: <h1>Returning you to Diffusion Studio…</h1>
+apps/web/public/checkout/electron-callback.html:35: var target = "diffusion://checkout/callback?" + params.toString();
+apps/web/src/assets/icons/README.md:6: [Figma UI library](https://www.figma.com/design/aLnWQdH3C7hqlQVYnsac9s/Diffusion-Studio---UI-Library?node-id=2270-51319&m=dev)
+apps/web/src/assets/icons/README.md:106: - **Brand logos** (`agent.*`, `editor.*`, `claude`, `codex`, `social.*`, `diffusion-logo*`) are moved to the 25 frame without reshaping.
+apps/web/src/components/dashboard/help-view.tsx:79: href="https://www.diffusion.studio/updates"
+apps/web/src/components/dashboard/help-view.tsx:95: href="mailto:support@diffusion.studio"
+apps/web/src/components/dashboard/mcp-view.tsx:118: description="Connect to Diffusion Studio’s MCP server to create and edit videos with your agents."
+apps/web/src/components/dashboard/mcp-view.tsx:179: title="Diffusion Studio MCP"
+apps/web/src/components/dashboard/mcp-view.tsx:195: <span>Available locally while Diffusion Studio is running. </span>
+apps/web/src/components/dashboard/mcp-view.tsx:215: toast("CLI installed", { description: "Run diffusion --help in a terminal to get started." });
+apps/web/src/components/dashboard/mcp-view.tsx:245: description="Give agents access to Diffusion Studio through terminal commands."
+apps/web/src/components/dashboard/mcp-view.tsx:250: title="diffusion CLI"
+apps/web/src/components/dashboard/mcp-view.tsx:251: leading={<Icon name="dapi-cli" class="text-foreground" />}
+apps/web/src/components/dashboard/mcp-view.tsx:252: description="Diffusion Studio’s command-line tool for accessing its media tools and managing projects."
+apps/web/src/components/dashboard/sidebar.tsx:55: <Icon name="diffusion-logo-large" class="text-muted-foreground" />
+apps/web/src/components/dashboard/sidebar.tsx:58: Diffusion Studio
+apps/web/src/components/dashboard/sidebar.tsx:77: <Icon name="diffusion-logo" class="shrink-0 text-muted-foreground" />
+apps/web/src/components/dashboard/sidebar.tsx:78: <p class="min-w-0 flex-1 truncate text-xs font-450 text-muted-foreground">Diffusion Studio</p>
+apps/web/src/components/dev-auth-code-input.tsx:68: placeholder="diffusion://... or raw code"
+apps/web/src/components/purchase-success.tsx:168: // Desktop returns from Stripe through a diffusion:// deep link rather than a
+apps/web/src/components/purchase-success.tsx:241: <Switch fallback="Thank you for supporting Diffusion Studio.">
+apps/web/src/components/screen-too-small.tsx:16: Diffusion Studio needs at least 720×480 to work properly. Please resize your window or switch to a larger display.
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:31: <DropdownMenuItem as="a" href="https://www.diffusion.studio/updates" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/help-menu.tsx:42: <DropdownMenuItem as="a" href="mailto:support@diffusion.studio" target="_blank">
+apps/web/src/components/sidebar-left/project-menu/index.tsx:86: <Icon name="diffusion-logo" />
+apps/web/src/components/sidebar-left/sidebar-left.tsx:84: <span class="min-w-0 flex-1 truncate text-xs text-muted-foreground font-450">Diffusion Studio</span>
+apps/web/src/components/sidebar-left/sidebar-left.tsx:219: <span class="text-xs text-muted-foreground font-450">Diffusion Studio</span>
+apps/web/src/components/sidebar-right/inspector/export.tsx:95: * (package.json `diffusion.export.<scene id>`, see
+apps/web/src/components/sidebar-right/inspector/variables.tsx:7: * project (see @diffusionstudio/jsx's inspect), filed under the groups their
+apps/web/src/components/unsupported-browser.tsx:25: Diffusion Studio requires a Chromium-based browser. Please switch to Google Chrome, Microsoft Edge, Brave, or Arc.
+apps/web/src/components/upgrade-dialog.tsx:93: <img src="/mark-macos-small.png" alt="Diffusion Studio Logo Mark" class="size-12" />
+apps/web/src/components/upgrade-dialog.tsx:95: Upgrade Diffusion Studio
+apps/web/src/context/auth.tsx:57: const ELECTRON_AUTH_REDIRECT = 'https://app.diffusion.studio/auth/electron-callback.html';
+apps/web/src/context/render.ts:20: * and the agent's export tool (`dapi/handlers/export`): the export
+apps/web/src/context/render.ts:127: comment: `Made with Diffusion Studio v${version}`,
+apps/web/src/dapi/bridge.ts:28: window.desktop?.on(DAPI_WIRE.CALL, (payload) => void this.dispatch(payload as DapiCall));
+apps/web/src/dapi/bridge.ts:29: window.desktop?.on(DAPI_WIRE.CANCEL, (payload) => this.inFlight.get((payload as DapiCancel).id)?.abort());
+apps/web/src/dapi/bridge.ts:69: if (!controller.signal.aborted) window.desktop?.send(DAPI_WIRE.REPLY, reply);
+apps/web/src/dapi/handlers/export.ts:98: // The scene's entry in the project's package.json (`diffusion.export.<id>`)
+apps/web/src/dapi/lib/remote.ts:17: throw new DapiError("sign-in-required", "Generating needs a Diffusion Studio account — sign in to the app first.");
+apps/web/src/dapi/session.ts:40: if (!current) throw new DapiError("no-project", "No project open — open one first (`dapi open <dir>`).");
+apps/web/src/engine/asset-actions.ts:6: // mechanics live in @diffusionstudio/assets.
+apps/web/src/engine/project-config.ts:7: // `diffusion` field of its package.json — the project record — rather than
+apps/web/src/engine/project-config.ts:16: // @diffusionstudio/jsx): stamped once by the compiler where the author wrote
+apps/web/src/engine/traits.ts:8: * None of it belongs in `@diffusionstudio/runtime` (a headless world has no
+apps/web/src/engine/traits.ts:154: * The config of the project on disk (its package.json `diffusion` field),
+apps/web/src/lib/api.ts:28: /** The Diffusion Studio API (v2), authenticated with the Supabase session. */
+apps/web/src/lib/checkout.ts:80: "https://app.diffusion.studio/checkout/electron-callback.html";
+apps/web/src/lib/db.ts:12: * the folder picker, or `diffusion open <path>`. The dashboard lists these and nothing else.
+apps/web/src/lib/db.ts:67: const DB_NAME = 'diffusion-studio-idb';
+apps/web/src/lib/desktop-app.ts:14: const RELEASES = "https://github.com/diffusionstudio/editor/releases/latest/download/";
+apps/web/src/lib/desktop-app.ts:17: macos: { url: `${RELEASES}Diffusion-Studio-arm64.dmg`, label: "macOS" },
+apps/web/src/lib/desktop-app.ts:18: windows: { url: `${RELEASES}Diffusion-Studio-x64-Setup.exe`, label: "Windows" },
+apps/web/src/lib/desktop-app.ts:63: "The desktop app ships for macOS and Windows. Open Diffusion Studio on one of those to install it.",
+apps/web/src/lib/mcp.ts:6: // app's MCP entry, and whether `diffusion` is on PATH. Desktop only — in the
+apps/web/src/pages/editor.tsx:60: // The project's own settings (package.json `diffusion`), next to the scene.
+apps/web/src/pages/login.tsx:37: * plus-addressed mail on our own domain (`ci+e2e@diffusion.studio`). Only we
+apps/web/src/pages/login.tsx:41: const PASSWORD_ACCOUNT_EMAIL = /^[^@\s]+\+[^@\s]+@diffusion\.studio$/i;
+apps/web/src/pages/login.tsx:90: <Icon name="diffusion-logo" />
+apps/web/src/pages/login.tsx:91: <span class="text-sm font-450 text-foreground">Diffusion Studio</span>
+apps/web/src/pages/login.tsx:184: href="https://www.diffusion.studio/legal/privacy-policy"
+apps/web/src/pages/login.tsx:193: href="https://www.diffusion.studio/legal/terms-of-service"
+apps/web/src/projects/host.ts:30: const SAVE_FOLDER_STORAGE_KEY = 'diffusion-studio:projects-root';
+apps/web/src/projects/host.ts:257: * `diffusion open <path>` lands anywhere on disk.
+apps/web/src/projects/host.ts:322: /** The project's config (the `diffusion` field of its package.json), unparsed; null when absent. */
+docs/INSTRUCTIONS.md:1: Diffusion Studio, a video editor, is running on this machine and you are connected to it.
+docs/INSTRUCTIONS.md:5: - `skills/editor.md` (the default) — Understand and edit footage with Diffusion Studio: analyze video/audio/images and compose video compositions. Use for any media analysis or video editing task.
+docs/INSTRUCTIONS.md:6: - `skills/watch.md` — Watch and understand footage with Diffusion Studio: answer questions about a video or audio file, summarize it, find scenes and moments, pull quotes, and describe what happens an
+docs/examples/01-basics.tsx:5: *   diffusion open ~/Projects/basics
+docs/examples/03-ticker.tsx:5: *   diffusion open ~/Projects/ticker
+docs/examples/04-html-in-canvas.tsx:4: *   diffusion open ~/Projects/html-in-canvas
+docs/examples/05-anime-timeline.tsx:4: *   diffusion open ~/Projects/anime-timeline
+docs/examples/06-three.tsx:4: *   diffusion open ~/Projects/three
+docs/examples/07-webgpu.tsx:4: *   diffusion open ~/Projects/webgpu
+docs/examples/08-shader-paint.tsx:5: *   diffusion open ~/Projects/shader-paint
+docs/examples/09-inspect-variables.tsx:7: *   diffusion open ~/Projects/inspect
+docs/examples/10-typegpu.tsx:16: *   diffusion open ~/Projects/caustics
+docs/examples/11-redraw.tsx:24: *   diffusion open ~/Projects/hello-redraw
+docs/examples/README.md:10: diffusion open ~/Projects/basics
+docs/examples/tsconfig.json:5: "jsxImportSource": "@diffusionstudio/jsx",
+docs/reference/jsx/README.md:62: 2. **Compile**: the entry file bundles with esbuild + `babel-preset-solid` in `universal` mode, so JSX compiles against the editor's renderer runtime instead of the DOM. `solid-js`, `solid-js/store` a
+docs/reference/jsx/captions.md:19: diffusion generate universal-3.5-pro '{"audio":{"scene":"talk"}}' -o transcripts/talk.json
+docs/reference/jsx/captions.md:20: diffusion job <id>    # until its status is succeeded
+docs/reference/jsx/html.md:3: An element whose children are **real HTML**: the browser lays them out at the element's box size and the result is drawn into the box via the [html-in-canvas](https://github.com/WICG/html-in-canvas) A
+docs/reference/jsx/module.md:26: | `package.json` | The project record: `projectId` (its identity, kept across renames), `displayName`, `main`, and the diffusion commands as scripts. |
+docs/reference/jsx/module.md:51: - **Host modules** (marked external at compile time, resolved in-app so the project shares the editor's reactive runtime): `solid-js`, `solid-js/store`, `@diffusionstudio/jsx`. These must be the edito
+docs/reference/jsx/module.md:79: `@diffusionstudio/jsx` ships the JSX namespace (which types the camelCase composition tags), for editor IntelliSense and typechecking in a project folder:
+docs/reference/jsx/module.md:85: "jsxImportSource": "@diffusionstudio/jsx"
+docs/reference/jsx/module.md:92: Installing a userland package gives it both its runtime code and its types. A package that ships no declarations of its own needs its `@types/…` alongside it (`npm i -D @types/three`). `@diffusionstud
+docs/reference/tools/README.md:3: Diffusion Studio exposes one set of tools, reachable two ways:
+docs/reference/tools/README.md:6: - **CLI.** `diffusion`, the command-line client shipped with the app, wraps every tool as a command for shells, scripts and CI. `diffusion <command> --help` prints the same description and the same fi
+docs/reference/tools/README.md:8: Both validate against the same schemas and return the same result, so each tool is documented once, on its own page. The catalog behind all three (server, CLI, these pages) lives in `packages/dapi`.
+docs/reference/tools/README.md:16: - The tool name is the command: `grab` is `diffusion grab`.
+docs/reference/tools/README.md:17: - A tool's first field is the positional argument: `capture`'s `id` is `diffusion capture <id>`.
+docs/reference/tools/README.md:29: Every tool runs inside the app, so the app has to be running. Over MCP that is a given — the connection is to the app. From a shell, `diffusion open` launches it (macOS and Windows) or surfaces the ru
+docs/reference/tools/README.md:35: | [`open`](./open.md) | `diffusion open` | Open project |
+docs/reference/tools/README.md:36: | [`context`](./context.md) | `diffusion context` | App context |
+docs/reference/tools/README.md:37: | [`capture`](./capture.md) | `diffusion capture` | Capture frames |
+docs/reference/tools/README.md:38: | [`check`](./check.md) | `diffusion check` | Check structure |
+docs/reference/tools/README.md:39: | [`export`](./export.md) | `diffusion export` | Export scene |
+docs/reference/tools/README.md:40: | [`probe`](./probe.md) | `diffusion probe` | Probe media |
+docs/reference/tools/README.md:41: | [`grab`](./grab.md) | `diffusion grab` | Grab frames |
+docs/reference/tools/README.md:42: | [`transcribe`](./transcribe.md) | `diffusion transcribe` | Transcribe speech |
+docs/reference/tools/README.md:43: | [`filmstrip`](./filmstrip.md) | `diffusion filmstrip` | Filmstrip preview |
+docs/reference/tools/README.md:44: | [`waveform`](./waveform.md) | `diffusion waveform` | Waveform preview |
+docs/reference/tools/README.md:45: | [`listen`](./listen.md) | `diffusion listen` | Listen to audio |
+docs/reference/tools/README.md:46: | [`generate`](./generate.md) | `diffusion generate` | Generate media |
+docs/reference/tools/README.md:47: | [`job`](./job.md) | `diffusion job` | Generation job |
+docs/reference/tools/README.md:48: | [`logs`](./logs.md) | `diffusion logs` | App logs |
+docs/reference/tools/README.md:49: | [`screenshot`](./screenshot.md) | `diffusion screenshot` | Window screenshot |
+docs/reference/tools/README.md:50: | [`window`](./window.md) | `diffusion window` | App window |
+docs/reference/tools/README.md:51: | [`fonts`](./fonts.md) | `diffusion fonts` | Fonts |
+docs/reference/tools/README.md:52: | [`report`](./report.md) | `diffusion report` | Report a bug |
+docs/reference/tools/README.md:58: - **Generation.** [`generate`](./generate.md) runs a model of the Diffusion Studio API (images, video, music, speech, and tools such as upscaling) on the account's credits, or a model on this machine 
+docs/reference/tools/capture.md:8: | CLI | `diffusion capture <id> [options]` |
+docs/reference/tools/capture.md:26: With `separate`, each position is rendered at 720p height and named after its timecode (e.g. `01s12f.png`). Without an `output` directory the images land in a fresh `dapi-capture-*` directory under th
+docs/reference/tools/capture.md:50: { images: Array<{ timecode: string; path: string }> }   // e.g. { "images": [{ "timecode": "0f-01s15f", "path": "/tmp/dapi-capture-3f2c1a8e/0f-01s15f.png" }] }
+docs/reference/tools/check.md:8: | CLI | `diffusion check <id>` |
+docs/reference/tools/check.md:59: Finding issues is not a failure: the result is the same object either way, and the caller reads `issues`. From a shell, `diffusion check` additionally exits `1` when an error-severity issue is found (
+docs/reference/tools/context.md:8: | CLI | `diffusion context` |
+docs/reference/tools/context.md:9: | CLI aliases | `diffusion ctx` |
+docs/reference/tools/export.md:3: Encode a scene to a video file — the same render the app's export runs, covering the scene's workarea. Settings come from the scene's `diffusion.export.<id>` entry in the project's package.json (the e
+docs/reference/tools/export.md:8: | CLI | `diffusion export <id> [output]` |
+docs/reference/tools/export.md:35: The scene's entry under `diffusion.export.<id>` in the project's `package.json`:
+docs/reference/tools/export.md:39: "diffusion": {
+docs/reference/tools/filmstrip.md:8: | CLI | `diffusion filmstrip <path> [options]` |
+docs/reference/tools/filmstrip.md:9: | CLI aliases | `diffusion film` |
+docs/reference/tools/filmstrip.md:31: path: string,   // e.g. "/tmp/dapi-filmstrip-3f2c1a8e-….png", or the `output` path
+docs/reference/tools/fonts.md:8: | CLI | `diffusion fonts [options]` |
+docs/reference/tools/generate.md:3: Start a job on a generative model — images, video, music, sound effects, speech, and tools such as background removal, upscaling, transcription and analysis on the Diffusion Studio API, and object seg
+docs/reference/tools/generate.md:8: | CLI | `diffusion generate <model> [fields] [options]` |
+docs/reference/tools/generate.md:9: | CLI aliases | `diffusion gen` |
+docs/reference/tools/generate.md:40: diffusion generate flux-2-klein --prompt "A red fox at dawn, misty meadow, telephoto"
+docs/reference/tools/generate.md:41: diffusion generate nano-banana-pro --prompt "The fox in the forest" '{"images":[{"path":"./fox.png"},{"path":"./forest.jpg"}],"aspectRatio":"16:9"}'
+docs/reference/tools/generate.md:42: diffusion generate veo-3.1-fast --prompt "The fox turns and runs into the trees" '{"startFrame":{"path":"./fox.png"},"duration":6}' -o ./fox-run.mp4
+docs/reference/tools/generate.md:43: diffusion generate elevenlabs-v3 --prompt "Welcome back to the channel." '{"voice":"JBFqnCBsd6RMkjVDRZzb"}'
+docs/reference/tools/generate.md:44: diffusion generate bria-rmbg-2.0 '{"image":{"path":"./fox.png"}}'
+docs/reference/tools/generate.md:52: diffusion generate veo-3.1-fast --prompt "The fox turns and runs into the trees" '{"duration":8}' --estimate
+docs/reference/tools/generate.md:94: - `sign-in-required` — an API model, and the app is not signed in to a Diffusion Studio account.
+docs/reference/tools/grab.md:8: | CLI | `diffusion grab <path> [options]` |
+docs/reference/tools/grab.md:9: | CLI aliases | `diffusion sample` |
+docs/reference/tools/grab.md:39: With `separate`, frames keep their own resolution and alpha, and each file is named after its timecode (e.g. `01s12f.png`). Without an `output` directory the images land in a fresh `dapi-grab-*` direc
+docs/reference/tools/job.md:8: | CLI | `diffusion job <id>` |
+docs/reference/tools/job.md:23: From a shell, `diffusion job` exits `1` once the job has failed or was canceled, and prints the job either way:
+docs/reference/tools/job.md:26: id=$(diffusion generate flux-2-klein --prompt "A red fox at dawn" | jq -r .id)
+docs/reference/tools/job.md:28: diffusion job "$id" | jq '{status, etaRemainingSeconds, assets: [.assets[].path]}'
+docs/reference/tools/job.md:50: diffusion job b22bbf6f-4c94-4a5b-a4c7-98c696706906 | jq .request
+docs/reference/tools/job.md:60: - `sign-in-required` — an API job, and the app is not signed in to a Diffusion Studio account.
+docs/reference/tools/listen.md:8: | CLI | `diffusion listen <path> [options]` |
+docs/reference/tools/logs.md:8: | CLI | `diffusion logs [options]` |
+docs/reference/tools/open.md:8: | CLI | `diffusion open [path] [options]` |
+docs/reference/tools/open.md:23: - a folder with no project record gains one in `package.json` — `projectId`, `displayName`, `main`, and the diffusion commands as `scripts` — which is what the app remembers the folder by. A package.j
+docs/reference/tools/open.md:33: `diffusion open` is also how the app starts: it launches Diffusion Studio (macOS and Windows) or surfaces the running instance, then, given a path, calls the tool. With no path it only makes sure the 
+docs/reference/tools/open.md:53: - From a shell on Linux, or from a `diffusion` that is not the one the app ships (a workspace build on Windows), the app cannot be launched; the command then requires it to already be running.
+docs/reference/tools/probe.md:8: | CLI | `diffusion probe <path>` |
+docs/reference/tools/report.md:3: Report a bug in diffusion or the app itself. Files a GitHub issue on diffusionstudio/editor with diagnostics attached (diffusion version, platform, recent app logs) and returns its URL. Submits immedi
+docs/reference/tools/report.md:8: | CLI | `diffusion report <title> [options]` |
+docs/reference/tools/report.md:9: | CLI aliases | `diffusion issue` |
+docs/reference/tools/report.md:17: | `commands` | `string[]` | `-c, --commands <cmd...>` | the diffusion commands or tool calls that reproduce it, in order |
+docs/reference/tools/report.md:20: For a tool that errors, contradicts this reference, or returns something it shouldn't. The description is bundled with diagnostics (app version, platform, Electron version, the app's recent console ou
+docs/reference/tools/report.md:32: url: string  // the created github.com/diffusionstudio/editor issue
+docs/reference/tools/report.md:46: diffusion capture intro
+docs/reference/tools/report.md:64: `commands` are rendered as a shell block under `## Repro`, in the order given; from a shell, `-c` is repeatable (`-c "diffusion context" -c "diffusion capture intro"`). `logs: 0` omits the log section
+docs/reference/tools/screenshot.md:8: | CLI | `diffusion screenshot [options]` |
+docs/reference/tools/screenshot.md:16: The shot is taken from the app's own window buffer, so it works even when the window is hidden or covered by other windows, and never includes anything outside the app. The file is named `diffusion-st
+docs/reference/tools/segment.md:8: | CLI | `diffusion generate sam-2.1 '<fields>' [-o <path>]` |
+docs/reference/tools/segment.md:40: diffusion generate sam-2.1 '{"video":{"path":"footage/skater.mp4"},"time":2.4,"box":[0.4,0.2,0.65,0.95],"preview":true}'
+docs/reference/tools/segment.md:41: diffusion generate sam-2.1 '{"video":{"path":"footage/skater.mp4"},"time":2.4,"box":[0.4,0.2,0.65,0.95],"exclude":[{"x":0.5,"y":0.9}],"preview":true}'
+docs/reference/tools/segment.md:42: diffusion generate sam-2.1 '{"video":{"path":"footage/skater.mp4"},"time":2.4,"box":[0.4,0.2,0.65,0.95],"exclude":[{"x":0.5,"y":0.9}],"start":2,"end":9}' -o masks/skater.mask
+docs/reference/tools/transcribe.md:8: | CLI | `diffusion transcribe <path>` |
+docs/reference/tools/transcribe.md:17: Times are in **seconds** of source/content time. An `output` naming an existing directory gets a fresh `dapi-transcript-*.json` inside it. The whole asset is transcribed once per app session (cached i
+docs/reference/tools/waveform.md:8: | CLI | `diffusion waveform <path> [options]` |
+docs/reference/tools/waveform.md:9: | CLI aliases | `diffusion wave` |
+docs/reference/tools/waveform.md:31: path: string,   // e.g. "/tmp/dapi-waveform-3f2c1a8e-….png", or the `output` path
+docs/reference/tools/window.md:8: | CLI | `diffusion window [show\|hide]` |
+docs/skills/editor.md:52: - For tasks that don't need an editing UI, keep the app in the background: from a shell, `diffusion open -b <dir>` launches it that way. Over MCP the app is already running, and `open` only opens the 
+package.json:2: "name": "@diffusionstudio/editor",
+package.json:13: "dev:web_v1": "npm run dev --workspace=@diffusionstudio/web",
+package.json:15: "build": "npm run build --workspace=@diffusionstudio/web",
+package.json:16: "build:web_v1": "npm run build --workspace=@diffusionstudio/web",
+package.json:17: "build:desktop": "npm run build --workspace=@diffusionstudio/desktop",
+package.json:18: "make": "npm run make --workspace=@diffusionstudio/desktop",
+packages/agent-chat/package.json:2: "name": "@diffusionstudio/agent-chat",
+packages/agent-chat/src/bin.ts:98: mcp: mcpUrl ? { name: "diffusion", url: mcpUrl } : null,
+packages/agent-chat/src/host/claude.ts:121: CLAUDE_AGENT_SDK_CLIENT_APP: `diffusion-studio/${version}`,
+packages/agent-chat/src/host/codex.ts:30: const CLIENT_NAME = "diffusion_studio";
+packages/agent-chat/src/host/codex.ts:78: if (mcpUrl) args.push("-c", `mcp_servers.diffusion.url="${mcpUrl}"`);
+packages/agent-chat/src/host/codex.ts:91: clientInfo: { name: CLIENT_NAME, title: "Diffusion Studio", version },
+packages/agent-chat/src/host/env.ts:140: * Where a harness binary is: an explicit override (`DIFFUSION_CLAUDE_PATH`,
+packages/agent-chat/src/host/env.ts:141: * `DIFFUSION_CODEX_PATH`), else `which`.
+packages/agent-chat/src/host/env.ts:144: const override = host.env[`DIFFUSION_${name.toUpperCase()}_PATH`] ?? process.env[`DIFFUSION_${name.toUpperCase()}_PATH`];
+packages/agent-chat/src/host/harness.ts:25: export type McpConfig = { name: "diffusion"; url: string };
+packages/agent-chat/src/host/harness.ts:134: /** `mcp__diffusion__capture` → "capture"; anything else stays. */
+packages/agent-chat/src/host/harness.ts:193: `You are running in Diffusion Studio's chat panel. The open project is at \`${cwd}\`. ` +
+packages/agent-chat/src/host/harness.ts:194: "The `diffusion` MCP tools act on it live — use `capture`/`check` to verify edits. " +
+packages/agent-chat/src/host/host.ts:220: const dir = join(this.options.uploadDir ?? join(tmpdir(), "diffusion-studio-pasted"), randomUUID());
+packages/agent-chat/src/index.ts:6: // lives behind `@diffusionstudio/agent-chat/host` and needs Node.
+packages/agent-chat/test/e2e.test.ts:37: mcp: { name: "diffusion", url: "http://127.0.0.1:3274/mcp?client=chat" },
+packages/assets/package.json:2: "name": "@diffusionstudio/assets",
+packages/assets/src/mask.ts:35: export const MASK_MIME_TYPE = 'application/x-diffusionstudio-mask';
+packages/dapi/README.md:1: # @diffusionstudio/dapi
+packages/dapi/README.md:3: The tool catalog behind `dapi`: one entry per tool with its name, description, and zod input and output schemas. The app registers the catalog with its MCP server, the renderer validates incoming call
+packages/dapi/package.json:2: "name": "@diffusionstudio/dapi",
+packages/dapi/package.json:4: "description": "The dapi tool catalog: every tool the Diffusion Studio app exposes to agents and the CLI, as a name, a description, and zod input/output schemas. The one definition the app serves, the
+packages/dapi/package.json:16: "dapi",
+packages/dapi/src/index.ts:25: export { DAPI_WIRE } from "./ipc";
+packages/dapi/src/ipc.ts:12: export const DAPI_WIRE = {
+packages/dapi/src/ipc.ts:14: CALL: "dapi:call",
+packages/dapi/src/ipc.ts:16: CANCEL: "dapi:cancel",
+packages/dapi/src/ipc.ts:18: REPLY: "dapi:reply",
+packages/dapi/src/mcp.ts:7: // config once. 3274 spells "dapi" on a phone keypad. Loopback only; no token
+packages/dapi/src/tools/export.ts:11: // The settings shape mirrors the scene's `diffusion.export.<id>` entry in the
+packages/dapi/src/tools/export.ts:40: "Encode a scene to a video file — the same render the app's export runs, covering the scene's workarea. Settings come from the scene's `diffusion.export.<id>` entry in the project's package.json (the 
+packages/dapi/src/tools/generate.ts:5: // Generation on the Diffusion Studio API, nearly as the API has it: a request
+packages/dapi/src/tools/generate.ts:106: "Start a job on a generative model — images, video, music, sound effects, speech, and tools such as background removal, upscaling, transcription and analysis on the Diffusion Studio API, and object se
+packages/dapi/src/tools/report.ts:15: "Report a bug in dapi or the app itself. Files a GitHub issue on diffusionstudio/editor with diagnostics attached (dapi version, platform, recent app logs) and returns its URL. Submits immediately and
+packages/dapi/src/tools/report.ts:19: commands: z.array(z.string()).optional().describe("the dapi commands or tool calls that reproduce it, in order"),
+packages/encoder/package.json:2: "name": "@diffusionstudio/encoder",
+packages/encoder/package.json:4: "description": "Offline video/audio/image encoding over @diffusionstudio/runtime worlds via mediabunny. Needs a browser-grade context (HTMLCanvasElement, OfflineAudioContext, AudioWorklet, SharedArray
+packages/jsx/README.md:1: # @diffusionstudio/jsx
+packages/jsx/README.md:10: See [reference/jsx](https://github.com/diffusionstudio/editor/blob/main/reference/jsx/README.md)
+packages/jsx/package.json:2: "name": "@diffusionstudio/jsx",
+packages/jsx/package.json:4: "description": "Types and authoring API for Diffusion Studio compositions: the JSX element vocabulary and the hooks the editor implements when it mounts a project.",
+packages/jsx/package.json:27: "diffusion-studio",
+packages/jsx/src/hooks.ts:8: * renderer substitutes its own "@diffusionstudio/jsx" module (see
+packages/jsx/src/hooks.ts:9: * @diffusionstudio/reconciler) and these implementations are replaced by ones
+packages/jsx/src/index.ts:10: * @diffusionstudio/reconciler), so nothing in this package touches a host.
+packages/jsx/src/inspect.ts:73: * declaration exists so the substituted module (see @diffusionstudio/reconciler)
+packages/jsx/src/jsx-runtime.ts:6: * Type-only JSX runtime for `jsxImportSource: "@diffusionstudio/jsx"`. JSX is
+packages/jsx/src/source.ts:136: * compile step canonicalizes them into (see @diffusionstudio/reconciler's
+packages/jsx/src/types.ts:410: /** A family available on the machine (`dapi fonts`). */
+packages/koota-solid/README.md:1: # @diffusionstudio/koota-solid
+packages/koota-solid/package.json:2: "name": "@diffusionstudio/koota-solid",
+packages/reconciler/package.json:2: "name": "@diffusionstudio/reconciler",
+packages/reconciler/package.json:4: "description": "The JSX runtime and host behind @diffusionstudio/jsx: evaluates a compiled project bundle (babel-preset-solid universal), binds it to Solid's universal renderer, and reconciles its ele
+packages/reconciler/src/document.ts:743: `<${tag}> is not supported yet (only composition elements exported by @diffusionstudio/jsx are accepted).`,
+packages/reconciler/src/evaluate.ts:26: if (!resolved) throw new Error(`Cannot import "${id}" — only solid-js and @diffusionstudio/jsx are available.`);
+packages/reconciler/src/inspect.ts:7: * @diffusionstudio/jsx (see "./runtime"), so a compiled `@inspect` declaration
+packages/reconciler/src/renderer.ts:91: * @diffusionstudio/jsx (see "./runtime"), so a mounted project's import
+packages/reconciler/src/runtime.ts:6: * What a compiled bundle sees as "@diffusionstudio/jsx".
+packages/runtime/README.md:1: # @diffusionstudio/runtime
+packages/runtime/README.md:5: Must work without a DOM and without solid-js so the CLI and node capture can consume it directly. Browser-only concerns (input, keyboard, HUD, timeline canvas UI, persistence) live in `apps/web`; Soli
+packages/runtime/package.json:2: "name": "@diffusionstudio/runtime",
+packages/runtime/src/actions/assets.ts:6: // goes through the AssetLibrary (@diffusionstudio/assets); these are the
+packages/runtime/src/systems/assets.ts:134: * locator of the source stamp (see SOURCE_ATTR in @diffusionstudio/jsx), so
+packages/runtime/src/traits/document.ts:14: * (see @diffusionstudio/jsx) instantiated with the DOM node type the document
+packages/runtime/src/traits/node.ts:68: // SOURCE_ATTR in @diffusionstudio/jsx). Set by the host while a project
+packages/runtime/src/traits/node.ts:75: // LOOP_ATTR in @diffusionstudio/jsx). Every iteration shares one Source, so
+packages/sam2/package.json:2: "name": "@diffusionstudio/sam2",
+packages/sam2/src/constants.ts:32: repo: 'https://huggingface.co/diffusionstudio/sam2.1-tiny-video-onnx-fp16/resolve/66673b5db39371b7dd7847f4d3bc0d4f4179b79e',
+packages/sam2/src/constants.ts:46: repo: 'https://huggingface.co/diffusionstudio/sam2.1-small-video-onnx-fp16/resolve/927ecec6e6ae2727d0af7720eefdb07f2efe4689',
+packages/sam2/src/constants.ts:60: repo: 'https://huggingface.co/diffusionstudio/sam2.1-base-plus-video-onnx-fp16/resolve/386b83e09a774fe2782d86fd1b8cb5aaf718aa9d',
+packages/sam2/src/constants.ts:74: repo: 'https://huggingface.co/diffusionstudio/sam2.1-large-video-onnx-fp16/resolve/98dbd222d9b3f75d15fe63a5c2a22b0b0029eea1',
+scripts/dev-desktop.mjs:6: //   1. builds the CLI, so a linked `dapi` (see `npm run link` in apps/cli) runs the
+scripts/dev-desktop.mjs:172: // 1. Build the CLI (blocking) so `dapi` and the app agree on the latest code.
+scripts/dev-desktop.mjs:174: npm(["run", "build", "--workspace=@diffusionstudio/cli"]);
+scripts/dev-desktop.mjs:190: npm(["run", "build", "--workspace=@diffusionstudio/desktop"]);
+#PKGS [('@diffusionstudio/runtime', 208), ('@diffusionstudio/assets', 112), ('@diffusionstudio/jsx', 99), ('@diffusionstudio/koota-solid', 94), ('@diffusionstudio/dapi', 63), ('@diffusionstudio/reconciler', 48), ('@diffusionstudio/api-contract', 31), ('@diffusionstudio/sam2', 27), ('@diffusionstudio/encoder', 17), ('@diffusionstudio/agent-chat', 15), ('@diffusionstudio/desktop', 8), ('@diffusionstudio/web', 5), ('@diffusionstudio/cli', 4), ('@diffusionstudio/assets.', 1), ('@diffusionstudio/editor', 1)]
+#ENV [('DAPI_WIRE', 16), ('DAPI_USER_PATH', 5), ('DS_S', 2), ('DAPI_PATH_BROADCAST', 2), ('DIFFUSION_APP_PATH', 1), ('DIFFUSION_ANALYTICS', 1), ('DIFFUSION_CLAUDE_PATH', 1), ('DIFFUSION_CODEX_PATH', 1)]
+#HDR Counter({'apps/web': 438, 'packages/runtime': 101, 'apps/desktop': 57, 'packages/dapi': 32, 'packages/agent-chat': 20, 'packages/assets': 15, 'packages/sam2': 12, 'packages/encoder': 10, 'packages/reconciler': 9, 'packages/jsx': 8, 'apps/cli': 4, 'LICENSE': 1, 'scripts/dev-desktop.mjs': 1, 'scripts/lib': 1, 'scripts/release.mjs': 1}) 710
+#NOHDR 49 ['apps/desktop/scripts/make-icns.sh', 'apps/desktop/scripts/tray-menu-icons.sh', 'apps/desktop/scripts/win-assets.py', 'apps/web/src/agent-chat/stick-to-bottom.ts', 'apps/web/src/engine/hooks/use-document.ts', 'apps/web/src/index.css', 'docs/brand/assets/components/callout.tsx', 'docs/brand/assets/components/lower-third.tsx', 'docs/brand/assets/components/media-grid.tsx', 'docs/brand/assets/components/title-card.tsx', 'docs/brand/assets/components/tokens.ts', 'docs/brand/assets/compositions/end-card.tsx', 'docs/brand/assets/compositions/product-demo.tsx', 'docs/brand/assets/compositions/product-tour.tsx', 'docs/examples/01-basics.tsx', 'docs/examples/03-ticker.tsx', 'docs/examples/04-html-in-canvas.tsx', 'docs/examples/05-anime-timeline.tsx', 'docs/examples/06-three.tsx', 'docs/examples/07-webgpu.tsx', 'docs/examples/08-shader-paint.tsx', 'docs/examples/09-inspect-variables.tsx', 'docs/examples/10-typegpu.tsx', 'docs/examples/11-redraw.tsx', 'packages/jsx/scripts/postpack.mjs', 'packages/jsx/scripts/prepack.mjs', 'packages/koota-solid/src/hooks/use-actions.ts', 'packages/koota-solid/src/hooks/use-has.ts', 'packages/koota-solid/src/hooks/use-query-first.ts', 'packages/koota-solid/src/hooks/use-query.ts', 'packages/koota-solid/src/hooks/use-tag.ts', 'packages/koota-solid/src/hooks/use-target.ts', 'packages/koota-solid/src/hooks/use-targets.ts', 'packages/koota-solid/src/hooks/use-trait-effect.ts', 'packages/koota-solid/src/hooks/use-trait.ts', 'packages/koota-solid/src/index.ts', 'packages/koota-solid/src/utils/is-world.ts', 'packages/koota-solid/src/utils/reactive-args.ts', 'packages/koota-solid/src/world/use-world.ts', 'packages/koota-solid/src/world/world-context.ts', 'packages/koota-solid/src/world/world-provider.ts', 'packages/runtime/src/fonts/index.ts', 'packages/runtime/src/index.ts', 'packages/runtime/src/queries/index.ts', 'packages/runtime/src/systems/index.ts', 'packages/runtime/src/traits/index.ts', 'packages/runtime/src/utils/index.ts', 'packages/sam2/scripts/export.py', 'packages/sam2/src/env.d.ts']

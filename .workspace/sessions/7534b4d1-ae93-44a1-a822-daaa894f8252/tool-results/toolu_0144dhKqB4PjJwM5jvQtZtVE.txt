@@ -1,0 +1,208 @@
+apps\desktop\src\squirrel.ts:9:// folder up from the versioned app folder), where the `diffusion`/`dapi`
+apps\desktop\src\squirrel.test.ts:15:const exe = "C:\\Users\\me\\AppData\\Local\\DiffusionStudio\\app-1.0.0\\Diffusion Studio.exe";
+apps\desktop\src\squirrel.test.ts:28:    expect(squirrelEvent([exe, "diffusion://auth?x=1"], "win32")).toBeNull();
+apps\desktop\src\squirrel.test.ts:32:    expect(squirrelEvent(["/Applications/Diffusion Studio.app/Contents/MacOS/Diffusion Studio", "--squirrel-install"], "darwin")).toBeNull();
+apps\desktop\src\projects.ts:13:import { MCP_URL } from "@hypergen/dapi";
+apps\desktop\src\projects.ts:105:// by. Top level rather than inside `diffusion`, which `writeConfig` replaces
+apps\desktop\src\projects.ts:200:  const dir = join(app.getPath("videos"), "Diffusion Studio");
+apps\desktop\src\projects.ts:530:  return cleaned || "diffusion-project";
+apps\desktop\src\projects.ts:538: * The diffusion surface as npm scripts: the CLI is how a project is inspected and
+apps\desktop\src\projects.ts:544:  open: "diffusion open .",
+apps\desktop\src\projects.ts:545:  context: "diffusion context",
+apps\desktop\src\projects.ts:546:  capture: "diffusion capture",
+apps\desktop\src\projects.ts:547:  probe: "diffusion probe",
+apps\desktop\src\projects.ts:548:  transcribe: "diffusion transcribe",
+apps\desktop\src\projects.ts:549:  grab: "diffusion grab",
+apps\desktop\src\projects.ts:550:  filmstrip: "diffusion filmstrip",
+apps\desktop\src\projects.ts:551:  waveform: "diffusion waveform",
+apps\desktop\src\projects.ts:552:  listen: "diffusion listen",
+apps\desktop\src\projects.ts:553:  fonts: "diffusion fonts",
+apps\desktop\src\projects.ts:554:  logs: "diffusion logs",
+apps\desktop\src\projects.ts:555:  screenshot: "diffusion screenshot",
+apps\desktop\src\projects.ts:556:  report: "diffusion report",
+apps\desktop\src\projects.ts:592:.diffusion/
+apps\desktop\src\projects.ts:619:A Diffusion Studio project: a video composition authored as code. The folder is
+apps\desktop\src\projects.ts:626:Everything an agent needs is in the app's MCP server (\`diffusion\`): its tools
+apps\desktop\src\projects.ts:637:| \`package.json\` | The project record: \`projectId\` (its identity, kept across renames), \`displayName\` (the name shown in the app), \`main\` (the entry), \`diffusion\` (how each scene is exported, and whether the stage has ever had anything on it), and the diffusion commands as scripts. |
+apps\desktop\src\projects.ts:698:Every diffusion command is a script here: \`npm run\` lists them, and
+apps\desktop\src\projects.ts:704:| \`open\` | \`diffusion open .\` | Launch the app with this project open. |
+apps\desktop\src\projects.ts:705:| \`context\` | \`diffusion context\` | Which project the app has open, where its playhead sits, its fonts, its background mask tracks. |
+apps\desktop\src\projects.ts:706:| \`capture\` | \`diffusion capture <id>\` | Render frames of a scene, as an export would, to labelled PNG contact sheets. |
+apps\desktop\src\projects.ts:707:| \`probe\` | \`diffusion probe <id\\|path>\` | Container and per-track metadata, without decoding. |
+apps\desktop\src\projects.ts:708:| \`transcribe\` | \`diffusion transcribe <id\\|path>\` | Timed speech transcript, word by word. |
+apps\desktop\src\projects.ts:709:| \`grab\` | \`diffusion grab <id\\|path>\` | Decode frames of a video to labelled PNG contact sheets. |
+apps\desktop\src\projects.ts:710:| \`filmstrip\` | \`diffusion filmstrip <id\\|path>\` | Thumbnail grid across a window of a video. |
+apps\desktop\src\projects.ts:711:| \`waveform\` | \`diffusion waveform <id\\|path>\` | Loudness over time, with the silences marked. |
+apps\desktop\src\projects.ts:712:| \`listen\` | \`diffusion listen <id\\|path>\` | Ask a multimodal model what is in an audio track. |
+apps\desktop\src\projects.ts:713:| \`fonts\` | \`diffusion fonts\` | Google Fonts and local font families, valid as \`fontFamily\`. |
+apps\desktop\src\projects.ts:714:| \`logs\` | \`diffusion logs\` | Recent console output from the app. |
+apps\desktop\src\projects.ts:715:| \`screenshot\` | \`diffusion screenshot\` | The whole app window as a PNG. |
+apps\desktop\src\projects.ts:716:| \`report\` | \`diffusion report <title>\` | File a bug against the editor, with diagnostics attached. |
+apps\desktop\src\projects.ts:720:- [JSX reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/jsx/README.md): elements, timing, paints, captions
+apps\desktop\src\projects.ts:721:- [Tool reference](https://github.com/diffusionstudio/editor/blob/main/docs/reference/tools/README.md): every tool and command, its options and its output
+apps\desktop\src\projects.ts:722:- [Examples](https://github.com/diffusionstudio/editor/tree/main/docs/examples): runnable compositions to read
+apps\desktop\src\projects.ts:733:const APP_DIR = ".diffusion";
+apps\desktop\src\projects.ts:754:  // scripts is left with them, one with none is given the diffusion surface.
+apps\desktop\src\projects.ts:809: * `diffusion open <path>` opens a folder.
+apps\desktop\src\projects.ts:1144:    const text = `# Diffusion Studio asset library. Edited by the app; hand edits are read on the next load.
+apps\desktop\src\projects.ts:1157:const CONFIG_FIELD = "diffusion";
+apps\desktop\src\projects.ts:1159:/** The project's config (package.json `diffusion`), or null when there is none. */
+apps\desktop\package.json:8:    "url": "https://github.com/diffusionstudio/editor.git"
+apps\desktop\package.json:48:    "@hypergen/dapi": "*",
+apps\desktop\src\cli-windows.ts:5:// The `diffusion` (and `dapi` alias) commands on Windows. Squirrel installs
+apps\desktop\src\cli-windows.ts:8:// (and, for `dapi.cmd`, into the agents' MCP configs) is a pair of shims in a
+apps\desktop\src\cli-windows.ts:10://   %LOCALAPPDATA%\DiffusionStudio\bin\dapi.cmd
+apps\desktop\src\cli-windows.ts:11://   %LOCALAPPDATA%\DiffusionStudio\bin\diffusion.cmd
+apps\desktop\src\cli-windows.ts:30:  return win32.join(local, "DiffusionStudio", "bin");
+apps\desktop\src\cli-windows.ts:34:  return win32.join(shimDir(env), "dapi.cmd");
+apps\desktop\src\cli-windows.ts:37:// `dapi.cmd` is the one `mcp-install.ts` registers with agents, so its name
+apps\desktop\src\cli-windows.ts:38:// and behavior above stay fixed. `diffusion.cmd` rides beside it purely so
+apps\desktop\src\cli-windows.ts:41:  return ["dapi.cmd", "diffusion.cmd"].map((name) => win32.join(shimDir(env), name));
+apps\desktop\src\cli-windows.ts:44:/** `dapi.js` as the packaged app stages it, next to `execPath`'s resources. */
+apps\desktop\src\cli-windows.ts:46:  return win32.join(win32.dirname(execPath), "resources", "cli", "dapi.js");
+apps\desktop\src\cli-windows.test.ts:14:const exe = `${local}\\DiffusionStudio\\app-1.2.0\\Diffusion Studio.exe`;
+apps\desktop\src\cli-windows.test.ts:15:const dir = `${local}\\DiffusionStudio\\bin`;
+apps\desktop\src\cli-windows.test.ts:20:    expect(shimPath({ LOCALAPPDATA: local })).toBe(`${dir}\\dapi.cmd`);
+apps\desktop\src\cli-windows.test.ts:24:    expect(stagedScript(exe)).toBe(`${local}\\DiffusionStudio\\app-1.2.0\\resources\\cli\\dapi.js`);
+apps\desktop\src\cli-windows.test.ts:35:    expect(shimContent("C:\\Users\\100%me\\app.exe", "C:\\x\\dapi.js")).toContain('"C:\\Users\\100%%me\\app.exe"');
+apps\desktop\src\agent-chat.ts:41:        mcp: options!.mcpUrl ? { name: "diffusion", url: options!.mcpUrl } : null,
+apps\desktop\src\mcp-config.test.ts:19:  command: "/Applications/Diffusion Studio.app/Contents/Resources/cli/bin/dapi",
+apps\desktop\src\mcp-config.test.ts:48:    expect(JSON.parse(text)).toEqual({ mcpServers: { diffusion: { type: "http", url: spec.url } } });
+apps\desktop\src\mcp-config.test.ts:54:    expect(JSON.parse(text)).toEqual({ servers: { diffusion: { type: "http", url: spec.url } } });
+apps\desktop\src\mcp-config.test.ts:62:    expect(JSON.parse(text)).toEqual({ mcp: { diffusion: { type: "remote", enabled: true, url: spec.url } } });
+apps\desktop\src\mcp-config.test.ts:76:    expect(after.mcpServers.diffusion).toEqual({ url: spec.url });
+apps\desktop\src\mcp-config.test.ts:80:    const before = upsertServer(null, "mcpServers", { command: "/old/dapi", args: ["mcp"] });
+apps\desktop\src\mcp-config.test.ts:81:    expect(readServer(before, "mcpServers")).toEqual({ command: "/old/dapi", args: ["mcp"] });
+apps\desktop\src\mcp-config.test.ts:84:    expect(JSON.parse(after).mcpServers.diffusion.command).toBeUndefined();
+apps\desktop\src\mcp-config.test.ts:101:    expect(JSON.parse(upsertServer("  \n", "mcpServers", { url: spec.url }))).toEqual({ mcpServers: { diffusion: { url: spec.url } } });
+apps\desktop\src\mcp-config.test.ts:107:      mcpServers: { other: { command: "x", args: [] }, diffusion: { type: "http", url: spec.url } },
+apps\desktop\src\mcp-config.test.ts:127:    expect(after).toBe('model = "o3"\n\n[mcp_servers.other]\ncommand = "x"\n\n[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps\desktop\src\mcp-config.test.ts:132:    const before = '[mcp_servers.diffusion]\ncommand = "/old/dapi"\nargs = ["mcp"]\n\n[mcp_servers.other]\ncommand = "x"\n';
+apps\desktop\src\mcp-config.test.ts:133:    expect(readServer(before, "toml")).toEqual({ command: "/old/dapi", args: ["mcp"] });
+apps\desktop\src\mcp-config.test.ts:135:    expect(after).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n[mcp_servers.other]\ncommand = "x"\n');
+apps\desktop\src\mcp-config.test.ts:141:    expect(text).toBe('[mcp_servers.diffusion]\nurl = "http://127.0.0.1:3274/mcp"\n');
+apps\desktop\src\mcp-config.test.ts:145:    const odd = { command: 'C:\\Apps\\"Diffusion"\\dapi', args: ["mcp"] };
+apps\desktop\src\mcp-config.test.ts:147:    expect(text).toContain('command = "C:\\\\Apps\\\\\\"Diffusion\\"\\\\dapi"');
+apps\desktop\src\mcp-config.test.ts:163:    const before = 'model = "o3"\n\n[mcp_servers.diffusion]\nurl = "u"\n\n[mcp_servers.other]\ncommand = "x"\n';
+apps\desktop\src\mcp-config.test.ts:173:  const shim = "C:\\Users\\me\\AppData\\Local\\DiffusionStudio\\bin\\dapi.cmd";
+apps\desktop\src\mcp-config.test.ts:192:    expect(runsOurProxy({ command: "/private/var/folders/x/AppTranslocation/y/d/cli/bin/dapi" })).toBe(true);
+apps\desktop\src\mcp-config.test.ts:195:    expect(runsOurProxy({ command: "/opt/homebrew/bin/dapi", args: ["mcp"] })).toBe(false);
+apps\desktop\src\main-channels.ts:11:// @hypergen/dapi), in the other direction: main asks, the renderer answers.
+apps\desktop\src\main-channels.ts:12:import type { LogEntry, ScreenshotResult } from "@hypergen/dapi";
+apps\desktop\src\main-channels.ts:30:// answered by the renderer's handlers (apps/web/src/dapi).
+apps\desktop\src\main-channels.ts:132:// agents that need the bundled `dapi` binary — why this build cannot
+apps\desktop\src\main-channels.ts:156:// Where the `diffusion` command stands. `managed` means what is there is a
+apps\desktop\src\main-channels.ts:167:// Outcome of linking the bundled diffusion CLI into PATH. "cancelled" means the
+apps\desktop\src\main-channels.ts:184:// Events fed by a `diffusion://` deep link. Main routes each link to exactly
+apps\desktop\src\main-channels.ts:324:  // The project's config: the `diffusion` field of its package.json, as
+apps\desktop\src\main-channels.ts:361:  // the `diffusion` command on PATH (see cli-install.ts). The install/uninstall
+apps\desktop\src\mcp-install.ts:7:// that speak HTTP, the bundled `dapi mcp` proxy for the rest. No PATH
+apps\desktop\src\mcp-install.ts:9:// type `diffusion` (or its `dapi` alias).
+apps\desktop\src\mcp-install.ts:15:import { MCP_URL } from "@hypergen/dapi";
+apps\desktop\src\mcp-install.ts:33:const DEV_BINARY = "/opt/homebrew/bin/dapi";
+apps\desktop\src\mcp-install.ts:36: * The bundled `dapi` binary, or null when none is available (an unstaged dev
+apps\desktop\src\mcp-install.ts:46:  const command = app.isPackaged ? join(process.resourcesPath, "cli", "bin", "dapi") : DEV_BINARY;
+apps\desktop\src\mcp-install.ts:87: * Only the stdio agents have reasons: a build without the `diffusion` binary has
+apps\desktop\src\mcp-install.ts:94:  if (current.command === "") return "Needs the diffusion command line tool, which this build does not include.";
+apps\desktop\src\mcp-install.ts:96:    return "Move Diffusion Studio to the Applications folder and relaunch it first.";
+apps\desktop\src\mcp-config.ts:11: * URL, which is the same on every machine; the rest get the bundled `dapi`
+apps\desktop\src\mcp-config.ts:20: * namespace an agent shows us under: `mcp__diffusion__<tool>` and
+apps\desktop\src\mcp-config.ts:21: * `/diffusion:<prompt>`. The same word as our URL scheme and the CLI's
+apps\desktop\src\mcp-config.ts:22: * primary name (`dapi` still works there too, as an alias).
+apps\desktop\src\mcp-config.ts:24:export const SERVER_NAME = "diffusion";
+apps\desktop\src\mcp-config.ts:110:/** Whether the agent runs our entry over stdio, and so needs the `dapi` binary. */
+apps\desktop\src\mcp-config.ts:156:const OUR_PATHS = ["Diffusion Studio", "/AppTranslocation/", "\\DiffusionStudio\\"];
+apps\desktop\assets\app.manifest:3:  Application manifest embedded into "Diffusion Studio.exe" on Windows
+apps\desktop\src\cli-install.ts:20:// `diffusion` is what we point to first when reporting status; `dapi` rides
+apps\desktop\src\cli-install.ts:23:const LINK_NAMES = ["diffusion", "dapi"] as const;
+apps\desktop\src\cli-install.ts:73:/** Where `diffusion` (or its `dapi` alias) stands on this machine, without asking for a password. */
+apps\desktop\src\cli-install.ts:93:  const wrapper = join(process.resourcesPath, "cli", "bin", "dapi");
+apps\desktop\src\cli-install.ts:165: * Takes the `diffusion`/`dapi` links off PATH, whichever of the two
+apps\desktop\src\main.ts:14:import { DapiServer } from "./dapi/server";
+apps\desktop\src\main.ts:58:import type { LogEntry } from "@hypergen/dapi";
+apps\desktop\src\main.ts:62:const AUTH_PROTOCOL = "diffusion";
+apps\desktop\src\main.ts:80:app.setName("Diffusion Studio");
+apps\desktop\src\main.ts:130:    repo: "diffusionstudio/editor",
+apps\desktop\src\main.ts:179:// The MCP server agents and the diffusion CLI talk to. Started once the app is
+apps\desktop\src\main.ts:181:const dapi = new DapiServer({
+apps\desktop\src\main.ts:221:// diffusion://auth/callback → auth, diffusion://checkout/callback → checkout.
+apps\desktop\src\main.ts:529:    dapi.start();
+apps\desktop\src\main.ts:531:    dapi.mcpUrl().then((url) =>
+apps\desktop\src\main.ts:552:    dapi.stop();
+apps\desktop\src\preload.ts:7:import { DAPI_WIRE } from "@hypergen/dapi";
+apps\desktop\scripts\stage-cli.mjs:5:// Stages the dapi CLI into apps/desktop/cli so electron-forge can ship it as
+apps\desktop\scripts\stage-cli.mjs:7://   cli/dapi.js        bundled CLI (built by apps/cli), self-contained
+apps\desktop\scripts\stage-cli.mjs:8://   cli/bin/dapi       macOS shell wrapper: what Claude Desktop runs as
+apps\desktop\scripts\stage-cli.mjs:9://                      `dapi mcp` (registered by mcp-install.ts) and the file
+apps\desktop\scripts\stage-cli.mjs:11://   cli/bin/dapi.cmd   Windows wrapper, relative to the install folder. PATH
+apps\desktop\scripts\stage-cli.mjs:30:cpSync(join(cliDir, "dist", "index.js"), join(stageDir, "dapi.js"));
+apps\desktop\scripts\stage-cli.mjs:47:export DIFFUSION_APP_PATH="$(cd "$DIR/../../../.." && pwd)"
+apps\desktop\scripts\stage-cli.mjs:48:ELECTRON_RUN_AS_NODE=1 exec "$DIR/../../../MacOS/Diffusion Studio" "$DIR/../dapi.js" "$@"
+apps\desktop\scripts\stage-cli.mjs:52:  writeFileSync(join(stageDir, "bin", "dapi"), wrapper);
+apps\desktop\scripts\stage-cli.mjs:53:  chmodSync(join(stageDir, "bin", "dapi"), 0o755);
+apps\desktop\scripts\stage-cli.mjs:61:  '"%~dp0..\\..\\..\\Diffusion Studio.exe" "%~dp0..\\dapi.js" %*',
+apps\desktop\scripts\stage-cli.mjs:66:  writeFileSync(join(stageDir, "bin", "dapi.cmd"), cmdWrapper);
+apps\desktop\scripts\stage-cli.mjs:69:console.log(`stage-cli: staged dapi at ${stageDir}`);
+apps\desktop\src\dapi\docs.test.ts:12:const root = mkdtempSync(join(tmpdir(), "dapi-docs-"));
+apps\desktop\src\dapi\docs.test.ts:18:  writeFileSync(join(docsDir, "INSTRUCTIONS.md"), "Diffusion Studio is running.\n\nRead `skills/editor.md`.\n");
+apps\desktop\src\dapi\docs.test.ts:28:    expect(text.startsWith("Diffusion Studio is running.\n\nRead `skills/editor.md`.")).toBe(true);
+apps\desktop\src\dapi\docs.test.ts:42:    expect(text).not.toContain("dapi://");
+apps\desktop\forge.config.ts:24:    name: 'Diffusion Studio',
+apps\desktop\forge.config.ts:25:    appBundleId: 'studio.diffusion.editor',
+apps\desktop\forge.config.ts:30:      CompanyName: 'Diffusion Studio',
+apps\desktop\forge.config.ts:31:      ProductName: 'Diffusion Studio',
+apps\desktop\forge.config.ts:32:      FileDescription: 'Diffusion Studio',
+apps\desktop\forge.config.ts:35:    protocols: [{ name: 'Diffusion Studio', schemes: ['diffusion'] }],
+apps\desktop\forge.config.ts:61:      name: 'DiffusionStudio',
+apps\desktop\forge.config.ts:62:      authors: 'Diffusion Studio',
+apps\desktop\forge.config.ts:64:      exe: 'Diffusion Studio.exe',
+apps\desktop\forge.config.ts:65:      setupExe: `Diffusion-Studio-${process.arch}-Setup.exe`,
+apps\desktop\forge.config.ts:69:      iconUrl: 'https://raw.githubusercontent.com/diffusionstudio/editor/main/apps/desktop/assets/icon.ico',
+apps\desktop\forge.config.ts:74:      name: `Diffusion-Studio-${process.arch}`,
+apps\desktop\forge.config.ts:91:      repository: { owner: 'diffusionstudio', name: 'editor' },
+apps\desktop\src\dapi\docs.ts:11:  "Diffusion Studio, a video editor, is running on this machine and you are connected to it. The tools are the whole API; their descriptions are authoritative.";
+apps\desktop\src\dapi\handler.ts:5:import type { LogEntry, ToolArgs, ToolResult } from "@hypergen/dapi";
+apps\desktop\src\dapi\http.test.ts:32:      session.registerResource("note", "dapi://note", { mimeType: "text/plain" }, async () => ({
+apps\desktop\src\dapi\http.test.ts:33:        contents: [{ uri: "dapi://note", mimeType: "text/plain", text: "hello" }],
+apps\desktop\src\dapi\http.test.ts:56:    const note = await client.readResource({ uri: "dapi://note" });
+apps\desktop\src\dapi\http.ts:48:        server.on("error", (error) => console.error("[dapi] http server error:", error));
+apps\desktop\src\dapi\http.ts:94:      console.error("[dapi] http request failed:", error);
+apps\desktop\src\dapi\present.test.ts:11:const dir = mkdtempSync(join(tmpdir(), "dapi-present-"));
+apps\desktop\src\dapi\present.test.ts:30:    expect(path).toMatch(/dapi-grab-.*[\\/]0f\.png$/);
+apps\desktop\src\dapi\present.test.ts:46:    expect(basename(previewPath)).toMatch(/^dapi-waveform-.*\.png$/);
+apps\desktop\src\dapi\present.test.ts:51:    expect(transcriptPath).toMatch(/dapi-transcript-.*\.json$/);
+apps\desktop\src\dapi\present.test.ts:60:    expect(a).toMatch(/diffusion-studio_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.png$/);
+apps\desktop\src\dapi\present.test.ts:142:      expect(path).toMatch(/dapi-generate-j-temp[\\/]a\.png$/);
+apps\desktop\src\dapi\present.test.ts:171:    expect(image).toMatch(/dapi-local-preview\.png$/);
+apps\desktop\scripts\win-assets.py:122:LABEL = 'Installing Diffusion Studio'
+apps\desktop\src\dapi\handlers\logs.test.ts:6:import { LOG_MESSAGE_MAX, LOG_TAIL } from "@hypergen/dapi";
+apps\desktop\src\dapi\handlers\logs.test.ts:9:import type { LogEntry } from "@hypergen/dapi";
+apps\desktop\src\dapi\handlers\logs.ts:5:import { LOG_MESSAGE_MAX, LOG_TAIL } from "@hypergen/dapi";
+apps\desktop\src\dapi\handlers\logs.ts:7:import type { LogEntry, LogLevel } from "@hypergen/dapi";
+apps\desktop\src\dapi\handlers\report.ts:7:import { DapiError, ISSUE_LOG_TAIL } from "@hypergen/dapi";
+apps\desktop\src\dapi\handlers\report.ts:12:const REPO = "diffusionstudio/editor";
+apps\desktop\src\dapi\present.ts:12:import { generatedPath } from "@hypergen/dapi";
+apps\desktop\src\dapi\present.ts:14:import type { GenerationResult, TimecodedImage, ToolArgs, ToolName, ToolOutput, ToolResult } from "@hypergen/dapi";
+apps\desktop\src\dapi\present.ts:25:const APP_SLUG = "diffusion-studio";
+apps\desktop\src\dapi\present.ts:67:  const dir = output ?? (await mkdtemp(join(tempDir(), `dapi-${kind}-`)));
+apps\desktop\src\dapi\present.ts:99:  const path = await singleFilePath(output, `dapi-${kind}-${randomUUID()}.png`);
+apps\desktop\src\dapi\present.ts:117:  const path = await singleFilePath(output, `dapi-transcript-${randomUUID()}.json`);
+apps\desktop\src\dapi\present.ts:145:      path = join(tempDir(), `dapi-${job.id}.png`);
+apps\desktop\src\dapi\present.ts:158:    const temp = join(tempDir(), `dapi-generate-${job.id}`);
+apps\desktop\src\dapi\tools-session.ts:6:import { toolJsonSchemas, tools } from "@hypergen/dapi";
+apps\desktop\src\dapi\tools-session.ts:10:import type { GenericTool, ToolName } from "@hypergen/dapi";
+apps\desktop\src\dapi\server.ts:6:import { MCP_HOST, MCP_PATH, MCP_PORT, isDapiError, tools } from "@hypergen/dapi";
+apps\desktop\src\dapi\server.ts:13:import type { TrackProps } from "@diffusionstudio/api-contract";
+apps\desktop\src\dapi\server.ts:14:import type { LogEntry } from "@hypergen/dapi";
+apps\desktop\src\dapi\server.ts:20: * shows the tools under: `mcp__diffusion__<tool>`. The same word as our URL
+apps\desktop\src\dapi\server.ts:21: * scheme and the CLI's primary name (`dapi` still works there too, as an
+apps\desktop\src\dapi\server.ts:24:const SERVER_NAME = "diffusion";
+apps\desktop\src\dapi\server.ts:43: * agents register and the `diffusion` CLI calls. Each client gets its own MCP
+apps\desktop\src\dapi\server.ts:83:        console.error(`[dapi] cannot serve MCP at ${this.url}: ${error.message}`);
+apps\desktop\src\dapi\server.ts:103:    const session = new McpServer({ name: SERVER_NAME, title: "Diffusion Studio", version: this.deps.version }, { instructions: this.instructionsText });
+apps\desktop\src\dapi\renderer-calls.ts:7:import { DAPI_WIRE, DapiError } from "@hypergen/dapi";
+apps\desktop\src\dapi\renderer-calls.ts:10:import type { DapiCall, DapiCancel, DapiReply } from "@hypergen/dapi";
+apps\desktop\src\dapi\renderer-calls.ts:26: * Runs renderer tools from main: one `dapi:call` per request, answered by
+apps\desktop\src\dapi\renderer-calls.ts:27: * `dapi:reply`, or `dapi:cancel` if the caller gives up. There may be no
+apps\desktop\src\dapi\renderer-calls.ts:79:          console.warn(`[dapi] could not reopen ${dir}: ${error.message}`),
+apps\desktop\src\dapi\tools-session.test.ts:9:import { JSON_SCHEMA_DIALECT, tools } from "@hypergen/dapi";
