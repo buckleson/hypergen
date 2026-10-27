@@ -1,205 +1,132 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Hypergen" width="700" />
+  <img src="assets/banner.png" alt="Hypergen" width="760" />
 </p>
 
-<p align="center">Turn your agent into a professional video editor</p>
-
-<br />
+<p align="center"><b>The AI video editor built for agents.</b><br />Edit video with Claude Code, Codex and your own words — then finish it by hand in a full editor.</p>
 
 <p align="center">
-  <img src="assets/desktop-screenshot.png" alt="The Hypergen editor" width="800" />
+  <a href="https://github.com/buckleson/hypergen/releases/latest">Download</a> ·
+  <a href="docs/reference/tools/README.md">Tool reference</a> ·
+  <a href="docs/reference/jsx/README.md">JSX reference</a> ·
+  <a href="docs/examples/README.md">Examples</a>
 </p>
 
-<br />
+---
 
-## Hypergen
+## What Hypergen is
 
-Edit videos with Codex, Claude Code, OpenCode, or Pi. Refine any output in a fully featured editing environment.
+Hypergen is a desktop video editor that AI agents can drive. You put your footage in a folder and tell your agent what video you want. The agent cuts, captions, colours, animates and renders it. You can open the same project in the editor and change anything by hand.
 
-Every edit you make is written to real code, so the agent always sees the latest version. A headless mode is available too.
+Every project is code. Each edit on the canvas or the timeline is written back to the project's JSX source, and each change to the source redraws the canvas. So you and your agent always work on the same version.
 
-## What people do with it
+## Features
 
-Drop your raw footage and files into a folder, then ask for the video you want. That's it.
+| | |
+| --- | --- |
+| **Agent editing** | Connects to Claude Code, Codex, Cursor, VS Code Copilot, Gemini CLI, Windsurf, OpenCode and Claude Desktop through the built-in `hypergen` MCP server. |
+| **Built-in chat** | A chat panel inside the editor drives your own Claude Code or Codex sign-in. No extra API key is needed. |
+| **Timeline editor** | Layers, keyframes, transitions, masks, captions, effects, snapping and full undo. |
+| **See and hear media** | Agents probe, grab frames, make filmstrips and waveforms, and transcribe and ask questions about footage. |
+| **Local transcription** | Word-level captions with Whisper, running on your computer. No key, no upload. |
+| **AI generation** | Images, video, voice, music, background removal and upscaling through your own fal.ai key. |
+| **Video questions** | Ask about a clip ("what is said in the intro?") through your own Gemini key. |
+| **Segmentation** | Track and cut out objects with SAM 2.1, running locally on the GPU. |
+| **Export** | Render MP4 locally. No cloud render. |
+| **Private by design** | No account, no telemetry. Your keys are encrypted on your computer. |
 
-The agent handles everything from there:
+## Install
 
-- Cuts the clips
-- Removes filler words
-- Adds subtitles
-- Applies color correction and filters
-- Handles animations
-- Renders the final video
+Download the installer for your system from [Releases](https://github.com/buckleson/hypergen/releases/latest):
 
-Beyond finishing a cut, it covers:
+| System | File |
+| --- | --- |
+| Windows (x64) | `Hypergen-x64-Setup.exe` |
+| macOS (Apple Silicon) | `Hypergen-arm64.dmg` |
+| Linux (x64) | `hypergen_*_amd64.deb` or the `.zip` |
 
-- **Motion graphics**: explainers, promos, and title sequences
-- **Clipping**: highlights from a long video, reformatted for social
-- **Video understanding**: summaries, scene search, quotes with timestamps
+The builds are not code-signed yet:
 
-## Getting started
+- **Windows:** at the SmartScreen warning, click **More info** → **Run anyway**.
+- **macOS:** right-click the app and click **Open** the first time.
 
-Install the desktop app for macOS (Apple Silicon) or Windows (x64), it walks you through setting everything up.
+## Connect your agent
 
-Use with Claude Code, Codex, Cursor, Copilot, or Gemini CLI. The app registers its MCP server with your agent, so just ask for what you want in plain language.
+1. Open Hypergen.
+2. Open **MCP & CLI** in the sidebar. Under **Agents**, turn on the switch next to your agent. Hypergen adds its `hypergen` MCP server to that agent's configuration.
+3. Restart the agent. It shows the `hypergen` tools (`mcp__hypergen__*`).
+4. Ask for the video you want, in plain language.
+
+To use the `hypergen` command in a terminal, click **Install** under **CLI** on the same page.
+
+## Add your AI provider keys (optional)
+
+Editing, transcription, segmentation and export work with no key. Two features use a key that you supply:
+
+| Feature | Provider | Get a key |
+| --- | --- | --- |
+| Generate images, video, voice, music; remove backgrounds; upscale | fal.ai | <https://fal.ai/dashboard/keys> |
+| Ask questions about video and audio (`listen`) | Google Gemini | <https://aistudio.google.com/apikey> |
+
+Add them in **Settings → AI providers**. Hypergen encrypts the keys with your operating system's key store. They never leave your computer except in the requests to that provider.
 
 ## Prompt examples
 
-<details open>
-<summary><b>Motion graphics</b></summary>
-
 ```text
-Create a polished, 20-second SaaS product promo video for https://typesafe.ai/. Use the website’s branding and highlight the product’s main benefit with animated UI mockups, concise on-screen text, and smooth transitions. End with a clear call to action.
+Edit the footage in ~/Videos/trip into a 60-second highlight video with music and captions.
 ```
 
 ```text
-Recreate the 3blue1brown animation from https://youtu.be/HEfHFsfGXjs, closely matching its visual style, pacing, framing, colors, labels, and transitions. Use the exact collision mathematics from Gregory Galperin's original paper, do not approximate the physics.
-```
-
-</details>
-
-<details>
-<summary><b>Video editing</b></summary>
-
-```text
-Edit the footage in /path/to/folder
+Turn this interview into a vertical 30-second clip for social media. Remove filler words and add bold captions.
 ```
 
 ```text
-Turn this footage into a polished YouTube video. Add readable captions and an attention-grabbing graphic in the opening to give viewers a strong visual hook.
-```
-
-</details>
-
-<details>
-<summary><b>Clipping</b></summary>
-
-```text
-Can you pull the best 30-second moment from https://youtu.be/MtQ0qxyf-Ds and make a vertical version for social?
+Create a 20-second animated product promo for our app, with a title card, three feature callouts and an end card.
 ```
 
 ```text
-Make a 15-second version of this launch video. https://x.com/claudeai/status/2045156267690213649
+List the three main topics in this talk with timestamps.
 ```
 
-</details>
+## The command line
 
-<details>
-<summary><b>Video understanding and reasoning</b></summary>
+Each MCP tool is also a `hypergen` command. Every result is one JSON object.
 
-```text
-In three bullets, explain what starts the conflict. Include timestamps. https://youtu.be/aqz-KE-bpKQ
+```sh
+hypergen open ~/Projects/promo                     # open (or create) a project folder
+hypergen probe clip.mp4                            # container and codec metadata
+hypergen grab clip.mp4 -t 0 12 45                  # frames as PNGs
+hypergen filmstrip clip.mp4                        # a grid of frames
+hypergen waveform track.mp3                        # audio waveform, silences flagged
+hypergen transcribe interview.wav                  # word-level transcript (local Whisper)
+hypergen listen interview.mp4 -p "what is said in the intro?"   # needs a Gemini key
+hypergen capture intro -t 0 2 4                    # frames as an export would render them
 ```
 
-```text
-Name three recurring locations and give one visual cue that distinguishes each. https://youtu.be/dQw4w9WgXcQ
-```
-
-</details>
-
-## How it works
-
-Hypergen uses [SolidJS](https://www.solidjs.com) modules as the document source. Think IDE, but it renders a video canvas instead of text.
-
-Editing works both ways: change something on the canvas and the code updates; change the code and the canvas redraws.
-
-The desktop app includes command-line tools that let agents watch and listen to footage, edit it on a timeline, and render the result.
+See the [tool reference](docs/reference/tools/README.md) for every command and option.
 
 ## Compositions as code
 
-A project is a folder of that JSX: `open` a folder once (`hypergen open <dir>` from a shell), then edit the files. Saving recompiles the entry file and mounts it directly into the editor's ECS.
-
-Every element carries an `id`, which is how the write-back finds its target: a rect dragged on the canvas, a clip trimmed on the timeline, or a retyped line lands as a prop on the element that authored it.
-
-The root is a `<stage>` holding one `<scene>` per frame you cut in:
+A project is a folder with a JSX entry file. The root is a `<stage>` with one `<scene>` per frame size:
 
 ```tsx
-import { For } from "solid-js";
-
-const TITLES = [
-  { text: "The Grid", start: 0, end: 2.5 },
-  { text: "Neon Nights", start: 2.5, end: 5 },
-];
-
 export default function Project() {
   return (
-    <stage camera={[0.3, 0, 0, 0.3, 85, 150]}>
+    <stage>
       <scene name="Intro" width={1920} height={1080} fill="black" active>
         <video src="footage/city.mp4" start={0} end={5} width={1920} height={1080} />
-        <For each={TITLES}>
-          {(t) => (
-            <text
-              width={1920}
-              height={1080}
-              textAlign="center"
-              textBaseline="middle"
-              fontSize={128}
-              color="#FFFFFF"
-              start={t.start}
-              end={t.end}
-            >
-              {t.text}
-            </text>
-          )}
-        </For>
+        <text width={1920} height={1080} textAlign="center" textBaseline="middle"
+              fontSize={128} color="#FFFFFF" start={0} end={2.5}>
+          Hypergen
+        </text>
       </scene>
     </stage>
   );
 }
 ```
 
-Everything a mount produces stays a first-class editor node, so a person can pick up in the UI exactly where the script left off.
+See the [JSX reference](docs/reference/jsx/README.md) and the [examples](docs/examples/README.md).
 
-## Seeing and hearing the media
-
-Cutting footage requires understanding it. The app exposes the inspection tools an agent needs to work with media it cannot watch — as MCP tools, and as the same commands in a shell:
-
-```sh
-hypergen probe clip.mp4                                # container + codec metadata, like ffprobe
-hypergen grab clip.mp4 -t 0 12 45                      # decode frames to PNGs
-hypergen filmstrip clip.mp4                            # grid of video frames
-hypergen waveform track.mp3                            # audio waveform, silence flagged
-hypergen transcribe interview.wav                      # timed, word-level transcript
-hypergen listen interview.mp4 -p "what is said in the intro?"   # ask a multimodal model
-hypergen capture intro -t 0 2 4                        # the frames a render would produce, by scene id
-```
-
-Each command is the MCP tool of the same name: `hypergen grab` is `grab`, `--per-sheet` is `perSheet`.
-
-| Command | Purpose |
-| --- | --- |
-| `hypergen open` | Launch the app and open (or create) a project folder, anywhere on disk |
-| `hypergen context` | Summary of app state |
-| `hypergen capture` | Render frames of a scene, as an export would, to a labelled contact sheet or one PNG per position |
-| `hypergen check` | Check a node's subtree for structural mistakes (black-frame gaps, never-visible nodes, failed sources) and report subtree stats |
-| `hypergen probe` / `grab` / `filmstrip` / `waveform` / `transcribe` / `listen` | Inspect a file by id or path |
-| `hypergen fonts` | Discover Google Fonts and local font families |
-| `hypergen screenshot` / `hypergen logs` | The app itself: capture the window, read recent console output |
-| `hypergen report` | Report a bug in the tools or the app: diagnostics bundled, filed as a GitHub issue via `gh` |
-
-Conventions throughout: every result is one JSON object, the same structured content the MCP tool returns; errors go to stderr with exit code `1`. Everything is built to be piped, grepped, and driven by a program.
-
-## Documentation
-
-- [Tool reference](docs/reference/tools/README.md): every tool and CLI command, its options, and its output
-- [JSX reference](docs/reference/jsx/README.md): the composition markup with elements, timing, paints, and captions
-- [Examples](docs/examples/README.md): runnable compositions, from basic scenes to three.js and raw WebGPU
-
-## Repository layout
-
-| Path | Package | What it is |
-| --- | --- | --- |
-| `apps/web` | `@hypergen/web` | The editor UI (Solid + Vite) |
-| `apps/desktop` | `@hypergen/desktop` | Electron shell hosting the editor |
-| `apps/cli` | `@hypergen/cli` | The `hypergen` CLI: a client of the app's MCP server |
-| `packages/runtime` | `@hypergen/runtime` | Headless editor runtime: the koota world, traits, actions, systems, media decoding, capture. No DOM, no Solid |
-| `packages/reconciler` | `@hypergen/reconciler` | Evaluates a compiled project bundle and reconciles its element tree onto runtime entities, via Solid's universal renderer |
-| `packages/jsx` | `@hypergen/jsx` | The authoring API: element vocabulary and types |
-| `packages/assets` | `@hypergen/assets` | A project's asset library: the `assets.yml` manifest, content hashing, probing, resolution |
-| `packages/encoder` | `@hypergen/encoder` | Offline video/audio/image encoding over runtime worlds (mediabunny) |
-| `packages/koota-solid` | `@hypergen/koota-solid` | Solid bindings for koota, ported from `@koota/react` |
-
-## Contributing / local setup
+## Build from source
 
 Requirements: Node 20+ and npm.
 
@@ -207,32 +134,43 @@ Requirements: Node 20+ and npm.
 git clone https://github.com/buckleson/hypergen.git
 cd hypergen
 npm install
-
-cp apps/web/.env.example apps/web/.env   # required: the app won't run without it
-
-npm run dev
+npm run dev          # start the desktop app in development mode
 ```
 
-To put `hypergen` on your PATH, link it once (`unlink` undoes it):
+Other commands:
 
 ```sh
-npm run link --workspace=@hypergen/cli
+npm run check        # typecheck all workspaces
+npm run lint         # lint
+npm test             # tests
+npm run make --workspace=@hypergen/desktop   # build installers for this OS
+npm run brand        # regenerate icons and images from scripts/brand
 ```
 
-Before sending a PR:
+### Repository layout
 
-```sh
-npm run check    # typecheck all workspaces
-npm run lint     # lint all workspaces
-npm run test     # ensure tests are green
-```
+| Path | What it is |
+| --- | --- |
+| `apps/web` | The editor UI (SolidJS + Vite) |
+| `apps/desktop` | The Electron app: MCP server, CLI install, agent chat host |
+| `apps/cli` | The `hypergen` command-line client |
+| `packages/runtime` | Headless editor runtime (ECS, media decoding, capture) |
+| `packages/reconciler` | Mounts a project's JSX onto the runtime |
+| `packages/jsx` | The composition elements and types |
+| `packages/assets` | The project asset library |
+| `packages/encoder` | Video, audio and image encoding |
+| `packages/dapi` | The agent tool catalog shared by the MCP server and the CLI |
+| `packages/agent-chat` | The chat panel host for Claude Code and Codex |
+| `packages/sam2` | Local SAM 2.1 segmentation |
+
+### Continue the development work
+
+The `.workspace/` folder holds the project plans, the decision records, the hand-off log and the agent definitions. Start with [`.workspace/README.md`](.workspace/README.md).
 
 ## License
 
-[MPL-2.0](LICENSE)
-
-The brand assets in [apps/desktop/assets](apps/desktop/assets) are not covered by this license.
+[MPL-2.0](LICENSE).
 
 ## Credits
 
-Secured by HyperOx · Powered by [Buckleson](https://buckleson.com) · Managed by [Pavi](https://pavi.tech)
+Secured by **HyperOx** · Powered by **[Buckleson](https://buckleson.com)** · Managed by **[Pavi](https://pavi.tech)**
