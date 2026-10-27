@@ -24,13 +24,17 @@ const { createProject, draftsRoot, duplicateProject, moveProject, readManifest, 
   await import("./projects");
 
 let root: string;
+const localAppData = process.env.LOCALAPPDATA;
 
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "drafts-test-"));
   userData = join(root, "userData");
+  // On Windows drafts live under LOCALAPPDATA; keep them in this test's folder too.
+  process.env.LOCALAPPDATA = root;
 });
 
 afterEach(async () => {
+  process.env.LOCALAPPDATA = localAppData;
   await rm(root, { recursive: true, force: true });
 });
 
