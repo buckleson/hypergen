@@ -116,11 +116,11 @@ describe("root .gitignore", () => {
   });
 });
 
-describe("build-windows.yml", () => {
-  const wf = read(root, ".github", "workflows", "build-windows.yml");
+describe("build.yml", () => {
+  const wf = read(root, ".github", "workflows", "build.yml");
 
-  it("uploads the artifact as hypergen-windows-<arch>", () => {
-    expect(wf).toMatch(/name:\s*hypergen-windows-\$\{\{\s*runner\.arch\s*\}\}/);
+  it("uploads the installers as hypergen-<os>-<arch>", () => {
+    expect(wf).toMatch(/name:\s*hypergen-\$\{\{\s*runner\.os\s*\}\}-\$\{\{\s*runner\.arch\s*\}\}/);
   });
 
   it("has no upstream brand", () => {
