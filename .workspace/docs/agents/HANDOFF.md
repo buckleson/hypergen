@@ -175,3 +175,53 @@ Every agent reads the **latest entry** before starting. The orchestrator appends
   2. P6 audit (every link, button, menu; agent connect shows "hypergen"; packaged-app smoke test on Windows).
   3. P7 website: ask the user for the design links.
 - **Waiting on the user:** OK to delete 84 test drafts in `%LOCALAPPDATA%\userData\Drafts`; website design links.
+
+## 2026-10-28 — Paused for a device restart during P6 (RESUME HERE)
+- **CI run 40659756049** (`5a9834d`):
+  - test ✓, Windows make ✓.
+  - Linux make ✗: the deb maker says "No Description or ProductDescription". Package A fixes it.
+  - macOS was queued, then the run ended as failure (Linux failed).
+- **P6 audit fixes:**
+  - Workflow run `wf_cc809282-4a4` (`subtasksFile` `E:/research-clones/docs/agents/p6-packages.json`).
+  - All 3 developers (A packaging/main, B web UI, C agent docs) and all 3 test-writers finished. The 3 test runs (`run:A`, `run:B`, `run:C`) were in progress when paused.
+  - Work saved as local commit "WIP P6 audit fixes" on main. NOT pushed. Tests not confirmed.
+- **Resume steps:**
+  1. Resume the Workflow: `scriptPath` `E:/research-clones/.claude/workflows/hypergen-phase.js`, `resumeFromRunId` `wf_cc809282-4a4`, `args` `{date:"2026-10-28", maxDevs:3, subtasksFile:"E:/research-clones/docs/agents/p6-packages.json", goal:"P6 AUDIT FIXES on E:/research-clones/hypergen (branch main; the merged, green app). Three work packages A/B/C with no shared files. Baseline: npm test 1363 pass, npm run check clean, npm run lint 0 errors. Commit nothing; the orchestrator commits."}`. The args must be identical.
+  2. When green: full `npm test`, `npm run check` and `npm run lint`. Squash the WIP into a real commit ("P6: audit fixes"). Run `python scripts/workspace/sync.py`. Push. Watch CI (all 3 OS makes).
+  3. Smoke-test the Windows installer from the CI artifacts if time allows.
+  4. P7 website: ask the user for the design links.
+- **Waiting on the user:** OK to delete 84 test drafts in `%LOCALAPPDATA%\userData\Drafts`; website design links.
+
+## 2026-10-28 — P6 audit fixes workflow green (run `wf_cc809282-4a4`, resumed 2026-10-29)
+- **Goal:** P6 audit fixes on `hypergen` main, packages A/B/C (`docs/agents/p6-packages.json`). Commit nothing; the orchestrator commits.
+- **Done (files):**
+  - A, desktop main and packaging: external links, updater, deb/mac makers, package identity. Tests `apps/desktop/src/external-links.edge.test.ts`, `apps/desktop/forge.config.edge.test.ts`.
+  - B, web UI cleanup: links, demo prompts, dead routes, old-brand and dead assets. Test `apps/web/test/web-ui-cleanup.test.ts`.
+  - C, agent docs, tool descriptions, project template, README. Tests `packages/dapi/src/docs.accuracy.edge.test.ts`, `apps/desktop/src/dapi/docs.edge.test.ts`, `apps/desktop/src/projects.readme.edge.test.ts`.
+- **Tests:** all green on the first run. No fix rounds.
+  - A: targeted 50/50; desktop 533/533; `tsc --noEmit` exit 0.
+  - B: targeted 57/57; web 610/610; `tsc -p tsconfig.app.json --noEmit` exit 0.
+  - C: targeted 154 + 36; dapi 491/491; desktop 569/569 (includes C's new tests); root `tsc --noEmit` exit 0 in both packages.
+  - Repo-wide `npm test`, `npm run check` and `npm run lint` were NOT run yet.
+- **Decisions:** none.
+- **Open issues:**
+  - `pnpm check` in `packages/dapi` and `apps/desktop` fails with "'tsc' is not recognized" (no local tsc). Root tsc works. Setup issue, not a type error.
+  - Weak test: "keeps a display name with Windows-hostile characters out of the commands table" only checks the heading and row count >= 18.
+  - Open (needs user): first demo prompt in `apps/web/src/components/dashboard/home-view.tsx:90` still says "polished YouTube video". No test covers it.
+- **Next step:**
+  1. Run full `npm test`, `npm run check`, `npm run lint` (baseline 1363 pass).
+  2. Squash the WIP commit into "P6: audit fixes". Run `python scripts/workspace/sync.py`. Push. Watch CI (all 3 OS makes).
+  3. Smoke-test the Windows installer from the CI artifacts.
+  4. P7 website: ask the user for the design links.
+- **Waiting on the user:** YouTube prompt wording; OK to delete 84 test drafts in `%LOCALAPPDATA%\userData\Drafts`; website design links.
+
+## 2026-10-29 — P6 audit fixes done
+- **Done:**
+  - Workflow `wf_cc809282-4a4` green (A packaging/main, B web UI, C agent docs).
+  - Fixed an agent-written test regex that held a literal backspace instead of `\b` (`apps/web/src/hypergen-web-ui.test.ts:356`).
+  - The "polished YouTube video" demo prompt names a format, not a link. Kept.
+- **Tests:** `npm test` 1,733 pass (desktop 569, web 610, agent-chat 63, dapi 491). `check` clean. `lint` 0 errors.
+- **Next step:**
+  1. Push. Watch CI (Linux .deb fix, macOS ad-hoc signing).
+  2. P7 website: needs the user's design links.
+- **Waiting on the user:** delete the 84 test drafts?; website design links; Firebase config (later).

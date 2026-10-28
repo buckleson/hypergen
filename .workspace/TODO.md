@@ -2,43 +2,33 @@
 
 Legend: [ ] todo · [~] in progress · [x] done · ⏸ waiting on you
 
-## Phase 0 — Setup
-- [x] Research Cardboard.ai and alternatives; pick LTX-Desktop as the base
-- [x] Agent docs: ADR, HANDOFF, TOOLS (`docs/agents/`)
-- [x] Agent team + orchestration workflow (`.claude/agents/`, `.claude/workflows/hypergen-phase.js`)
-- [x] Tools: uv, Graphify, headroom (codebase-memory already connected)
-- ⏸ Your answers: demo hardware, deadline, repo name, HyperOx logo, Firebase config
+## Done
+- [x] Research Cardboard.ai and alternatives. Base app: the open-source agent video editor (MPL-2.0).
+- [x] Agent team, docs and orchestration workflow (`.claude/agents/`, `.claude/workflows/hypergen-phase.js`, `docs/agents/`).
+- [x] Tools: uv, Graphify, headroom, codebase-memory.
+- [x] P0: fresh repo, install, test baseline.
+- [x] P1+P2: full rebrand to Hypergen (names, icons, CLI `hypergen`, MCP id `hypergen`, agent docs, project template).
+- [x] P3: local-first backend. No vendor sign-in, billing or telemetry. Local Whisper transcribe, Gemini listen and fal.ai generate with your own keys (Settings → AI providers).
+- [x] P5: credits in Help → About (Secured by HyperOx · Powered by Buckleson · Managed by Pavi). README rewritten.
+- [x] Public repo github.com/buckleson/hypergen with CI (tests and installers for Windows, macOS, Linux). Session data in `.workspace/`.
+- [x] Windows installer builds in CI.
 
-## Phase 1 — Demo (waiting for you to pick the first task)
-- [x] Clone the fork into `hypergen/`, index it, record the baseline tests
-- [x] Rebrand P1+P2 → Hypergen: committed 56411af (2026-10-27)
-  - [x] Repo-wide branding grep (ADR rule 9) and `graphify update .`
-  - [x] Fix Windows EPERM flake: retry rename in `hypergen/apps/desktop/src/atomic.ts:44` (`projects.watch.test.ts`)
-  - [x] `jsxTypings()` packaged mode: check `resourcesPath/jsx` exists (`hypergen/apps/desktop/src/projects.ts` ~738)
-  - [x] P3: update `hypergen-web-ui.test.ts` login.tsx assertion when login.tsx changes
-  - [x] Commit P1+P2, then merge with the P3 worktree
-- [ ] Remove cloud features: LTX API, fal, Gemini, telemetry, updater, Hugging Face OAuth
-- [ ] Remove templates and catalogs; add simple Hypergen prompt templates
-- [ ] Login window: Firebase (email/password, Google, GitHub)
-- [ ] Model-download window: "HyperGenX by Pavi" from the Hugging Face mirror
-- [ ] Rehost the Python runtime archives
-- [x] GitHub repo buckleson/hypergen (public) + Actions build for Windows, macOS, Linux
-- [x] P3 cut vendor backend: WP1–WP8 green (2026-10-28), uncommitted on branch p3-backend
-  - [ ] Commit P3 on p3-backend
-  - [ ] apps/web: install jsdom or drop the jsdom test environment (vitest exits 1)
-  - [ ] apps/web: raise timeout of flaky test wp5-fal-generation-core.test.ts:347
-  - ⏸ Confirm ADR-011 (fal.ai, Gemini) supersedes ADR rule 4 (no third-party AI APIs)
-- [x] README rewrite (d8e647f)
-- [x] CI test fixes: Dock per platform, build.yml test, Windows drafts isolation
-- [x] Merge P3 → main (c894ba4); full gate green: 1,363 tests, check, lint
-- [ ] CI green on GitHub
-- [x] P5 credits UI (Help → About: HyperOx, Buckleson, Pavi)
-- [ ] P6 full audit (links, buttons, branding, agent connect)
-- [ ] P7 website
+## In progress
+- [x] P6: audit fixes. External links open in the browser, Linux .deb packaging, macOS ad-hoc signing, demo prompts, dead files, agent docs accuracy.
+  - [x] Workflow `wf_cc809282-4a4` green (A, B, C targeted tests and package suites pass).
+  - [x] Repo-wide gate green (1,733 tests, check, lint); committed and pushed.
+- [ ] CI green on all three OS (Linux .deb fix is part of P6).
 
-## Phase 2 — Polish
-- [ ] UX improvements in the same theme
-- [ ] Full test suite green in CI
+## Next
+- [ ] P7: marketing website (dark, glassmorphism, bento grid, animations). ⏸ Waiting for your design links.
+- [ ] Firebase sign-in (email/password, Google, GitHub). ⏸ Waiting for your Firebase config.
 
-## Phase 3 — Optional
-- [ ] Low-VRAM (8–12 GB) support with a GGUF loader (ADR-006)
+## Waiting on you
+- ⏸ OK to delete 84 test-draft folders in `%LOCALAPPDATA%\userData\Drafts` (made by earlier test runs).
+- ⏸ Website design links.
+- ⏸ Firebase config (when you want sign-in).
+
+## Later / optional
+- [ ] Mirror the SAM 2.1 model weights under a Buckleson Hugging Face account (they still download from the original repos).
+- [ ] Code signing (Windows certificate, Apple Developer ID), so macOS auto-update works and the OS warnings go away.
+- [ ] Reset the version number (0.216.0 is inherited) before the first Hypergen release tag.
