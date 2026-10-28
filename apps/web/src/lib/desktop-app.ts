@@ -19,9 +19,6 @@ const DOWNLOADS = {
 
 export type DesktopAppPlatform = keyof typeof DOWNLOADS;
 
-/** Where a download was started from, so the promos can be compared. */
-export type DesktopAppDownloadSource = "canvas_banner" | "dashboard_footer" | "main_menu" | "chat_panel";
-
 /** The platform the desktop app is built for that this browser runs on, if any. */
 export function desktopAppPlatform(): DesktopAppPlatform | null {
   const uaData = (navigator as { userAgentData?: { platform?: string } }).userAgentData;
@@ -52,7 +49,7 @@ export function desktopAppDownloadLabel(): string {
  * macOS and Windows builds to hand out — everywhere else this explains that
  * instead.
  */
-export function downloadDesktopApp(_source: DesktopAppDownloadSource) {
+export function downloadDesktopApp() {
   const platform = desktopAppPlatform();
 
   if (!platform) {

@@ -1,5 +1,9 @@
 {
   "name": "@hypergen/desktop",
+  "productName": "Hypergen",
+  "description": "The AI video editor built for agents",
+  "author": "Buckleson",
+  "homepage": "https://github.com/buckleson/hypergen",
   "private": true,
   "version": "0.216.0",
   "license": "MPL-2.0",

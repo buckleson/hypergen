@@ -47,7 +47,7 @@ export function DashboardGetDesktopApp() {
               </p>
             </div>
           </div>
-          <Button variant="secondary" onClick={() => downloadDesktopApp("dashboard_footer")}>
+          <Button variant="secondary" onClick={() => downloadDesktopApp()}>
             {desktopAppDownloadLabel()}
           </Button>
         </ContextMenuTrigger>

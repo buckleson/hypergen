@@ -4,7 +4,8 @@
 
 // Cuts a release: bumps the single global version in the root and all app
 // package.jsons, refreshes the lockfile, commits, and tags. Pushing the tag
-// is what triggers the Release workflow, so that stays a manual step.
+// triggers the release job in .github/workflows/build.yml, so that stays a
+// manual step.
 // Usage: npm run release <patch|minor|major|x.y.z>
 
 import { execFileSync } from "node:child_process";

@@ -1,6 +1,6 @@
 # Models
 
-Every model [`generate`](./tools/generate.md) runs, and the fields each takes. A request is `model` plus these fields. Generation runs on [fal.ai](https://fal.ai) with the user's own fal.ai API key, added in Hypergen > Settings > AI providers; without one, a fal.ai model fails with `MISSING_KEY` (see [generate](./tools/generate.md#errors)). Hypergen maps the fields to the model's fal endpoint, and fal.ai validates them, answering a field it cannot take with what to fix ([local models](#local) are checked by the app the same way). Leave a field out for the model's default. Files are `{ "path": … }` (see [generate](./tools/generate.md#files)).
+Every model [`generate`](./tools/generate.md) runs, and the fields each takes. A request is `model` plus these fields. Generation runs on [fal.ai](https://fal.ai) with the user's own fal.ai API key, added in Hypergen > Settings > AI providers; without one, a fal.ai model fails with `MISSING_KEY` (see [generate](./tools/generate.md#errors)). Hypergen maps each model's fields to its fal endpoint; fields a model does not use are ignored, and fal.ai answers a value it cannot take with what to fix ([local models](#local) are checked by the app). Leave a field out for the model's default. Files are `{ "path": … }`, sent inline with the request (at most 10 MB; see [generate](./tools/generate.md#files)).
 
 [`transcribe`](./tools/transcribe.md) is not a model here: it runs locally with Whisper. [`listen`](./tools/listen.md) uses the user's own Gemini API key.
 

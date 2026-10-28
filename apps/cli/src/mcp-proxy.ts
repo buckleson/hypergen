@@ -20,7 +20,7 @@ export async function runProxy(): Promise<void> {
     await ping();
   } catch (e) {
     if (!isAppDown(e)) throw e;
-    // Launching is macOS's job; elsewhere the user starts the app by hand.
+    // The app is launched on macOS and Windows; elsewhere the user starts it by hand.
     if (!(await launchApp(true))) {
       throw new Error(`${APP_NAME} is not running. Launch the app first, then retry.`);
     }

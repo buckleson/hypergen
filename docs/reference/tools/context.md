@@ -1,6 +1,6 @@
 # context
 
-Report the current app context: the folder new projects are created in (always reported), the folder of the project the app has open (null when none is), where its playhead sits in seconds, and the registered font families.
+Report the current app context: the folder the last project was saved to (always reported; null until one has been), the folder of the project the app has open (null when none is), where its playhead sits in seconds, and the registered font families.
 
 | | |
 | --- | --- |
@@ -31,7 +31,7 @@ One JSON object:
 
 With no project open (the app sits at the dashboard) the report is just `{ rootDir, projectDir: null }`: there is no playhead, no world, and no fonts to speak of. Open one with [`open`](./open.md).
 
-`rootDir` is reported whether or not a project is open — it is where a caller with nothing open goes to find one. It is not where the app creates projects: a new project starts as a draft in the app's own folder, and moves when the user saves it (⌘S), which also makes its parent the new `rootDir`.
+`rootDir` is reported whether or not a project is open — it is where a caller with nothing open goes to find one. It is not where the app creates projects: a new project starts as a draft in the app's own folder, and moves when the user saves it (Ctrl/Cmd+S), which also makes its parent the new `rootDir`.
 
 `currentTime` is local to the active scene, the same origin a clip's `start` and `end` are placed against, and in the same unit.
 

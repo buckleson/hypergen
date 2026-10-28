@@ -44,7 +44,7 @@ const config: ForgeConfig = {
     // Staged by scripts/stage-{cli,runtime,docs}.mjs; end up at
     // Contents/Resources/{cli,runtime,docs}.
     extraResource: ['./cli', './runtime', './docs', './jsx'],
-    osxSign: process.env.SKIP_SIGN ? undefined : {},
+    osxSign: process.env.SKIP_SIGN ? { identity: '-' } : {},
     osxNotarize:
       process.env.APPLE_ID && process.env.APPLE_PASSWORD && process.env.APPLE_TEAM_ID
         ? {
@@ -57,11 +57,23 @@ const config: ForgeConfig = {
   },
   makers: [
     new MakerZIP({}, ['darwin', 'linux']),
-    new MakerDeb({ options: { name: 'hypergen', productName: 'Hypergen', maintainer: 'Buckleson', homepage: 'https://pavi.tech', icon: './assets/icon.png', categories: ['AudioVideo', 'Video'] } }),
+    new MakerDeb({
+      options: {
+        name: 'hypergen',
+        bin: 'Hypergen',
+        productName: 'Hypergen',
+        description: 'The AI video editor built for agents',
+        productDescription: 'Hypergen is a video editor that people and AI agents drive together through the same timeline.',
+        maintainer: 'Buckleson',
+        homepage: 'https://github.com/buckleson/hypergen',
+        icon: './assets/icon.png',
+        categories: ['AudioVideo', 'Video'],
+      },
+    }),
     new MakerSquirrel({
       name: 'Hypergen',
       authors: 'Buckleson',
-      description: 'The professional video editor built for agents',
+      description: 'The AI video editor built for agents',
       exe: 'Hypergen.exe',
       setupExe: `Hypergen-${process.arch}-Setup.exe`,
       setupIcon: './assets/icon.ico',
@@ -74,11 +86,11 @@ const config: ForgeConfig = {
     new MakerDMG({
       name: `Hypergen-${process.arch}`,
       icon: './assets/icon.icns',
-      // Dark, on-brand window; @2x sibling is picked up automatically for retina.
+      // Light window matching dmg-background.png; @2x sibling is picked up automatically for retina.
       background: './assets/dmg-background.png',
       iconSize: 120,
       additionalDMGOptions: {
-        'background-color': '#1c1c1c',
+        'background-color': '#f7f9fc',
         window: { size: { width: 658, height: 498 } },
       },
       contents: (opts) => [

@@ -157,7 +157,7 @@ export function ProjectMenu() {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   class="gap-1 pl-0 pr-2"
-                  onSelect={() => downloadDesktopApp("main_menu")}
+                  onSelect={() => downloadDesktopApp()}
                 >
                   <span class="grid h-7 w-6 shrink-0 place-items-center overflow-clip">
                     <Icon name="download" />

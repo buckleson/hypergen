@@ -20,14 +20,17 @@ type DashboardHelpExternalRowProps = {
 
 function DashboardHelpExternalRow(props: DashboardHelpExternalRowProps) {
   return (
-    <div class="flex h-4 w-full items-center gap-4 rounded-md text-xs text-foreground outline-none focus-ring">
+    <a
+      href={props.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex h-4 w-full items-center gap-4 rounded-md text-xs text-foreground outline-none focus-ring"
+    >
       <span class="min-w-0 flex-1 truncate text-left">
         {props.label}
       </span>
-      <a href={props.href} target="_blank">
-        <Icon name="external-link" class="text-foreground" />
-      </a>
-    </div>
+      <Icon name="external-link" class="text-foreground" />
+    </a>
   );
 }
 
@@ -40,7 +43,7 @@ export function DashboardHelpView() {
             label="Report an issue"
             href="https://github.com/buckleson/hypergen/issues"
           />
-          <DashboardHelpExternalRow label="Website" href="https://pavi.tech" />
+          <DashboardHelpExternalRow label="Website" href="https://github.com/buckleson/hypergen" />
         </DashboardDividedStack>
       </DashboardSurfaceSection>
 
@@ -50,21 +53,6 @@ export function DashboardHelpView() {
           <HypergenCredits />
         </div>
       </DashboardSurfaceSection>
-
-      {/* 
-      <DashboardSurfaceSection title="Keyboard shortcuts">
-        <DashboardInfoActionRow
-          leading={<Icon name="keyboard-shortcut" class="text-foreground" />}
-          title="View, search, and customize shortcuts."
-          action={
-            <Button variant="secondary">
-              Open keyboard shortcuts...
-            </Button>
-          }
-          layout="inline"
-        />
-      </DashboardSurfaceSection> 
-      */}
     </DashboardScrollView>
   );
 }

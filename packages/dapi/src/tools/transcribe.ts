@@ -14,7 +14,6 @@ export const TranscriptWord = z.object({
 
 export const TranscriptSegment = z.object({
   text: z.string(),
-  speaker: z.string().optional().describe("speaker label (A, B, …) when speakers are told apart"),
   words: z.array(TranscriptWord),
 });
 

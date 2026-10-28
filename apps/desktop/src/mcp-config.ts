@@ -17,8 +17,7 @@ export type McpServerSpec = { url: string; command: string; args: string[] };
 
 /**
  * The key our entry lives under in every agent's server map, and so the
- * namespace an agent shows us under: `mcp__hypergen__<tool>` and
- * `/hypergen:<prompt>`. The same word as our URL scheme and the CLI's name.
+ * namespace an agent shows us under: `mcp__hypergen__<tool>`. The same word as our URL scheme and the CLI's name.
  */
 export const SERVER_NAME = "hypergen";
 

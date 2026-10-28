@@ -8,7 +8,8 @@ import { join } from "node:path";
 export const INSTRUCTIONS_FILE = "INSTRUCTIONS.md";
 
 const FALLBACK_INSTRUCTIONS =
-  "Hypergen, a video editor, is running on this machine and you are connected to it. The tools are the whole API; their descriptions are authoritative.";
+  "Hypergen, a video editor, is running on this machine and you are connected to it. The tools are the whole API; their descriptions are authoritative.\n\n" +
+  "Hypergen is local-first and needs no account. `generate` runs on fal.ai with the user's own fal.ai API key; `listen` uses the user's own Gemini API key; `transcribe` runs locally with Whisper and needs no key. When a tool fails with MISSING_KEY, tell the user to add the key in Hypergen > Settings > AI providers, and do not retry.";
 
 /**
  * The text every client gets on connect: INSTRUCTIONS.md from the docs, then
@@ -21,7 +22,7 @@ export function instructions(docsDir: string | null): string {
   const parts = [text?.trim() || FALLBACK_INSTRUCTIONS];
   if (docsDir) {
     parts.push(
-      `The docs, including every page named above, are the files at \`${docsDir}\`: the skills, the tool and JSX reference, guides, runnable examples, and the brand kit (fonts, imagery, components to copy). They belong to the app; read them, never edit them.`,
+      `The docs, including every page named above, are the files at \`${docsDir}\`: the skills, the tool and JSX reference, guides, runnable examples, and the brand kit (style references, components and compositions to copy). They belong to the app; read them, never edit them.`,
     );
   }
   return parts.join("\n\n");

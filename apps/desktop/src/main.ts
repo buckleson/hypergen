@@ -21,6 +21,7 @@ import { clipboardPaths } from "./clipboard";
 import { installedEditors, openInEditor } from "./editors";
 import { AppTray } from "./tray";
 import { WindowHost } from "./window-host";
+import { openExternalUrl, routeExternalLinks } from "./external-links";
 import { handleSquirrelEvent } from "./squirrel";
 import { mainBridge } from "./main-manager";
 import { MAIN_CHANNELS } from "./main-channels";
@@ -123,7 +124,8 @@ function offerUpdate() {
   notifyUser(info);
 }
 
-if (app.isPackaged && !squirrelLaunch) {
+// Windows only: unsigned macOS builds cannot install Squirrel.Mac updates and Linux has none.
+if (app.isPackaged && !squirrelLaunch && process.platform === "win32") {
   updateElectronApp({
     repo: "buckleson/hypergen",
     onNotifyUser: function (info) {
@@ -259,6 +261,9 @@ function createWindow(): BrowserWindow {
   mainWindow = new BrowserWindow(options);
 
   captureConsole(mainWindow);
+  routeExternalLinks(mainWindow.webContents, (url) =>
+    app.isPackaged ? url.startsWith("file:") : url === DEV_URL || url.startsWith(`${DEV_URL}/`),
+  );
 
   applyCornerRadius(MACOS_CORNER_RADIUS);
   applyBackdrop();
@@ -308,7 +313,7 @@ if (squirrelLaunch) {
     }
   });
 
-  mainBridge.handle(MAIN_CHANNELS.APP_OPEN_EXTERNAL, ({ url }) => shell.openExternal(url));
+  mainBridge.handle(MAIN_CHANNELS.APP_OPEN_EXTERNAL, ({ url }) => openExternalUrl(url));
   mainBridge.handle(MAIN_CHANNELS.APP_SHOW_IN_FOLDER, ({ path }) => shell.showItemInFolder(path));
   mainBridge.handle(MAIN_CHANNELS.APP_EDITORS_LIST, () => installedEditors());
   mainBridge.handle(MAIN_CHANNELS.APP_OPEN_IN_EDITOR, ({ id, dir }) => openInEditor(id, dir));

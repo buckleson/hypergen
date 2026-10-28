@@ -82,7 +82,7 @@ describe('labels', () => {
 describe('downloadDesktopApp', () => {
   it('hands macOS the Hypergen arm64 dmg from the hypergen releases', () => {
     stubBrowser('MacIntel');
-    downloadDesktopApp('main_menu');
+    downloadDesktopApp();
     expect(anchors).toHaveLength(1);
     expect(anchors[0].href).toBe(`${RELEASES}Hypergen-arm64.dmg`);
     expect(anchors[0].download).toBe('');
@@ -93,13 +93,13 @@ describe('downloadDesktopApp', () => {
 
   it('hands Windows the Hypergen x64 setup exe from the hypergen releases', () => {
     stubBrowser('Win32');
-    downloadDesktopApp('dashboard_footer');
+    downloadDesktopApp();
     expect(anchors.map((a) => a.href)).toEqual([`${RELEASES}Hypergen-x64-Setup.exe`]);
   });
 
   it('starts no download elsewhere and explains with a Hypergen notice', () => {
     stubBrowser('Linux x86_64');
-    downloadDesktopApp('canvas_banner');
+    downloadDesktopApp();
     expect(anchors).toEqual([]);
     expect(toast).toHaveBeenCalledOnce();
     const [title, options] = toast.mock.calls[0] as [string, { description: string }];
@@ -112,7 +112,7 @@ describe('downloadDesktopApp', () => {
     for (const platform of ['MacIntel', 'Win32', 'Linux x86_64']) {
       stubBrowser(platform);
       seen.push(desktopAppDownloadLabel());
-      downloadDesktopApp('chat_panel');
+      downloadDesktopApp();
     }
     for (const [title, options] of toast.mock.calls as [string, { description: string }][]) seen.push(title, options.description);
     seen.push(...anchors.map((a) => a.href));

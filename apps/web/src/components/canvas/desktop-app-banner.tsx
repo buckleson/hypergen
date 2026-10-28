@@ -27,7 +27,7 @@ export function DesktopAppBanner() {
 
   const handleDismiss = () => setDismissed(true);
 
-  const handleDownload = () => downloadDesktopApp("canvas_banner");
+  const handleDownload = () => downloadDesktopApp();
 
   return (
     <Show when={!dismissed() && !isDesktop}>

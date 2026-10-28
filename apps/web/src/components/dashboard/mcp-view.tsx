@@ -30,7 +30,7 @@ import {
   DashboardTitledSection,
 } from "./shared";
 
-const MCP_DOCS_URL = "https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers";
+const MCP_DOCS_URL = "https://modelcontextprotocol.io/docs/develop/connect-local-servers";
 
 // --- Agents ------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ function DashboardMcpServerSection() {
       </DashboardSurfaceCard>
       <p class="px-2 pt-3 text-xs text-muted-foreground">
         <span>Available locally while Hypergen is running. </span>
-        <a href={MCP_DOCS_URL} target="_blank" class="text-primary hover:underline">
+        <a href={MCP_DOCS_URL} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
           What is MCP?
         </a>
       </p>

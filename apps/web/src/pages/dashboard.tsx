@@ -40,11 +40,9 @@ const DASHBOARD_VIEWS: readonly DashboardView[] = [
   "home",
   "projects",
   "drafts",
-  "templates",
   "settings",
   "ai-providers",
   "mcp",
-  "preferences",
   "help",
 ];
 

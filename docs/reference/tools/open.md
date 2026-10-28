@@ -1,6 +1,6 @@
 # open
 
-Open a folder as a project in the running app, creating the project files if the folder is not one yet, and show it in the editor. Returns the project's id, display name, and folder. Run this once before tools that need an open project (capture, check, export, context, and library paths in media tools).
+Open a folder as a project in the running app, creating the project files if the folder is not one yet, and load it in the editor (the window stays as it is; use `window` to show it). Returns the project's id, display name, and folder. Run this once before tools that need an open project (capture, check, export, context, and library paths in media tools).
 
 | | |
 | --- | --- |

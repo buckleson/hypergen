@@ -233,7 +233,7 @@ describe("telemetry call sites", () => {
     const text = code(read(rel));
     expect(text).not.toMatch(/useAuth|user\(\)|\.email|user id|userId|clipboard/i);
     expect(text).toContain("https://github.com/buckleson/hypergen/issues");
-    expect(text).toContain("https://pavi.tech");
+    expect(text).toContain("https://github.com/buckleson/hypergen\"");
     expect(text).not.toMatch(/discord|mailto:|diffusion\.studio/i);
   });
 
@@ -258,7 +258,7 @@ describe("env and build config", () => {
     expect(env).not.toMatch(/VITE_API_URL/);
   });
 
-  it(".env.example still exists (CI and vercel.json copy it)", () => {
+  it(".env.example still exists (CI copies it)", () => {
     expect(existsSync(join(WEB, ".env.example"))).toBe(true);
   });
 
@@ -383,7 +383,7 @@ describe("downloadDesktopApp after losing its track call", () => {
 
   it("starts the Windows installer download on Win32", async () => {
     const { downloadDesktopApp } = await load("Win32");
-    downloadDesktopApp("dashboard_footer");
+    downloadDesktopApp();
     expect(toast).not.toHaveBeenCalled();
     expect(clicked).toHaveLength(1);
     expect(clicked[0].href).toMatch(/x64-Setup\.exe$/);
@@ -392,13 +392,13 @@ describe("downloadDesktopApp after losing its track call", () => {
 
   it("starts the macOS download on MacIntel", async () => {
     const { downloadDesktopApp } = await load("MacIntel");
-    downloadDesktopApp("canvas_banner");
+    downloadDesktopApp();
     expect(clicked[0].href).toMatch(/arm64\.dmg$/);
   });
 
   it("explains instead of downloading on an unsupported platform", async () => {
     const { downloadDesktopApp } = await load("Linux x86_64");
-    downloadDesktopApp("main_menu");
+    downloadDesktopApp();
     expect(clicked).toEqual([]);
     expect(toast).toHaveBeenCalledOnce();
     expect(String(toast.mock.calls[0][0])).toMatch(/macOS and Windows/);
@@ -406,7 +406,7 @@ describe("downloadDesktopApp after losing its track call", () => {
 
   it("treats an empty platform string as unsupported", async () => {
     const { downloadDesktopApp } = await load("");
-    downloadDesktopApp("chat_panel");
+    downloadDesktopApp();
     expect(clicked).toEqual([]);
     expect(toast).toHaveBeenCalledOnce();
   });

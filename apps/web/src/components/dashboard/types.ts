@@ -4,19 +4,10 @@
 
 import type { CollectionRecord } from "@/projects";
 
-export type DashboardView = "home" | "projects" | "drafts" | "templates" | "settings" | "ai-providers" | "mcp" | "preferences" | "help";
+export type DashboardView = "home" | "projects" | "drafts" | "settings" | "ai-providers" | "mcp" | "help";
 /** Which projects the projects view lists: all of them, the drafts, or one collection's. */
 export type ProjectScope =
   | { kind: "all" }
   | { kind: "drafts" }
   | { kind: "collection"; collection: CollectionRecord };
 export type ProjectSortOption = | "last-viewed" | "alphabetical" | "date-created";
-export type TemplateSourceOption = "official" | "custom";
-export type TemplatePreviewKind = "landscape" | "portrait" | "square";
-
-export type TemplateCard = {
-  name: string;
-  resolution: string;
-  badge: string;
-  previewKind: TemplatePreviewKind;
-};

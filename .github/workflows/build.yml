@@ -34,11 +34,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            out: squirrel.windows
           - os: macos-14
-            out: "*"
           - os: ubuntu-latest
-            out: "*"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

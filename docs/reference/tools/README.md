@@ -2,7 +2,7 @@
 
 Hypergen exposes one set of tools, reachable two ways:
 
-- **MCP.** The running app serves an MCP server at `http://127.0.0.1:3274/mcp` (Streamable HTTP). A connected agent gets every tool in `tools/list`, with the descriptions on these pages and its input and output as JSON Schema 2020-12, and instructions that give the path of these docs in the installed app. A client that can only spawn a stdio server can bridge to the URL with a generic proxy such as `mcp-remote`.
+- **MCP.** The running app serves an MCP server at `http://127.0.0.1:3274/mcp` (Streamable HTTP). A connected agent gets every tool in `tools/list`, with the descriptions on these pages and its input and output as JSON Schema 2020-12, and instructions that give the path of these docs in the installed app. A client that can only spawn a stdio server should run the bundled `hypergen mcp`, a stdio proxy to that URL that also launches the app if it is not running.
 - **CLI.** `hypergen`, the command-line client shipped with the app, wraps every tool as a command for shells, scripts and CI. `hypergen <command> --help` prints the same description and the same field help.
 
 Both validate against the same schemas and return the same result, so each tool is documented once, on its own page. The catalog behind all three (server, CLI, these pages) lives in the app's tool catalog package.

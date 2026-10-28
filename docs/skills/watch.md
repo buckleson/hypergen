@@ -8,7 +8,7 @@ How to understand source material. Inspect only the modalities the question turn
 - **Transcribe speech.** For speech, `transcribe` writes the full transcript with word-level start/end times to a JSON file and returns its path — search the file for the line you need and read its times from there, rather than loading it whole.
 - **Sample the video against the audio.** Use `grab` to pull frames. When the audio has already pointed you at specific moments, feed those timestamps straight in from the transcript or listen output as `times` (e.g. `00:32`, `00:45`). When you need a visual pass without such cues, reach for `auto`: it scans the footage and keeps only the frames where the picture settles into a new visual state, dropping near-duplicates.
 
-The media tools (`probe`, `grab`, `transcribe`, `filmstrip`, `waveform`, `listen`) take a path or a direct media URL. Footage behind a page URL (YouTube, TikTok, Instagram, …) is downloaded first with `yt-dlp` from a shell — audio only (`yt-dlp -x --audio-format m4a -o talk.m4a <url>`) unless the question needs frames; see the [tool reference](https://github.com/yt-dlp/yt-dlp).
+The media tools (`probe`, `grab`, `transcribe`, `filmstrip`, `waveform`, `listen`) take a path or a direct media URL. Footage behind a page URL (YouTube, TikTok, Instagram, …) is downloaded first with `yt-dlp` from a shell — audio only (`yt-dlp -x --audio-format m4a -o talk.m4a <url>`) unless the question needs frames; see the [yt-dlp docs](https://github.com/yt-dlp/yt-dlp).
 
 # Matching depth to the question
 

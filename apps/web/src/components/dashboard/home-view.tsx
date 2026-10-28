@@ -88,8 +88,8 @@ const MENU_PROJECTS = 8;
 /** The edits the placeholder cycles through, one whole line at a time. */
 const PROMPT_EXAMPLES = [
   "Turn this footage into a polished YouTube video. Add readable captions and an attention-grabbing graphic in the opening to give viewers a strong visual hook.",
-  "Can you pull the best 30-second moment from https://youtu.be/MtQ0qxyf-Ds and make a vertical version for social?",
-  "Name three recurring locations and give one visual cue that distinguishes each. https://youtu.be/dQw4w9WgXcQ",
+  "Pull the best 30-second moment from the interview in this project and make a vertical version for social.",
+  "Name three recurring locations in my footage and give one visual cue that distinguishes each.",
 ];
 
 /** Milliseconds a line takes to fade in or out, and how long it stays readable. */

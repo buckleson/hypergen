@@ -158,7 +158,7 @@ export function ChatPanel() {
       </Show>
       <Show when={chatState.connection === "unavailable"}>
         <div class="mx-4 mb-2 flex shrink-0 items-center justify-end">
-          <Button variant="secondary" size="small" onClick={() => downloadDesktopApp("chat_panel")}>
+          <Button variant="secondary" size="small" onClick={() => downloadDesktopApp()}>
             Get desktop app
           </Button>
         </div>

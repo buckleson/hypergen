@@ -19,7 +19,7 @@ The input is the model's request — `model` plus that model's fields — with t
 | `output` | `string` | `-o, --output <path>` | file the result is saved as: a library path like `b-roll/fox.png` (needs an open project) or an absolute path; its extension is corrected to what the model made, several files are numbered (`fox-1.png`, `fox-2.png`), and a file already there is replaced (default: the library's root under the model's name for the file with a project open, its files under `assets/`; else a fresh directory under the system temp dir). On the CLI a path starting with `.` resolves against the working directory. |
 | `estimate` | `boolean` | `--estimate` | don't start the job: answer with only its `etaSeconds` (see [Estimating](#estimating)) |
 
-A fal.ai model's fields are not checked here: they are mapped to the model's fal endpoint as given, and fal.ai answers a request it cannot run with what to fix (e.g. an aspect ratio the model does not offer). Each model narrows its kind's bounds, so read its entry in [models.md](../models.md) rather than guessing. A [local model](../models.md#local)'s fields are checked by the app, the same way, before its job starts.
+A fal.ai model's fields are not checked here: Hypergen maps each model's fields to its fal endpoint (fields a model does not use are ignored), and fal.ai answers a request it cannot run with what to fix (e.g. an aspect ratio the model does not offer). Each model narrows its kind's bounds, so read its entry in [models.md](../models.md) rather than guessing. A [local model](../models.md#local)'s fields are checked by the app, the same way, before its job starts.
 
 ## Files
 

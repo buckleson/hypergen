@@ -15,6 +15,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("@electron-forge/maker-zip", () => ({
   MakerZIP: class { kind = "zip"; constructor(public config: unknown, public platforms?: string[]) {} },
 }));
+vi.mock("@electron-forge/maker-deb", () => ({
+  MakerDeb: class { kind = "deb"; constructor(public config: any) {} },
+}));
 vi.mock("@electron-forge/maker-squirrel", () => ({
   MakerSquirrel: class { kind = "squirrel"; constructor(public config: any) {} },
 }));
@@ -68,9 +71,9 @@ describe("forge packagerConfig", () => {
     expect(config.packagerConfig.appVersion).toBe(JSON.parse(read(root, "package.json")).version);
   });
 
-  it("leaves signing off when SKIP_SIGN is set", () => {
+  it("skips Windows signing and ad-hoc signs macOS when SKIP_SIGN is set", () => {
     expect(config.packagerConfig.windowsSign).toBeUndefined();
-    expect(config.packagerConfig.osxSign).toBeUndefined();
+    expect(config.packagerConfig.osxSign).toEqual({ identity: "-" });
   });
 });
 
@@ -96,6 +99,18 @@ describe("forge makers and publisher", () => {
     const sq = maker("squirrel").config;
     expect(sq.setupExe).not.toMatch(/\s/);
     expect(sq.setupExe).toMatch(/^Hypergen-[a-z0-9]+-Setup\.exe$/);
+  });
+
+  it("installs the deb as Hypergen with the product description", () => {
+    const deb = maker("deb").config.options;
+    expect(deb.bin).toBe("Hypergen");
+    expect(deb.description).toBe("The AI video editor built for agents");
+    expect(deb.productDescription).toMatch(/\.$/);
+    expect(deb.homepage).toBe("https://github.com/buckleson/hypergen");
+  });
+
+  it("describes the Squirrel installer like the deb", () => {
+    expect(maker("squirrel").config.description).toBe("The AI video editor built for agents");
   });
 
   it("names the DMG per arch", () => {

@@ -47,7 +47,9 @@ Download the installer for your system from [Releases](https://github.com/buckle
 The builds are not code-signed yet:
 
 - **Windows:** at the SmartScreen warning, click **More info** → **Run anyway**.
-- **macOS:** right-click the app and click **Open** the first time.
+- **macOS:** the first time, open **System Settings > Privacy & Security** and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/Hypergen.app`).
+
+Automatic updates are Windows-only for now; on macOS, download each new release from Releases.
 
 ## Connect your agent
 

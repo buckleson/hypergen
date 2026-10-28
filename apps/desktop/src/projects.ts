@@ -541,12 +541,17 @@ const SCRIPTS: Record<string, string> = {
   open: "hypergen open .",
   context: "hypergen context",
   capture: "hypergen capture",
+  check: "hypergen check",
+  export: "hypergen export",
   probe: "hypergen probe",
   transcribe: "hypergen transcribe",
   grab: "hypergen grab",
   filmstrip: "hypergen filmstrip",
   waveform: "hypergen waveform",
   listen: "hypergen listen",
+  generate: "hypergen generate",
+  job: "hypergen job",
+  window: "hypergen window",
   fonts: "hypergen fonts",
   logs: "hypergen logs",
   screenshot: "hypergen screenshot",
@@ -624,8 +629,8 @@ on the canvas.
 ## Agents
 
 Everything an agent needs is in the app's MCP server (\`hypergen\`): its tools
-are the API, its instructions say how to work, and its resources are the
-authoring reference for the installed version. If it is not among your tools,
+are the API, and its instructions say how to work and where the authoring
+reference for the installed version sits on disk. If it is not among your tools,
 add it — the app serves it at \`${MCP_URL}\` while it is running — and start
 a new session.
 
@@ -697,19 +702,24 @@ yourself with \`npx tsc --noEmit\`.
 
 Every hypergen command is a script here: \`npm run\` lists them, and
 \`npm run <name> -- <args>\` runs one (\`npm run grab -- b-roll/drone.mp4 -c 6\`).
-All of them talk to the running app, except \`fonts\`.
+All of them talk to the running app.
 
 | Script | Command | What it does |
 | ------ | ------- | ------------ |
 | \`open\` | \`hypergen open .\` | Launch the app with this project open. |
-| \`context\` | \`hypergen context\` | Which project the app has open, where its playhead sits, its fonts, its background mask tracks. |
+| \`context\` | \`hypergen context\` | Which project the app has open, where its playhead sits, and the fonts it has loaded. |
 | \`capture\` | \`hypergen capture <id>\` | Render frames of a scene, as an export would, to labelled PNG contact sheets. |
+| \`check\` | \`hypergen check <id>\` | Check a node's subtree for structural mistakes (black spans, assets that failed to load), without rendering. |
+| \`export\` | \`hypergen export <id> [output]\` | Encode a scene to a video file, as the app's export does. |
 | \`probe\` | \`hypergen probe <id\\|path>\` | Container and per-track metadata, without decoding. |
-| \`transcribe\` | \`hypergen transcribe <id\\|path>\` | Timed speech transcript, word by word. |
+| \`transcribe\` | \`hypergen transcribe <id\\|path>\` | Timed speech transcript, word by word, run locally with Whisper. |
 | \`grab\` | \`hypergen grab <id\\|path>\` | Decode frames of a video to labelled PNG contact sheets. |
 | \`filmstrip\` | \`hypergen filmstrip <id\\|path>\` | Thumbnail grid across a window of a video. |
 | \`waveform\` | \`hypergen waveform <id\\|path>\` | Loudness over time, with the silences marked. |
-| \`listen\` | \`hypergen listen <id\\|path>\` | Ask a multimodal model what is in an audio track. |
+| \`listen\` | \`hypergen listen <id\\|path>\` | Ask Gemini, with your own Gemini API key, what is in an audio track. |
+| \`generate\` | \`hypergen generate <model>\` | Start a generation job on fal.ai, with your own fal.ai API key. |
+| \`job\` | \`hypergen job <id>\` | A generation job's status, and its files once it has succeeded. |
+| \`window\` | \`hypergen window [show\\|hide]\` | Show (and focus) or hide the app window. |
 | \`fonts\` | \`hypergen fonts\` | Google Fonts and local font families, valid as \`fontFamily\`. |
 | \`logs\` | \`hypergen logs\` | Recent console output from the app. |
 | \`screenshot\` | \`hypergen screenshot\` | The whole app window as a PNG. |

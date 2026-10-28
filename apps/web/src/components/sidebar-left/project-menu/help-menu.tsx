@@ -11,10 +11,10 @@ export function HelpMenu() {
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuItem as="a" href="https://github.com/buckleson/hypergen/issues" target="_blank">
+        <DropdownMenuItem as="a" href="https://github.com/buckleson/hypergen/issues" target="_blank" rel="noopener noreferrer">
           Report an issue
         </DropdownMenuItem>
-        <DropdownMenuItem as="a" href="https://pavi.tech" target="_blank">
+        <DropdownMenuItem as="a" href="https://github.com/buckleson/hypergen" target="_blank" rel="noopener noreferrer">
           Website
         </DropdownMenuItem>
       </DropdownMenuGroup>

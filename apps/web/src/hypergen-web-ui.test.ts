@@ -18,6 +18,10 @@ import mcpViewSrc from './components/dashboard/mcp-view.tsx?raw';
 import helpViewSrc from './components/dashboard/help-view.tsx?raw';
 import helpMenuSrc from './components/sidebar-left/project-menu/help-menu.tsx?raw';
 import iconsReadme from './assets/icons/README.md?raw';
+import homeViewSrc from './components/dashboard/home-view.tsx?raw';
+import dashboardTypesSrc from './components/dashboard/types.ts?raw';
+import persistRouteSrc from './lib/persist-route.tsx?raw';
+import desktopAppSrc from './lib/desktop-app.ts?raw';
 
 // Lazy glob: only the keys are used, so no SVG is loaded.
 const ICON_FILES = Object.keys(import.meta.glob('./assets/icons/*.svg', { query: '?raw', import: 'default' }));
@@ -235,31 +239,53 @@ describe('T23 help links: issues + website only', () => {
     expect(src).not.toMatch(/What['’]s new/i);
   });
 
-  it('help-view shows Report an issue -> GitHub issues and Website -> pavi.tech', () => {
+  it('help-view shows Report an issue -> GitHub issues and Website -> the GitHub repo', () => {
     expect(helpViewSrc).toMatch(
       /label="Report an issue"\s+href="https:\/\/github\.com\/buckleson\/hypergen\/issues"/,
     );
-    expect(helpViewSrc).toMatch(/label="Website"\s+href="https:\/\/pavi\.tech"/);
+    expect(helpViewSrc).toMatch(/label="Website"\s+href="https:\/\/github\.com\/buckleson\/hypergen"/);
   });
 
-  it('help-menu shows Report an issue -> GitHub issues and Website -> pavi.tech', () => {
+  it('help-menu shows Report an issue -> GitHub issues and Website -> the GitHub repo', () => {
     expect(helpMenuSrc).toMatch(
       /href="https:\/\/github\.com\/buckleson\/hypergen\/issues"[^>]*>\s*Report an issue\s*</,
     );
-    expect(helpMenuSrc).toMatch(/href="https:\/\/pavi\.tech"[^>]*>\s*Website\s*</);
+    expect(helpMenuSrc).toMatch(/href="https:\/\/github\.com\/buckleson\/hypergen"[^>]*>\s*Website\s*</);
   });
 
   it.each(Object.keys(HELP))('%s links only to the issues page and the website, over https, in a new tab', (name) => {
     const src = HELP[name as keyof typeof HELP];
     const urls = [...src.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/href=["']([^"']+)["']/g)].map((m) => m[1]);
-    expect(urls.sort()).toEqual(['https://github.com/buckleson/hypergen/issues', 'https://pavi.tech']);
+    expect(urls.sort()).toEqual(['https://github.com/buckleson/hypergen', 'https://github.com/buckleson/hypergen/issues']);
   });
 
-  it('every external link opens in a new tab', () => {
-    expect(helpViewSrc).toContain('<a href={props.href} target="_blank">');
+  it('every external link opens in a new tab with rel="noopener noreferrer"', () => {
+    const viewLinks = helpViewSrc.match(/<a\s[^>]*>/g) ?? [];
+    expect(viewLinks).toHaveLength(1);
+    expect(viewLinks[0]).toMatch(/href=\{props\.href\}/);
+    expect(viewLinks[0]).toContain('target="_blank"');
+    expect(viewLinks[0]).toContain('rel="noopener noreferrer"');
     const menuLinks = helpMenuSrc.match(/<DropdownMenuItem as="a"[^>]*>/g) ?? [];
     expect(menuLinks).toHaveLength(2);
-    for (const a of menuLinks) expect(a).toContain('target="_blank"');
+    for (const a of menuLinks) {
+      expect(a).toContain('target="_blank"');
+      expect(a).toContain('rel="noopener noreferrer"');
+    }
+  });
+
+  it('help-view makes the whole row one link whose text is the label', () => {
+    const row = helpViewSrc.match(/function DashboardHelpExternalRow[\s\S]*?\n}/)?.[0] ?? '';
+    expect(row).toMatch(/<a\s[\s\S]*?\{props\.label\}[\s\S]*?<\/a>/);
+    expect(row).not.toMatch(/<div/);
+  });
+
+  it('help-view has no commented-out keyboard-shortcuts block', () => {
+    expect(helpViewSrc).not.toMatch(/Keyboard shortcuts|\{\/\*/);
+  });
+
+  it('mcp-view docs link has rel and the undated connect-local-servers URL', () => {
+    expect(mcpViewSrc).toContain('"https://modelcontextprotocol.io/docs/develop/connect-local-servers"');
+    expect(mcpViewSrc).toMatch(/<a href=\{MCP_DOCS_URL\}[^>]*rel="noopener noreferrer"/);
   });
 
   it.each(Object.keys(HELP))('%s has no copy-user-id flow (sign-in is gone)', (name) => {
@@ -314,5 +340,35 @@ describe('icon names in the touched components all resolve', () => {
   ])('%s', (_name, src) => {
     const missing = iconNames(src).filter((n) => !ICON_NAMES.has(n));
     expect(missing).toEqual([]);
+  });
+});
+
+describe('web UI cleanup: demo prompts, dead routes, meta', () => {
+  it('home-view demo prompts link no third-party video', () => {
+    expect(homeViewSrc).not.toMatch(/youtu\.be|youtube\.com/i);
+    const prompts = homeViewSrc.match(/const PROMPT_EXAMPLES = \[([\s\S]*?)\];/)?.[1] ?? '';
+    expect(prompts).toMatch(/your own|this project|my footage/);
+    expect(prompts).not.toMatch(/https?:\/\//);
+  });
+
+  it('DashboardView has no templates or preferences, and no Template* types remain', () => {
+    expect(dashboardTypesSrc).not.toMatch(/"templates"|"preferences"/);
+    expect(dashboardTypesSrc).not.toMatch(/\bTemplate\w*/);
+  });
+
+  it('persist-route has no checkout param or /auth/ route handling', () => {
+    expect(persistRouteSrc).not.toMatch(/checkout|\/auth\//);
+  });
+
+  it('downloadDesktopApp takes no analytics source', () => {
+    expect(desktopAppSrc).not.toMatch(/DesktopAppDownloadSource|_source/);
+    expect(desktopAppSrc).toContain('export function downloadDesktopApp() {');
+  });
+
+  it('meta, og and twitter descriptions are the agent-first copy', () => {
+    const copy = 'Hypergen is the AI video editor built for agents. Edit video with Claude Code, Codex and your own words, then finish it by hand.';
+    for (const attr of ['name="description"', 'property="og:description"', 'name="twitter:description"']) {
+      expect(indexHtml).toContain(`<meta ${attr} content="${copy}" />`);
+    }
   });
 });

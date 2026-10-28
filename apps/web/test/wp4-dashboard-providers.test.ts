@@ -97,7 +97,7 @@ describe("DashboardView type", () => {
     expect(members.length).toBeGreaterThan(0);
   });
 
-  it.each(["ai-credits", "billing", "account"])("drops '%s'", (v) => {
+  it.each(["ai-credits", "billing", "account", "templates", "preferences"])("drops '%s'", (v) => {
     expect(members).not.toContain(v);
   });
 
@@ -124,7 +124,7 @@ describe("pages/dashboard.tsx", () => {
   it("DASHBOARD_VIEWS parses ai-providers and none of the removed views", () => {
     const views = listOf("DASHBOARD_VIEWS");
     expect(views).toContain("ai-providers");
-    for (const v of ["ai-credits", "billing", "account"]) expect(views).not.toContain(v);
+    for (const v of ["ai-credits", "billing", "account", "templates", "preferences"]) expect(views).not.toContain(v);
   });
 
   it("SETTINGS_VIEWS is exactly settings, ai-providers, mcp, help", () => {
