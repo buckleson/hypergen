@@ -1,0 +1,737 @@
+=== apps/cli/scripts/dev-link.mjs
+12: <<<<<<< HEAD
+13: //   macOS    a symlink in Homebrew's bin, `/opt/homebrew/bin/hypergen`, which
+14: //            is user-writable, so no admin prompt. The packaged app uses
+15: //            `/usr/local/bin` instead and the two never collide.
+16: //   Windows  `%LOCALAPPDATA%\Hypergen\bin\hypergen.cmd`, the same file the
+17: //            packaged app keeps its own shim in (apps/desktop/src/cli-windows.ts).
+18: //            A packaged app rewrites it on launch, so run this again after
+19: //            using one. The folder is added to the user PATH the way the
+20: =======
+21: //   macOS    symlinks in Homebrew's bin, `/opt/homebrew/bin/dapi` and
+22: //            `/opt/homebrew/bin/diffusion`, which is user-writable, so no admin
+23: //            prompt. The packaged app uses `/usr/local/bin` instead and the two never collide.
+24: //   Windows  `%LOCALAPPDATA%\DiffusionStudio\bin\dapi.cmd` and `...\bin\diffusion.cmd`, the same
+25: //            file the packaged app keeps its own shim in (apps/desktop/src/cli-windows.ts).
+26: //            A packaged app rewrites the `dapi` one on launch, so run this again
+27: //            after using one. The folder is added to the user PATH the way the
+28: >>>>>>> 5b1695e (P3 squash)
+---
+=== apps/cli/src/index.ts
+1: <<<<<<< HEAD
+2: #!/usr/bin/env node
+3: /* This Source Code Form is subject to the terms of the Mozilla Public
+4:  * License, v. 2.0. If a copy of the MPL was not distributed with this
+5:  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+6: 
+7: import { existsSync } from "node:fs";
+8: import { isAbsolute, resolve } from "node:path";
+9: import { Argument, Command } from "commander";
+10: import { z } from "zod";
+11: import { version } from "../../../package.json";
+12: import { MCP_URL, toolByName } from "@hypergen/dapi";
+13: import { APP_NAME, call, isAppDown, launchApp, ping, waitForApp } from "./cli-client";
+14: import { runProxy } from "./mcp-proxy";
+15: 
+16: import type { GenericTool, ToolInput, ToolName } from "@hypergen/dapi";
+17: 
+18: function fail(message: string): never {
+19:   console.error(message);
+20:   process.exit(1);
+21: }
+22: 
+23: function appError(e: unknown): never {
+24:   if (isAppDown(e)) fail(`${APP_NAME} is not running. Launch the app first, then retry.`);
+25:   fail((e as Error).message);
+26: }
+27: 
+28: /** The tool's description, verbatim. */
+29: function describe(name: ToolName): string {
+30:   return toolByName(name).description;
+31: }
+32: 
+33: /** An input field's description, verbatim, for the option that maps onto it. */
+34: function field(name: ToolName, key: string): string {
+35:   const tool: GenericTool = toolByName(name);
+36:   const schema = tool.input.shape[key];
+37:   if (schema === undefined) throw new Error(`tool ${name} has no input field "${key}"`);
+38:   return schema.description ?? "";
+39: }
+40: 
+41: /**
+42:  * Checks the input against the tool's schema, calls the tool, and prints
+43:  * what the app returns — its structured content, as one JSON object, the
+44:  * same thing an agent receives. Strings stay strings: times like "45f" are
+45:  * parsed by the schema on both sides.
+46:  */
+47: async function run<N extends ToolName>(name: N, input: ToolInput<N>): Promise<void> {
+48:   const parsed = toolByName(name).input.safeParse(input);
+49:   if (!parsed.success) fail(z.prettifyError(parsed.error));
+50:   const output = await call(name, input).catch(appError);
+51:   console.log(JSON.stringify(output));
+52: }
+53: 
+54: // Numbers are converted so the schema can check them as numbers; an empty or
+55: // non-numeric string becomes NaN, which the schema rejects with its own message.
+56: const numeric = (value: string): number => (value.trim() === "" ? NaN : Number(value));
+57: 
+58: /**
+59:  * A local file (or frames folder) that exists is sent as its absolute path;
+60:  * anything else — a URL, or a library path (`b-roll/clip.mp4`) — is passed
+61:  * through for the app to resolve. Library paths need an open project.
+62:  */
+63: function assetPath(ref: string): string {
+64:   const abs = resolve(ref);
+65:   if (existsSync(abs)) return abs;
+66:   if (isAbsolute(ref)) fail(`File not found: ${abs}`);
+67:   return ref;
+68: }
+69: 
+70: /** Parsed JSON, or a failure naming what was being read. */
+71: function json(value: string, what: string): unknown {
+72:   try {
+73:     return JSON.parse(value);
+74:   } catch (e) {
+75:     fail(`${what} is not valid JSON: ${(e as Error).message}`);
+76:   }
+77: }
+78: 
+79: /** Every `{ "path": … }` file reference in a request, resolved as `assetPath` does; the rest untouched. */
+80: function resolveFileRefs(value: unknown): unknown {
+81:   if (Array.isArray(value)) return value.map(resolveFileRefs);
+82:   if (typeof value !== "object" || value === null) return value;
+83:   const entries = Object.entries(value);
+84:   if (entries.length === 1 && entries[0]![0] === "path" && typeof entries[0]![1] === "string") return { path: assetPath(entries[0]![1]) };
+85:   return Object.fromEntries(entries.map(([key, item]) => [key, resolveFileRefs(item)]));
+86: }
+87: 
+88: /**
+89:  * Where generated files go: a path spelled as one on disk
+90:  * (absolute, or starting with `.`) resolves against the working directory;
+91:  * anything else is a library path, passed through for the app to resolve in
+92:  * the open project.
+93:  */
+94: function libraryOrDiskPath(ref: string): string {
+95:   return isAbsolute(ref) || ref.startsWith(".") ? resolve(ref) : ref;
+96: }
+97: 
+98: const program = new Command();
+99: 
+100: program
+101:   .name("hypergen")
+102:   .description(
+103:     `The Hypergen CLI: understand and edit footage.
+104: Analyze video/audio/images and compose assets.
+105: Use for any media analysis or video editing task. No ffmpeg needed.`)
+106:   .version(version);
+107: 
+108: program
+109:   .command("open")
+110:   .description(
+111:     `Launch ${APP_NAME} (or surface the running instance) and, given a path, open that folder as a project, creating the project files if the folder is not one yet. 
+112:   )
+113:   .argument("[path]", `${field("open", "dir")} (default: none — just launch the app)`)
+114:   .option("-b, --background", "launch or keep the app in the background, without raising a window")
+115:   .action(async (path: string | undefined, opts: { background?: boolean }) => {
+116:     const background = opts.background ?? false;
+117:     const running = background && (await ping().then(() => true, (e) => (isAppDown(e) ? false : appError(e))));
+118:     const launched = !running && (await launchApp(background));
+119:     await (launched ? waitForApp() : ping()).catch(appError);
+120:     if (path !== undefined) await run("open", { dir: resolve(path) });
+121:   });
+122: 
+123: program
+124:   .command("mcp")
+125:   .description(
+126:     `Serve ${APP_NAME}'s MCP server over stdio, for agents that cannot connect to it by URL (Claude Desktop). Launches the app in the background if it is not running
+127:   )
+128:   .action(() => runProxy().catch(appError));
+129: 
+130: program
+131:   .command("context")
+132:   .alias("ctx")
+133:   .description(describe("context"))
+134:   .action(() => run("context", {}));
+135: 
+136: program
+137:   .command("capture")
+138:   .description(describe("capture"))
+139:   .argument("<id>", field("capture", "id"))
+140:   .option("-t, --times <time...>", field("capture", "times"))
+141:   .option("-S, --separate", field("capture", "separate"))
+142:   .option("--per-sheet <n>", field("capture", "perSheet"), numeric)
+143:   .option("-o, --output <dir>", field("capture", "output"))
+144:   .action((id: string, opts: Omit<ToolInput<"capture">, "id">) =>
+145:     run("capture", { id, ...opts, output: opts.output && resolve(opts.output) }),
+146:   );
+147: 
+148: program
+149:   .command("export")
+150:   .description(describe("export"))
+151:   .argument("<id>", field("export", "id"))
+152:   .argument("[output]", field("export", "path"))
+153:   .action((id: string, output: string | undefined) => run("export", { id, path: output && resolve(output) }));
+154: 
+155: program
+156:   .command("check")
+157:   .description(`${describe("check")} Exits 1 when an error-severity issue is found.`)
+158:   .argument("<id>", field("check", "id"))
+159:   .action(async (id: string) => {
+160:     const output = await call("check", { id }).catch(appError);
+161:     console.log(JSON.stringify(output));
+162:     if (output.issues.some((issue) => issue.severity === "error")) process.exitCode = 1;
+163:   });
+164: 
+165: program
+166:   .command("probe")
+167:   .description(describe("probe"))
+168:   .argument("<path>", field("probe", "path"))
+169:   .action((ref: string) => run("probe", { path: assetPath(ref) }));
+170: 
+171: program
+172:   .command("transcribe")
+173:   .description(describe("transcribe"))
+174:   .argument("<path>", field("transcribe", "path"))
+175:   .option("-o, --output <path>", field("transcribe", "output"))
+176:   .action((ref: string, opts: Omit<ToolInput<"transcribe">, "path">) =>
+177:     run("transcribe", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+178:   );
+179: 
+180: program
+181:   .command("grab")
+182:   .alias("sample")
+183:   .description(describe("grab"))
+184:   .argument("<path>", field("grab", "path"))
+185:   .option("-t, --times <time...>", field("grab", "times"))
+186:   .option("-c, --count <n>", field("grab", "count"), numeric)
+187:   .option("-a, --auto", field("grab", "auto"))
+188:   .option("-s, --start <time>", field("grab", "start"))
+189:   .option("-e, --end <time>", field("grab", "end"))
+190:   .option("-q, --quality <preset>", field("grab", "quality"))
+191:   .option("-S, --separate", field("grab", "separate"))
+192:   .option("--per-sheet <n>", field("grab", "perSheet"), numeric)
+193:   .option("--uncapped", field("grab", "uncapped"))
+194:   .option("-o, --output <dir>", field("grab", "output"))
+195:   .action((ref: string, opts: Omit<ToolInput<"grab">, "path">) =>
+196:     run("grab", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+197:   );
+198: 
+199: program
+200:   .command("filmstrip")
+201:   .alias("film")
+202:   .description(describe("filmstrip"))
+203:   .argument("<path>", field("filmstrip", "path"))
+204:   .option("-s, --start <time>", field("filmstrip", "start"))
+205:   .option("-e, --end <time>", field("filmstrip", "end"))
+206:   .option("-x, --scale <factor>", field("filmstrip", "scale"), numeric)
+207:   .option("-o, --output <path>", field("filmstrip", "output"))
+208:   .action((ref: string, opts: Omit<ToolInput<"filmstrip">, "path">) =>
+209:     run("filmstrip", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+210:   );
+211: 
+212: program
+213:   .command("waveform")
+214:   .alias("wave")
+215:   .description(describe("waveform"))
+216:   .argument("<path>", field("waveform", "path"))
+217:   .option("-s, --start <time>", field("waveform", "start"))
+218:   .option("-e, --end <time>", field("waveform", "end"))
+219:   .option("-x, --scale <factor>", field("waveform", "scale"), numeric)
+220:   .option("-o, --output <path>", field("waveform", "output"))
+221:   .action((ref: string, opts: Omit<ToolInput<"waveform">, "path">) =>
+222:     run("waveform", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+223:   );
+224: 
+225: program
+226:   .command("listen")
+227:   .description(describe("listen"))
+228:   .argument("<path>", field("listen", "path"))
+229:   .option("-p, --prompt <str>", field("listen", "prompt"))
+230:   .option("-s, --start <time>", field("listen", "start"))
+231:   .option("-e, --end <time>", field("listen", "end"))
+232:   .action((ref: string, opts: Omit<ToolInput<"listen">, "path">) => run("listen", { path: assetPath(ref), ...opts }));
+233: 
+234: program
+235:   .command("generate")
+236:   .alias("gen")
+237:   .description(describe("generate"))
+238:   .addArgument(new Argument("<model>", field("generate", "model")).choices(toolByName("generate").input.shape.model.options))
+239:   .argument(
+240:     "[fields]",
+241:     `the model's other fields as one JSON object, e.g. '{"aspectRatio":"16:9","images":[{"path":"./ref.png"}]}'; a { "path" } that exists relative to the working dir
+242:   )
+243:   .option("-p, --prompt <text>", "the request's `prompt`, without JSON quoting; wins over one in the fields")
+244:   .option(
+245:     "-o, --output <path>",
+246:     `${field("generate", "output")}; a path starting with . resolves against the working directory`,
+247:   )
+248:   .option("--max-credits <n>", field("generate", "maxCredits"), numeric)
+249:   .option("--estimate", field("generate", "estimate"))
+250:   .action((model: ToolInput<"generate">["model"], fields: string | undefined, opts: { prompt?: string; output?: string; maxCredits?: number; estimate?: boolean }) =>
+251:     const parsed = fields === undefined ? {} : json(fields, "fields");
+252:     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) fail("fields must be a JSON object.");
+253:     const request = resolveFileRefs(parsed) as Record<string, unknown>;
+254:     return run("generate", {
+255:       ...request,
+256:       model,
+257:       ...(opts.prompt === undefined ? {} : { prompt: opts.prompt }),
+258:       output: opts.output && libraryOrDiskPath(opts.output),
+259:       maxCredits: opts.maxCredits,
+260:       estimate: opts.estimate,
+261:     });
+262:   });
+263: 
+264: program
+265:   .command("job")
+266:   .description(`${describe("job")} Exits 1 when the job failed or was canceled.`)
+267:   .argument("<id>", field("job", "id"))
+268:   .option("--cancel", field("job", "cancel"))
+269:   .action(async (id: string, opts: { cancel?: boolean }) => {
+270:     const output = await call("job", { id, cancel: opts.cancel }).catch(appError);
+271:     console.log(JSON.stringify(output));
+272:     if (output.status === "failed" || output.status === "canceled") process.exitCode = 1;
+273:   });
+274: 
+275: program
+276:   .command("logs")
+277:   .description(describe("logs"))
+278:   .option("-n, --tail <n>", field("logs", "tail"), numeric)
+279:   .option("-l, --level <level>", field("logs", "level"))
+280:   .option("--since <ms>", field("logs", "since"), numeric)
+281:   .option("-c, --contains <text>", field("logs", "contains"))
+282:   .action((opts: ToolInput<"logs">) => run("logs", opts));
+283: 
+284: program
+285:   .command("screenshot")
+286:   .description(describe("screenshot"))
+287:   .option("-o, --output <dir>", field("screenshot", "output"))
+288:   .action((opts: ToolInput<"screenshot">) => run("screenshot", { output: opts.output && resolve(opts.output) }));
+289: 
+290: program
+291:   .command("window")
+292:   .description(describe("window"))
+293:   .argument("[state]", "show (and focus) or hide the window (default: leave it as it is)")
+294:   .action((state: string | undefined) => {
+295:     if (state !== undefined && state !== "show" && state !== "hide") fail(`Expected show or hide, got "${state}".`);
+296:     return run("window", { visible: state === undefined ? undefined : state === "show" });
+297:   });
+298: 
+299: program
+300:   .command("report")
+301:   .alias("issue")
+302:   .description(describe("report"))
+303:   .argument("<title>", field("report", "title"))
+304:   .option("-b, --body <text>", field("report", "body"))
+305:   .option("-c, --commands <cmd...>", field("report", "commands"))
+306:   .option("--logs <n>", field("report", "logs"), numeric)
+307:   .action((title: string, opts: Omit<ToolInput<"report">, "title">) => run("report", { title, ...opts }));
+308: 
+309: program
+310:   .command("fonts")
+311:   .description(describe("fonts"))
+312:   .option("-f, --family <pattern>", field("fonts", "family"))
+313:   .option("-p, --provider <provider>", field("fonts", "provider"))
+314:   .option("--popular", field("fonts", "popular"))
+315:   .option("-w, --weights <weights...>", field("fonts", "weights"))
+316:   .option("-s, --style <style>", field("fonts", "style"))
+317:   .option("-l, --limit <n>", field("fonts", "limit"), numeric)
+318:   .action((opts: ToolInput<"fonts">) => run("fonts", opts));
+319: 
+320: // Explicit argv convention: the packaged wrapper runs this bundle on
+321: // Electron in ELECTRON_RUN_AS_NODE mode, where commander would otherwise
+322: // detect Electron and drop the script path from argv.
+323: // The media commands used to sit under a `media` (`m`) group; drop that word so
+324: // scripts written against it (older projects' npm scripts) keep working.
+325: const argv = ["media", "m"].includes(process.argv[2] ?? "") ? process.argv.toSpliced(2, 1) : process.argv;
+326: 
+327: program.parse(argv, { from: "node" });
+328: =======
+329: #!/usr/bin/env node
+330: /* This Source Code Form is subject to the terms of the Mozilla Public
+331:  * License, v. 2.0. If a copy of the MPL was not distributed with this
+332:  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+333: 
+334: import { existsSync } from "node:fs";
+335: import { isAbsolute, resolve } from "node:path";
+336: import { Argument, Command } from "commander";
+337: import { z } from "zod";
+338: import { version } from "../../../package.json";
+339: import { MCP_URL, toolByName } from "@hypergen/dapi";
+340: import { APP_NAME, call, isAppDown, launchApp, ping, waitForApp } from "./cli-client";
+341: import { runProxy } from "./mcp-proxy";
+342: 
+343: import type { GenericTool, ToolInput, ToolName } from "@hypergen/dapi";
+344: 
+345: function fail(message: string): never {
+346:   console.error(message);
+347:   process.exit(1);
+348: }
+349: 
+350: function appError(e: unknown): never {
+351:   if (isAppDown(e)) fail(`${APP_NAME} is not running. Launch the app first, then retry.`);
+352:   fail((e as Error).message);
+353: }
+354: 
+355: /** The tool's description, verbatim. */
+356: function describe(name: ToolName): string {
+357:   return toolByName(name).description;
+358: }
+359: 
+360: /** An input field's description, verbatim, for the option that maps onto it. */
+361: function field(name: ToolName, key: string): string {
+362:   const tool: GenericTool = toolByName(name);
+363:   const schema = tool.input.shape[key];
+364:   if (schema === undefined) throw new Error(`tool ${name} has no input field "${key}"`);
+365:   return schema.description ?? "";
+366: }
+367: 
+368: /**
+369:  * Checks the input against the tool's schema, calls the tool, and prints
+370:  * what the app returns — its structured content, as one JSON object, the
+371:  * same thing an agent receives. Strings stay strings: times like "45f" are
+372:  * parsed by the schema on both sides.
+373:  */
+374: async function run<N extends ToolName>(name: N, input: ToolInput<N>): Promise<void> {
+375:   const parsed = toolByName(name).input.safeParse(input);
+376:   if (!parsed.success) fail(z.prettifyError(parsed.error));
+377:   const output = await call(name, input).catch(appError);
+378:   console.log(JSON.stringify(output));
+379: }
+380: 
+381: // Numbers are converted so the schema can check them as numbers; an empty or
+382: // non-numeric string becomes NaN, which the schema rejects with its own message.
+383: const numeric = (value: string): number => (value.trim() === "" ? NaN : Number(value));
+384: 
+385: /**
+386:  * A local file (or frames folder) that exists is sent as its absolute path;
+387:  * anything else — a URL, or a library path (`b-roll/clip.mp4`) — is passed
+388:  * through for the app to resolve. Library paths need an open project.
+389:  */
+390: function assetPath(ref: string): string {
+391:   const abs = resolve(ref);
+392:   if (existsSync(abs)) return abs;
+393:   if (isAbsolute(ref)) fail(`File not found: ${abs}`);
+394:   return ref;
+395: }
+396: 
+397: /** Parsed JSON, or a failure naming what was being read. */
+398: function json(value: string, what: string): unknown {
+399:   try {
+400:     return JSON.parse(value);
+401:   } catch (e) {
+402:     fail(`${what} is not valid JSON: ${(e as Error).message}`);
+403:   }
+404: }
+405: 
+406: /** Every `{ "path": … }` file reference in a request, resolved as `assetPath` does; the rest untouched. */
+407: function resolveFileRefs(value: unknown): unknown {
+408:   if (Array.isArray(value)) return value.map(resolveFileRefs);
+409:   if (typeof value !== "object" || value === null) return value;
+410:   const entries = Object.entries(value);
+411:   if (entries.length === 1 && entries[0]![0] === "path" && typeof entries[0]![1] === "string") return { path: assetPath(entries[0]![1]) };
+412:   return Object.fromEntries(entries.map(([key, item]) => [key, resolveFileRefs(item)]));
+413: }
+414: 
+415: /**
+416:  * Where generated files go: a path spelled as one on disk
+417:  * (absolute, or starting with `.`) resolves against the working directory;
+418:  * anything else is a library path, passed through for the app to resolve in
+419:  * the open project.
+420:  */
+421: function libraryOrDiskPath(ref: string): string {
+422:   return isAbsolute(ref) || ref.startsWith(".") ? resolve(ref) : ref;
+423: }
+424: 
+425: const program = new Command();
+426: 
+427: program
+428:   .name("diffusion")
+429:   .description(
+430:     `The Diffusion Studio CLI: understand and edit footage.
+431: Analyze video/audio/images and compose assets.
+432: Use for any media analysis or video editing task. No ffmpeg needed.`)
+433:   .version(version);
+434: 
+435: program
+436:   .command("open")
+437:   .description(
+438:     `Launch ${APP_NAME} (or surface the running instance) and, given a path, open that folder as a project, creating the project files if the folder is not one yet. 
+439:   )
+440:   .argument("[path]", `${field("open", "dir")} (default: none — just launch the app)`)
+441:   .option("-b, --background", "launch or keep the app in the background, without raising a window")
+442:   .action(async (path: string | undefined, opts: { background?: boolean }) => {
+443:     const background = opts.background ?? false;
+444:     const running = background && (await ping().then(() => true, (e) => (isAppDown(e) ? false : appError(e))));
+445:     const launched = !running && (await launchApp(background));
+446:     await (launched ? waitForApp() : ping()).catch(appError);
+447:     if (path !== undefined) await run("open", { dir: resolve(path) });
+448:   });
+449: 
+450: program
+451:   .command("mcp")
+452:   .description(
+453:     `Serve ${APP_NAME}'s MCP server over stdio, for agents that cannot connect to it by URL (Claude Desktop). Launches the app in the background if it is not running
+454:   )
+455:   .action(() => runProxy().catch(appError));
+456: 
+457: program
+458:   .command("context")
+459:   .alias("ctx")
+460:   .description(describe("context"))
+461:   .action(() => run("context", {}));
+462: 
+463: program
+464:   .command("capture")
+465:   .description(describe("capture"))
+466:   .argument("<id>", field("capture", "id"))
+467:   .option("-t, --times <time...>", field("capture", "times"))
+468:   .option("-S, --separate", field("capture", "separate"))
+469:   .option("--per-sheet <n>", field("capture", "perSheet"), numeric)
+470:   .option("-o, --output <dir>", field("capture", "output"))
+471:   .action((id: string, opts: Omit<ToolInput<"capture">, "id">) =>
+472:     run("capture", { id, ...opts, output: opts.output && resolve(opts.output) }),
+473:   );
+474: 
+475: program
+476:   .command("export")
+477:   .description(describe("export"))
+478:   .argument("<id>", field("export", "id"))
+479:   .argument("[output]", field("export", "path"))
+480:   .action((id: string, output: string | undefined) => run("export", { id, path: output && resolve(output) }));
+481: 
+482: program
+483:   .command("check")
+484:   .description(`${describe("check")} Exits 1 when an error-severity issue is found.`)
+485:   .argument("<id>", field("check", "id"))
+486:   .action(async (id: string) => {
+487:     const output = await call("check", { id }).catch(appError);
+488:     console.log(JSON.stringify(output));
+489:     if (output.issues.some((issue) => issue.severity === "error")) process.exitCode = 1;
+490:   });
+491: 
+492: program
+493:   .command("probe")
+494:   .description(describe("probe"))
+495:   .argument("<path>", field("probe", "path"))
+496:   .action((ref: string) => run("probe", { path: assetPath(ref) }));
+497: 
+498: program
+499:   .command("transcribe")
+500:   .description(describe("transcribe"))
+501:   .argument("<path>", field("transcribe", "path"))
+502:   .option("-o, --output <path>", field("transcribe", "output"))
+503:   .action((ref: string, opts: Omit<ToolInput<"transcribe">, "path">) =>
+504:     run("transcribe", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+505:   );
+506: 
+507: program
+508:   .command("grab")
+509:   .alias("sample")
+510:   .description(describe("grab"))
+511:   .argument("<path>", field("grab", "path"))
+512:   .option("-t, --times <time...>", field("grab", "times"))
+513:   .option("-c, --count <n>", field("grab", "count"), numeric)
+514:   .option("-a, --auto", field("grab", "auto"))
+515:   .option("-s, --start <time>", field("grab", "start"))
+516:   .option("-e, --end <time>", field("grab", "end"))
+517:   .option("-q, --quality <preset>", field("grab", "quality"))
+518:   .option("-S, --separate", field("grab", "separate"))
+519:   .option("--per-sheet <n>", field("grab", "perSheet"), numeric)
+520:   .option("--uncapped", field("grab", "uncapped"))
+521:   .option("-o, --output <dir>", field("grab", "output"))
+522:   .action((ref: string, opts: Omit<ToolInput<"grab">, "path">) =>
+523:     run("grab", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+524:   );
+525: 
+526: program
+527:   .command("filmstrip")
+528:   .alias("film")
+529:   .description(describe("filmstrip"))
+530:   .argument("<path>", field("filmstrip", "path"))
+531:   .option("-s, --start <time>", field("filmstrip", "start"))
+532:   .option("-e, --end <time>", field("filmstrip", "end"))
+533:   .option("-x, --scale <factor>", field("filmstrip", "scale"), numeric)
+534:   .option("-o, --output <path>", field("filmstrip", "output"))
+535:   .action((ref: string, opts: Omit<ToolInput<"filmstrip">, "path">) =>
+536:     run("filmstrip", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+537:   );
+538: 
+539: program
+540:   .command("waveform")
+541:   .alias("wave")
+542:   .description(describe("waveform"))
+543:   .argument("<path>", field("waveform", "path"))
+544:   .option("-s, --start <time>", field("waveform", "start"))
+545:   .option("-e, --end <time>", field("waveform", "end"))
+546:   .option("-x, --scale <factor>", field("waveform", "scale"), numeric)
+547:   .option("-o, --output <path>", field("waveform", "output"))
+548:   .action((ref: string, opts: Omit<ToolInput<"waveform">, "path">) =>
+549:     run("waveform", { path: assetPath(ref), ...opts, output: opts.output && resolve(opts.output) }),
+550:   );
+551: 
+552: program
+553:   .command("listen")
+554:   .description(describe("listen"))
+555:   .argument("<path>", field("listen", "path"))
+556:   .option("-p, --prompt <str>", field("listen", "prompt"))
+557:   .option("-s, --start <time>", field("listen", "start"))
+558:   .option("-e, --end <time>", field("listen", "end"))
+559:   .action((ref: string, opts: Omit<ToolInput<"listen">, "path">) => run("listen", { path: assetPath(ref), ...opts }));
+560: 
+561: program
+562:   .command("generate")
+563:   .alias("gen")
+564:   .description(describe("generate"))
+565:   .addArgument(new Argument("<model>", field("generate", "model")).choices(toolByName("generate").input.shape.model.options))
+566:   .argument(
+567:     "[fields]",
+568:     `the model's other fields as one JSON object, e.g. '{"aspectRatio":"16:9","images":[{"path":"./ref.png"}]}'; a { "path" } that exists relative to the working dir
+569:   )
+570:   .option("-p, --prompt <text>", "the request's `prompt`, without JSON quoting; wins over one in the fields")
+571:   .option(
+572:     "-o, --output <path>",
+573:     `${field("generate", "output")}; a path starting with . resolves against the working directory`,
+574:   )
+575:   .option("--estimate", field("generate", "estimate"))
+576:   .action((model: ToolInput<"generate">["model"], fields: string | undefined, opts: { prompt?: string; output?: string; estimate?: boolean }) => {
+577:     const parsed = fields === undefined ? {} : json(fields, "fields");
+578:     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) fail("fields must be a JSON object.");
+579:     const request = resolveFileRefs(parsed) as Record<string, unknown>;
+580:     return run("generate", {
+581:       ...request,
+582:       model,
+583:       ...(opts.prompt === undefined ? {} : { prompt: opts.prompt }),
+584:       output: opts.output && libraryOrDiskPath(opts.output),
+585:       estimate: opts.estimate,
+586:     });
+587:   });
+588: 
+589: program
+590:   .command("job")
+591:   .description(`${describe("job")} Exits 1 when the job failed or was canceled.`)
+592:   .argument("<id>", field("job", "id"))
+593:   .option("--cancel", field("job", "cancel"))
+594:   .action(async (id: string, opts: { cancel?: boolean }) => {
+595:     const output = await call("job", { id, cancel: opts.cancel }).catch(appError);
+596:     console.log(JSON.stringify(output));
+597:     if (output.status === "failed" || output.status === "canceled") process.exitCode = 1;
+598:   });
+599: 
+600: program
+601:   .command("logs")
+602:   .description(describe("logs"))
+603:   .option("-n, --tail <n>", field("logs", "tail"), numeric)
+604:   .option("-l, --level <level>", field("logs", "level"))
+605:   .option("--since <ms>", field("logs", "since"), numeric)
+606:   .option("-c, --contains <text>", field("logs", "contains"))
+607:   .action((opts: ToolInput<"logs">) => run("logs", opts));
+608: 
+609: program
+610:   .command("screenshot")
+611:   .description(describe("screenshot"))
+612:   .option("-o, --output <dir>", field("screenshot", "output"))
+613:   .action((opts: ToolInput<"screenshot">) => run("screenshot", { output: opts.output && resolve(opts.output) }));
+614: 
+615: program
+616:   .command("window")
+617:   .description(describe("window"))
+618:   .argument("[state]", "show (and focus) or hide the window (default: leave it as it is)")
+619:   .action((state: string | undefined) => {
+620:     if (state !== undefined && state !== "show" && state !== "hide") fail(`Expected show or hide, got "${state}".`);
+621:     return run("window", { visible: state === undefined ? undefined : state === "show" });
+622:   });
+623: 
+624: program
+625:   .command("report")
+626:   .alias("issue")
+627:   .description(describe("report"))
+628:   .argument("<title>", field("report", "title"))
+629:   .option("-b, --body <text>", field("report", "body"))
+630:   .option("-c, --commands <cmd...>", field("report", "commands"))
+631:   .option("--logs <n>", field("report", "logs"), numeric)
+632:   .action((title: string, opts: Omit<ToolInput<"report">, "title">) => run("report", { title, ...opts }));
+633: 
+634: program
+635:   .command("fonts")
+636:   .description(describe("fonts"))
+637:   .option("-f, --family <pattern>", field("fonts", "family"))
+638:   .option("-p, --provider <provider>", field("fonts", "provider"))
+639:   .option("--popular", field("fonts", "popular"))
+640:   .option("-w, --weights <weights...>", field("fonts", "weights"))
+641:   .option("-s, --style <style>", field("fonts", "style"))
+642:   .option("-l, --limit <n>", field("fonts", "limit"), numeric)
+643:   .action((opts: ToolInput<"fonts">) => run("fonts", opts));
+644: 
+645: // Explicit argv convention: the packaged wrapper runs this bundle on
+646: // Electron in ELECTRON_RUN_AS_NODE mode, where commander would otherwise
+647: // detect Electron and drop the script path from argv.
+648: // The media commands used to sit under a `media` (`m`) group; drop that word so
+649: // scripts written against it (older projects' npm scripts) keep working.
+650: const argv = ["media", "m"].includes(process.argv[2] ?? "") ? process.argv.toSpliced(2, 1) : process.argv;
+651: 
+652: program.parse(argv, { from: "node" });
+653: >>>>>>> 5b1695e (P3 squash)
+---
+=== packages/dapi/package.json
+1: <<<<<<< HEAD
+2: {
+3:   "name": "@hypergen/dapi",
+4:   "version": "0.1.0",
+5:   "description": "The Hypergen tool catalog: every tool the Hypergen app exposes to agents and the CLI, as a name, a description, and zod input/output schemas. The one
+6:   "license": "MPL-2.0",
+7:   "type": "module",
+8:   "sideEffects": false,
+9:   "exports": {
+10:     ".": "./src/index.ts"
+11:   },
+12:   "scripts": {
+13:     "check": "tsc --noEmit",
+14:     "test": "vitest run"
+15:   },
+16:   "keywords": [
+17:     "mcp",
+18:     "zod"
+19:   ],
+20:   "dependencies": {
+21:     "@diffusionstudio/api-contract": "^0.5.0",
+22:     "@hypergen/jsx": "*",
+23:     "zod": "^4.4.3"
+24:   },
+25:   "devDependencies": {
+26:     "@types/node": "^24.10.1",
+27:     "typescript": "~5.9.3",
+28:     "vitest": "^4.0.0"
+29:   }
+30: }
+31: =======
+32: {
+33:   "name": "@hypergen/dapi",
+34:   "version": "0.1.0",
+35:   "description": "The dapi tool catalog: every tool the Hypergen app exposes to agents and the CLI, as a name, a description, and zod input/output schemas. The one de
+36:   "license": "MPL-2.0",
+37:   "type": "module",
+38:   "sideEffects": false,
+39:   "exports": {
+40:     ".": "./src/index.ts"
+41:   },
+42:   "scripts": {
+43:     "check": "tsc --noEmit",
+44:     "test": "vitest run"
+45:   },
+46:   "keywords": [
+47:     "dapi",
+48:     "mcp",
+49:     "zod"
+50:   ],
+51:   "dependencies": {
+52:     "@hypergen/jsx": "*",
+53:     "zod": "^4.4.3"
+54:   },
+55:   "devDependencies": {
+56:     "@types/node": "^24.10.1",
+57:     "typescript": "~5.9.3",
+58:     "vitest": "^4.0.0"
+59:   }
+60: }
+61: >>>>>>> 5b1695e (P3 squash)
+---

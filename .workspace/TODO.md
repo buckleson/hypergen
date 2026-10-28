@@ -15,7 +15,7 @@ Legend: [ ] todo · [~] in progress · [x] done · ⏸ waiting on you
   - [x] Repo-wide branding grep (ADR rule 9) and `graphify update .`
   - [x] Fix Windows EPERM flake: retry rename in `hypergen/apps/desktop/src/atomic.ts:44` (`projects.watch.test.ts`)
   - [x] `jsxTypings()` packaged mode: check `resourcesPath/jsx` exists (`hypergen/apps/desktop/src/projects.ts` ~738)
-  - [ ] P3: update `hypergen-web-ui.test.ts` login.tsx assertion when login.tsx changes
+  - [x] P3: update `hypergen-web-ui.test.ts` login.tsx assertion when login.tsx changes
   - [x] Commit P1+P2, then merge with the P3 worktree
 - [ ] Remove cloud features: LTX API, fal, Gemini, telemetry, updater, Hugging Face OAuth
 - [ ] Remove templates and catalogs; add simple Hypergen prompt templates
@@ -23,8 +23,16 @@ Legend: [ ] todo · [~] in progress · [x] done · ⏸ waiting on you
 - [ ] Model-download window: "HyperGenX by Pavi" from the Hugging Face mirror
 - [ ] Rehost the Python runtime archives
 - [x] GitHub repo buckleson/hypergen (public) + Actions build for Windows, macOS, Linux
-- [~] P3 cut vendor backend (WP1–WP4 green, WP5–WP8 left; branch p3-backend)
-- [ ] P5 README rewrite + credits UI
+- [x] P3 cut vendor backend: WP1–WP8 green (2026-10-28), uncommitted on branch p3-backend
+  - [ ] Commit P3 on p3-backend
+  - [ ] apps/web: install jsdom or drop the jsdom test environment (vitest exits 1)
+  - [ ] apps/web: raise timeout of flaky test wp5-fal-generation-core.test.ts:347
+  - ⏸ Confirm ADR-011 (fal.ai, Gemini) supersedes ADR rule 4 (no third-party AI APIs)
+- [x] README rewrite (d8e647f)
+- [x] CI test fixes: Dock per platform, build.yml test, Windows drafts isolation
+- [x] Merge P3 → main (c894ba4); full gate green: 1,363 tests, check, lint
+- [ ] CI green on GitHub
+- [x] P5 credits UI (Help → About: HyperOx, Buckleson, Pavi)
 - [ ] P6 full audit (links, buttons, branding, agent connect)
 - [ ] P7 website
 

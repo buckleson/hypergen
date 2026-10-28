@@ -1,0 +1,443 @@
+ok crates/desktop/artcraft/tauri-dev-hot-reload.conf.json
+ok crates/desktop/artcraft/tauri-dev-static.conf.json
+ok crates/desktop/artcraft/tauri-mac.conf.json
+ok crates/desktop/artcraft/tauri.conf.json
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>ArtCraft</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!---->
+  <!-- <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js"></script> -->
+
+  <base href="/" />
+  <link rel="icon" type="image/svg+xml" href="/artcraft-icon.svg" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+grep exit 1
+D  .coderabbit.yaml
+ M .github/dependabot.yml
+D  .github/workflows/artcraft-macos-publish.yml
+D  .github/workflows/artcraft-windows-publish.yml
+D  .github/workflows/sonarcloud.yml
+ M .gitignore
+ M NOTICE
+ M README.md
+ M crates/api_clients/artcraft/artcraft_router/Cargo.toml
+ M crates/api_clients/artcraft/artcraft_router/src/client/mod.rs
+ M crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs
+ M crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs
+ M crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs
+ D crates/api_clients/artcraft/artcraft_router/src/client/router_kinovi_web_client.rs
+ D crates/api_clients/artcraft/artcraft_router/src/client/router_midjourney_client.rs
+ M crates/api_clients/artcraft/artcraft_router/src/errors/artcraft_router_error.rs
+ M crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs
+ M crates/api_clients/artcraft/artcraft_router/src/errors/download_error.rs
+ M crates/api_clients/artcraft/artcraft_router/src/errors/provider_error.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft_context.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_response.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/resolve.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/mod.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft_context.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/resolve.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/upload.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/midjourney/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/midjourney/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/midjourney/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/midjourney/request.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/mod.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_response.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/artcraft/seedance_common.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/resolve.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/build.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/cost.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/draft.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/mod.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs
+ D crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/upload.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/mod.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft_context.rs
+ M crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs
+ M crates/api_clients/worldlabs_api_client/Cargo.toml
+ M crates/api_clients/worldlabs_api_client/src/api/requests/delete_world/delete_world.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/generate_world/generate_world.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/get_media_asset/get_media_asset.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/get_operation/get_operation.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/get_world/get_world.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/list_worlds/list_worlds.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/prepare_upload/prepare_upload.rs
+ M crates/api_clients/worldlabs_api_client/src/api/requests/upload_to_signed_url/upload_to_signed_url.rs
+ M crates/api_clients/worldlabs_api_client/src/error/filter_world_labs_http_error.rs
+ M crates/api_clients/worldlabs_api_client/src/error/world_labs_client_error.rs
+ M crates/api_clients/worldlabs_api_client/src/error/world_labs_generic_api_error.rs
+ M crates/desktop/artcraft/tauri-dev-hot-reload.conf.json
+ M crates/desktop/artcraft/tauri-dev-static.conf.json
+ M crates/desktop/artcraft/tauri-mac.conf.json
+ M crates/desktop/artcraft/tauri.conf.json
+ M frontend/apps/artcraft/app/index.html
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Baseball Bunt.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Breakdance Ready.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Breakdance Uprock Var 1.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Catwalk Walk Forward Crossed.webp"
+D  frontend/apps/artcraft/app/public/resources/characters_gif/Convulsing.webp
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Corkscrew Evade.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Femme Peek Around Corner.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Getting Bit.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Ginga Variation 3.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Great Sword Impact.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Jump Forward.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Laying Breathless.webp"
+D  frontend/apps/artcraft/app/public/resources/characters_gif/Leaning.webp
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Lengthy Head Nod.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Look Around.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Orc Walk.webp"
+D  frontend/apps/artcraft/app/public/resources/characters_gif/Pushing.webp
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Right Hook.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Right Strafe Walking.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Run Look Back.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Sitting Yell.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Sneaking Forward.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Standard Walk.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Sword And Shield Casting.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Sword And Shield Jump.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Texting While Standing.webp"
+D  frontend/apps/artcraft/app/public/resources/characters_gif/Texting.webp
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Tonic Seizure.webp"
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Twist Dance.webp"
+D  frontend/apps/artcraft/app/public/resources/characters_gif/Uppercut.webp
+D  "frontend/apps/artcraft/app/public/resources/characters_gif/Zombie Biting.webp"
+D  frontend/apps/artcraft/app/public/resources/memes/doge.jpg
+D  frontend/apps/artcraft/app/public/resources/memes/grimace.jpg
+D  frontend/apps/artcraft/app/public/resources/memes/jd_vance.jpg
+D  frontend/apps/artcraft/app/public/resources/memes/lil_jd.jpg
+D  frontend/apps/artcraft/app/public/resources/memes/roblox.jpg
+D  frontend/apps/artcraft/app/public/resources/memes/toothless.jpg
+D  "frontend/apps/artcraft/app/public/resources/pose/Lumine Idle cycle.vmd"
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_0_FrontZ.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_1_Back-Z.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_2_LeftX.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_3_Right-X.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_4_UpY.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/gray/Sky_AllSky_Overcast4_Low_Cam_5_Down-Y.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_0_FrontZ.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_1_Back-Z.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_2_LeftX.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_3_Right-X.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_4_UpY.webp
+D  frontend/apps/artcraft/app/public/resources/skybox/night/Night_Moon_Burst_Cam_5_Down-Y.webp
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_101.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_102.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_111.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_113.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_135.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_173.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_174.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_175.wav
+D  frontend/apps/artcraft/app/public/resources/sound/goldensun_214.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_12.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_13.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_14.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_15.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_18.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_51.wav
+D  frontend/apps/artcraft/app/public/resources/sound/metroidprime_UI_52.wav
+D  frontend/apps/artcraft/app/public/resources/sound/oot_dialogue_done.wav
+D  frontend/apps/artcraft/app/public/resources/sound/oot_dialogue_next.wav
+D  frontend/apps/artcraft/app/public/resources/sound/oot_scrub_crumble.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_character_extrapower.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_click.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_correct.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_drybones_crumble.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_enemy_spikethrow.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_flower.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_ghost.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_mario_giantshellkick.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_specialflower.wav
+D  frontend/apps/artcraft/app/public/resources/sound/smrpg_wrong.wav
+ M frontend/libs/components/pagescene/src/lib/engine/scene.ts
+ M frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoAnimationItems.ts
+ M frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoMemeItems.ts
+ M frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoSkyboxItems.ts
+ M frontend/libs/soundboard/src/lib/SoundManager.ts
+D  sonar-project.properties
+?? .github/assets/
+?? .github/workflows/
+?? crates/api_clients/artcraft/artcraft_router/tests/
+?? crates/api_clients/worldlabs_api_client/tests/
+?? frontend/libs/components/pagescene/src/lib/engine/scene.removedAssets.spec.ts
+?? frontend/libs/components/pagescene/src/lib/signals/demoAssets/removedAssets.spec.ts
+?? frontend/libs/soundboard/src/lib/SoundManager.test.ts
+?? frontend/tools/brand-check/
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'NOTICE', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/Cargo.toml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/client/mod.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/errors/artcraft_router_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/errors/download_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/errors/provider_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft_context.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_response.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/mod.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft_context.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/mod.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_response.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/artcraft/seedance_common.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/mod.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft_context.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/Cargo.toml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/delete_world/delete_world.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/generate_world/generate_world.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/get_media_asset/get_media_asset.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/get_operation/get_operation.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/get_world/get_world.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/list_worlds/list_worlds.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/prepare_upload/prepare_upload.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/api/requests/upload_to_signed_url/upload_to_signed_url.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/error/filter_world_labs_http_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/error/world_labs_client_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/api_clients/worldlabs_api_client/src/error/world_labs_generic_api_error.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/desktop/artcraft/tauri-dev-hot-reload.conf.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/desktop/artcraft/tauri-dev-static.conf.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/desktop/artcraft/tauri-mac.conf.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'crates/desktop/artcraft/tauri.conf.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/artcraft/app/index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/libs/components/pagescene/src/lib/engine/scene.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoAnimationItems.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoMemeItems.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/libs/components/pagescene/src/lib/signals/demoAssets/demoSkyboxItems.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/libs/soundboard/src/lib/SoundManager.ts', LF will be replaced by CRLF the next time Git touches it
+ .github/dependabot.yml                             |   8 +-
+ .gitignore                                         |   3 +
+ NOTICE                                             |   2 +
+ README.md                                          | 168 ++----
+ .../artcraft/artcraft_router/Cargo.toml            |   4 -
+ .../artcraft/artcraft_router/src/client/mod.rs     |   3 -
+ .../src/client/multi_router_client.rs              |  14 -
+ .../src/client/multi_router_client_builder.rs      |  18 -
+ .../artcraft_router/src/client/router_client.rs    |  20 -
+ .../src/client/router_kinovi_web_client.rs         |  11 -
+ .../src/client/router_midjourney_client.rs         |  24 -
+ .../src/errors/artcraft_router_error.rs            |   4 -
+ .../artcraft_router/src/errors/client_error.rs     |  23 -
+ .../artcraft_router/src/errors/download_error.rs   |   9 -
+ .../artcraft_router/src/errors/provider_error.rs   |  15 -
+ .../generate_audio/audio_generation_draft.rs       |  46 +-
+ .../audio_generation_draft_context.rs              |  11 -
+ .../generate_audio/audio_generation_request.rs     |  36 --
+ .../generate_audio_request_builder.rs              |  53 --
+ .../generate_audio/generate_audio_response.rs      |  14 -
+ .../generate_audio/providers/kinovi/mod.rs         |   5 -
+ .../generate_audio/providers/kinovi/resolve.rs     | 133 ----
+ .../providers/kinovi/suno_music/build.rs           | 128 ----
+ .../providers/kinovi/suno_music/cost.rs            |  65 --
+ .../providers/kinovi/suno_music/mod.rs             |   3 -
+ .../providers/kinovi/suno_music/request.rs         | 113 ----
+ .../providers/kinovi/suno_remix/build.rs           | 178 ------
+ .../providers/kinovi/suno_remix/cost.rs            |  75 ---
+ .../providers/kinovi/suno_remix/draft.rs           |  49 --
+ .../providers/kinovi/suno_remix/mod.rs             |   4 -
+ .../providers/kinovi/suno_remix/request.rs         | 134 ----
+ .../providers/kinovi/suno_sample/build.rs          | 172 ------
+ .../providers/kinovi/suno_sample/cost.rs           |  75 ---
+ .../providers/kinovi/suno_sample/draft.rs          |  59 --
+ .../providers/kinovi/suno_sample/mod.rs            |   4 -
+ .../providers/kinovi/suno_sample/request.rs        | 135 -----
+ .../providers/kinovi/suno_sounds/build.rs          | 209 -------
+ .../providers/kinovi/suno_sounds/cost.rs           |  70 ---
+ .../providers/kinovi/suno_sounds/mod.rs            |   3 -
+ .../providers/kinovi/suno_sounds/request.rs        | 114 ----
+ .../src/generate/generate_audio/providers/mod.rs   |   1 -
+ .../generate_image_request_builder.rs              |  13 -
+ .../generate_image/generate_image_response.rs      |  25 -
+ .../generate_image/image_generation_draft.rs       |  61 +-
+ .../image_generation_draft_context.rs              |  19 +-
+ .../generate_image/image_generation_request.rs     |  52 --
+ .../providers/artcraft/seedream_5p0_pro/cost.rs    |  29 -
+ .../artcraft/seedream_5p0_pro_ultra/cost.rs        |  29 -
+ .../providers/kinovi/midjourney_7/build.rs         | 478 ---------------
+ .../providers/kinovi/midjourney_7/cost.rs          | 212 -------
+ .../providers/kinovi/midjourney_7/draft.rs         |  94 ---
+ .../providers/kinovi/midjourney_7/mod.rs           |   4 -
+ .../providers/kinovi/midjourney_7/request.rs       | 142 -----
+ .../providers/kinovi/midjourney_7_niji/build.rs    | 282 ---------
+ .../providers/kinovi/midjourney_7_niji/cost.rs     |  91 ---
+ .../providers/kinovi/midjourney_7_niji/draft.rs    |  58 --
+ .../providers/kinovi/midjourney_7_niji/mod.rs      |   4 -
+ .../providers/kinovi/midjourney_7_niji/request.rs  | 140 -----
+ .../providers/kinovi/midjourney_8/build.rs         | 243 --------
+ .../providers/kinovi/midjourney_8/cost.rs          |  81 ---
+ .../providers/kinovi/midjourney_8/draft.rs         |  58 --
+ .../providers/kinovi/midjourney_8/mod.rs           |   4 -
+ .../providers/kinovi/midjourney_8/request.rs       | 140 -----
+ .../generate_image/providers/kinovi/mod.rs         |   7 -
+ .../generate_image/providers/kinovi/resolve.rs     |  51 --
+ .../providers/kinovi/seedream_5p0_pro/build.rs     | 408 -------------
+ .../providers/kinovi/seedream_5p0_pro/cost.rs      | 100 ---
+ .../providers/kinovi/seedream_5p0_pro/draft.rs     |  53 --
+ .../providers/kinovi/seedream_5p0_pro/mod.rs       |   4 -
+ .../providers/kinovi/seedream_5p0_pro/request.rs   | 141 -----
+ .../generate_image/providers/kinovi/upload.rs      |  44 --
+ .../generate_image/providers/midjourney/build.rs   | 130 ----
+ .../generate_image/providers/midjourney/cost.rs    |  15 -
+ .../generate_image/providers/midjourney/mod.rs     |   3 -
+ .../generate_image/providers/midjourney/request.rs |  41 --
+ .../src/generate/generate_image/providers/mod.rs   |   3 -
+ .../generate_video_request_builder.rs              |  15 -
+ .../generate_video/generate_video_response.rs      |  16 -
+ .../providers/artcraft/seedance_common.rs          |  97 ++-
+ .../providers/kinovi/happy_horse_1p0/build.rs      | 463 --------------
+ .../providers/kinovi/happy_horse_1p0/cost.rs       | 344 -----------
+ .../providers/kinovi/happy_horse_1p0/draft.rs      |  55 --
+ .../providers/kinovi/happy_horse_1p0/mod.rs        |   4 -
+ .../providers/kinovi/happy_horse_1p0/request.rs    | 256 --------
+ .../generate_video/providers/kinovi/mod.rs         |   8 -
+ .../generate_video/providers/kinovi/resolve.rs     | 142 -----
+ .../providers/kinovi/seedance_2p0/build.rs         | 642 --------------------
+ .../providers/kinovi/seedance_2p0/cost.rs          | 660 --------------------
+ .../providers/kinovi/seedance_2p0/draft.rs         | 103 ----
+ .../providers/kinovi/seedance_2p0/mod.rs           |   4 -
+ .../providers/kinovi/seedance_2p0/request.rs       |  37 --
+ .../providers/kinovi/seedance_2p0_fast/build.rs    | 671 ---------------------
+ .../providers/kinovi/seedance_2p0_fast/cost.rs     | 456 --------------
+ .../providers/kinovi/seedance_2p0_fast/draft.rs    | 100 ---
+ .../providers/kinovi/seedance_2p0_fast/mod.rs      |   4 -
+ .../providers/kinovi/seedance_2p0_fast/request.rs  |  37 --
+ .../providers/kinovi/seedance_2p0_mini/build.rs    | 513 ----------------
+ .../providers/kinovi/seedance_2p0_mini/cost.rs     | 386 ------------
+ .../providers/kinovi/seedance_2p0_mini/draft.rs    | 100 ---
+ .../providers/kinovi/seedance_2p0_mini/mod.rs      |   4 -
+ .../providers/kinovi/seedance_2p0_mini/request.rs  |  37 --
+ .../providers/kinovi/seedance_2p5/build.rs         | 473 ---------------
+ .../providers/kinovi/seedance_2p5/cost.rs          | 244 --------
+ .../providers/kinovi/seedance_2p5/draft.rs         | 118 ----
+ .../providers/kinovi/seedance_2p5/mod.rs           |   4 -
+ .../providers/kinovi/seedance_2p5/request.rs       |  37 --
+ .../providers/kinovi/seedance_2p5_preview/build.rs | 501 ---------------
+ .../providers/kinovi/seedance_2p5_preview/cost.rs  | 152 -----
+ .../providers/kinovi/seedance_2p5_preview/draft.rs |  78 ---
+ .../providers/kinovi/seedance_2p5_preview/mod.rs   |   4 -
+ .../kinovi/seedance_2p5_preview/request.rs         |  37 --
+ .../generate_video/providers/kinovi/upload.rs      |  60 --
+ .../src/generate/generate_video/providers/mod.rs   |   1 -
+ .../generate_video/video_generation_draft.rs       |  77 +--
+ .../video_generation_draft_context.rs              |  18 -
+ .../generate_video/video_generation_request.rs     |  54 --
+ crates/api_clients/worldlabs_api_client/Cargo.toml |   2 +-
+ .../src/api/requests/delete_world/delete_world.rs  |   6 +-
+ .../api/requests/generate_world/generate_world.rs  |   6 +-
+ .../requests/get_media_asset/get_media_asset.rs    |   6 +-
+ .../api/requests/get_operation/get_operation.rs    |   6 +-
+ .../src/api/requests/get_world/get_world.rs        |   6 +-
+ .../src/api/requests/list_worlds/list_worlds.rs    |   6 +-
+ .../api/requests/prepare_upload/prepare_upload.rs  |   6 +-
+ .../upload_to_signed_url/upload_to_signed_url.rs   |   4 +-
+ .../src/error/filter_world_labs_http_error.rs      |   2 +-
+ .../src/error/world_labs_client_error.rs           |   6 +-
+ .../src/error/world_labs_generic_api_error.rs      |   6 +-
+ .../artcraft/tauri-dev-hot-reload.conf.json        |   7 -
+ crates/desktop/artcraft/tauri-mac.conf.json        |   7 -
+ crates/desktop/artcraft/tauri.conf.json            |   7 -
+ frontend/apps/artcraft/app/index.html              |  18 -
+ .../components/pagescene/src/lib/engine/scene.ts   |  42 +-
+ .../lib/signals/demoAssets/demoAnimationItems.ts   |  31 -
+ .../src/lib/signals/demoAssets/demoMemeItems.ts    |  52 +-
+ .../src/lib/signals/demoAssets/demoSkyboxItems.ts  |  15 -
+ frontend/libs/soundboard/src/lib/SoundManager.ts   |  41 +-
+ 137 files changed, 228 insertions(+), 12540 deletions(-)

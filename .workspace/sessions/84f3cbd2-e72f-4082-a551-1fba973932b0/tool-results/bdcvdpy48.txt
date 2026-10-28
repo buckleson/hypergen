@@ -1,0 +1,348 @@
+---
+name: developer
+description: H0x developer (run as dev-1/dev-2/dev-3). Implements exactly one subtask, YAGNI-style, touching only its listed files.
+---
+You implement ONE subtask in `E:/research-clones/h0x-video-studio/app`. Follow the ADR Deterministic rules and TOOLS.md.
+
+- Touch only the files listed in the subtask. If another file must change, stop and report it; another developer may hold it.
+- Locate code with `graphify query` or graft, not by reading whole files. Find literals with Grep.
+- Write the smallest change that meets the acceptance criteria. Match surrounding style, delete dead code you make obsolete, and add no new abstractions, flags or obvious comments.
+- Repo coding rules (inherited from upstream):
+  - 2-space indent in Rust and TypeScript.
+  - `log` macros, not `println!`.
+  - `anyhow::Result` in app code; `maybe_` prefix for optional fields.
+  - One Tauri command per file.
+  - Never touch `external/` or `secrets/`.
+- Branding rule: no user-visible "ArtCraft", "getartcraft", "Storyteller" or "FakeYou" outside the ADR allow-list.
+- Before you finish, run the fastest relevant check:
+  - TS: `npx vitest run <file>` inside `frontend/`, or `npx tsc -p <lib tsconfig> --noEmit`.
+  - Rust: `SQLX_OFFLINE=true cargo check -p <crate>`. It is heavy; run it once at the end.
+- When fixing a failure report, fix the root cause. Never weaken or skip the test unless the report says the test itself is wrong.
+- Don't commit. The main session commits.
+
+Return: the files changed, one line on what changed, and the check you ran with its result.
+src/generate/generate_image/generate_image_request_builder.rs:159:      // Kinovi / KinoviWeb (Midjourney + Seedream)
+src/generate/generate_image/generate_image_request_builder.rs:160:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney7) => build_kinovi_midjourney_7(self),
+src/generate/generate_image/generate_image_request_builder.rs:161:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney7Niji) => build_kinovi_midjourney_7_niji(self),
+src/generate/generate_image/generate_image_request_builder.rs:162:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney8) => build_kinovi_midjourney_8(self),
+src/generate/generate_image/generate_image_request_builder.rs:163:      (RouterProvider::KinoviWeb, RouterImageModel::Seedream5p0Pro) => build_kinovi_seedream_5p0_pro(self),
+src/generate/generate_image/generate_image_request_builder.rs:164:      (RouterProvider::KinoviWeb, RouterImageModel::Seedream5p0ProUltra) => build_kinovi_seedream_5p0_pro(self),
+src/generate/generate_image/generate_image_response.rs:28:/// Response from the KinoviWeb/Kinovi provider (used for Midjourney
+src/generate/generate_image/generate_image_response.rs:29:/// image generation). Mirrors `KinoviWebVideoResponsePayload` on the
+src/generate/generate_image/generate_image_response.rs:32:pub struct KinoviWebImageResponsePayload {
+src/generate/generate_image/generate_image_response.rs:44:  KinoviWeb(KinoviWebImageResponsePayload),
+src/generate/generate_image/generate_image_response.rs:62:  pub fn get_kinovi_web_payload(&self) -> Option<KinoviWebImageResponsePayload> {
+src/generate/generate_image/generate_image_response.rs:64:      Self::KinoviWeb(p) => Some(p.clone()),
+src/generate/generate_image/image_generation_draft.rs:6:use crate::generate::generate_image::providers::kinovi::midjourney_7::cost::KinoviMidjourney7CostState;
+src/generate/generate_image/image_generation_draft.rs:7:use crate::generate::generate_image::providers::kinovi::midjourney_7::draft::KinoviMidjourney7DraftState;
+src/generate/generate_image/image_generation_draft.rs:8:use crate::generate::generate_image::providers::kinovi::midjourney_7_niji::cost::KinoviMidjourney7NijiCostState;
+src/generate/generate_image/image_generation_draft.rs:9:use crate::generate::generate_image::providers::kinovi::midjourney_7_niji::draft::KinoviMidjourney7NijiDraftState;
+src/generate/generate_image/image_generation_draft.rs:10:use crate::generate::generate_image::providers::kinovi::midjourney_8::cost::KinoviMidjourney8CostState;
+src/generate/generate_image/image_generation_draft.rs:11:use crate::generate::generate_image::providers::kinovi::midjourney_8::draft::KinoviMidjourney8DraftState;
+src/generate/generate_image/image_generation_draft.rs:12:use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::cost::KinoviSeedream5p0ProCostState;
+src/generate/generate_image/image_generation_draft.rs:13:use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::draft::KinoviSeedream5p0ProDraftState;
+src/generate/generate_image/image_generation_draft.rs:19:/// be sent. Today only the Kinovi models need this — when the caller
+src/generate/generate_image/image_generation_draft.rs:20:/// supplies reference images, we must upload them to the KinoviWeb
+src/generate/generate_image/image_generation_draft.rs:24:  KinoviMidjourney7(KinoviMidjourney7DraftState),
+src/generate/generate_image/image_generation_draft.rs:25:  KinoviMidjourney7Niji(KinoviMidjourney7NijiDraftState),
+src/generate/generate_image/image_generation_draft.rs:26:  KinoviMidjourney8(KinoviMidjourney8DraftState),
+src/generate/generate_image/image_generation_draft.rs:27:  KinoviSeedream5p0Pro(KinoviSeedream5p0ProDraftState),
+src/generate/generate_image/image_generation_draft.rs:33:      Self::KinoviMidjourney7(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_draft.rs:34:      Self::KinoviMidjourney7Niji(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_draft.rs:35:      Self::KinoviMidjourney8(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_draft.rs:36:      Self::KinoviSeedream5p0Pro(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_draft.rs:42:      Self::KinoviMidjourney7(draft) => Ok(KinoviMidjourney7CostState::from_draft(draft).estimate_cost()),
+src/generate/generate_image/image_generation_draft.rs:43:      Self::KinoviMidjourney7Niji(draft) => Ok(KinoviMidjourney7NijiCostState::from_draft(draft).estimate_cost()),
+src/generate/generate_image/image_generation_draft.rs:44:      Self::KinoviMidjourney8(draft) => Ok(KinoviMidjourney8CostState::from_draft(draft).estimate_cost()),
+src/generate/generate_image/image_generation_draft.rs:45:      Self::KinoviSeedream5p0Pro(draft) => Ok(KinoviSeedream5p0ProCostState::from_draft(draft).estimate_cost()),
+src/generate/generate_image/image_generation_draft.rs:51:      Self::KinoviMidjourney7(mut draft) => {
+src/generate/generate_image/image_generation_draft.rs:53:        Ok(ImageGenerationRequest::KinoviMidjourney7(result))
+src/generate/generate_image/image_generation_draft.rs:55:      Self::KinoviMidjourney7Niji(mut draft) => {
+src/generate/generate_image/image_generation_draft.rs:57:        Ok(ImageGenerationRequest::KinoviMidjourney7Niji(result))
+src/generate/generate_image/image_generation_draft.rs:59:      Self::KinoviMidjourney8(mut draft) => {
+src/generate/generate_image/image_generation_draft.rs:61:        Ok(ImageGenerationRequest::KinoviMidjourney8(result))
+src/generate/generate_image/image_generation_draft.rs:63:      Self::KinoviSeedream5p0Pro(mut draft) => {
+src/generate/generate_image/image_generation_draft.rs:65:        Ok(ImageGenerationRequest::KinoviSeedream5p0Pro(result))
+src/generate/generate_image/image_generation_draft_context.rs:7:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+src/generate/generate_image/image_generation_draft_context.rs:14:/// sending the request. Today that's the KinoviWeb/Kinovi pipeline
+src/generate/generate_image/image_generation_draft_context.rs:21:  /// authenticated calls (e.g. KinoviWeb/Kinovi uploads).
+src/generate/generate_image/image_generation_draft_context.rs:32:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
+src/generate/generate_image/image_generation_draft_context.rs:34:    client.get_kinovi_web_client_ref()
+src/generate/generate_image/image_generation_request.rs:1:use crate::generate::generate_image::providers::midjourney::request::MidjourneyRequestState;
+src/generate/generate_image/image_generation_request.rs:2:use crate::generate::generate_image::providers::midjourney::cost::MidjourneyCostState;
+src/generate/generate_image/image_generation_request.rs:86:use crate::generate::generate_image::providers::kinovi::midjourney_7::cost::KinoviMidjourney7CostState;
+src/generate/generate_image/image_generation_request.rs:87:use crate::generate::generate_image::providers::kinovi::midjourney_7::request::KinoviMidjourney7RequestState;
+src/generate/generate_image/image_generation_request.rs:88:use crate::generate::generate_image::providers::kinovi::midjourney_7_niji::cost::KinoviMidjourney7NijiCostState;
+src/generate/generate_image/image_generation_request.rs:89:use crate::generate::generate_image::providers::kinovi::midjourney_7_niji::request::KinoviMidjourney7NijiRequestState;
+src/generate/generate_image/image_generation_request.rs:90:use crate::generate::generate_image::providers::kinovi::midjourney_8::cost::KinoviMidjourney8CostState;
+src/generate/generate_image/image_generation_request.rs:91:use crate::generate::generate_image::providers::kinovi::midjourney_8::request::KinoviMidjourney8RequestState;
+src/generate/generate_image/image_generation_request.rs:92:use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::cost::KinoviSeedream5p0ProCostState;
+src/generate/generate_image/image_generation_request.rs:93:use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::request::KinoviSeedream5p0ProRequestState;
+src/generate/generate_image/image_generation_request.rs:97:  MidjourneyRequest(MidjourneyRequestState),
+src/generate/generate_image/image_generation_request.rs:141:  // ── Kinovi / KinoviWeb provider (Midjourney + Seedream image generation) ──
+src/generate/generate_image/image_generation_request.rs:142:  KinoviMidjourney7(KinoviMidjourney7RequestState),
+src/generate/generate_image/image_generation_request.rs:143:  KinoviMidjourney7Niji(KinoviMidjourney7NijiRequestState),
+src/generate/generate_image/image_generation_request.rs:144:  KinoviMidjourney8(KinoviMidjourney8RequestState),
+src/generate/generate_image/image_generation_request.rs:145:  KinoviSeedream5p0Pro(KinoviSeedream5p0ProRequestState),
+src/generate/generate_image/image_generation_request.rs:151:      Self::MidjourneyRequest(_) => RouterProvider::Midjourney,
+src/generate/generate_image/image_generation_request.rs:193:      Self::KinoviMidjourney7(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_request.rs:194:      Self::KinoviMidjourney7Niji(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_request.rs:195:      Self::KinoviMidjourney8(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_request.rs:196:      Self::KinoviSeedream5p0Pro(_) => RouterProvider::KinoviWeb,
+src/generate/generate_image/image_generation_request.rs:202:      Self::MidjourneyRequest(request) => Ok(MidjourneyCostState::from_request(request).estimate_cost()),
+src/generate/generate_image/image_generation_request.rs:290:      Self::KinoviMidjourney7(request) => Ok(KinoviMidjourney7CostState::from_request(request).estimate_cost()),
+src/generate/generate_image/image_generation_request.rs:291:      Self::KinoviMidjourney7Niji(request) => Ok(KinoviMidjourney7NijiCostState::from_request(request).estimate_cost()),
+src/generate/generate_image/image_generation_request.rs:292:      Self::KinoviMidjourney8(request) => Ok(KinoviMidjourney8CostState::from_request(request).estimate_cost()),
+src/generate/generate_image/image_generation_request.rs:293:      Self::KinoviSeedream5p0Pro(request) => Ok(KinoviSeedream5p0ProCostState::from_request(request).estimate_cost()),
+src/generate/generate_image/image_generation_request.rs:299:      Self::MidjourneyRequest(request) => request.send(client.get_midjourney_client_ref()?).await,
+src/generate/generate_image/image_generation_request.rs:465:      // ── Kinovi / KinoviWeb (Midjourney + Seedream) ──
+src/generate/generate_image/image_generation_request.rs:466:      Self::KinoviMidjourney7(request) => {
+src/generate/generate_image/image_generation_request.rs:467:        let seedance_client = client.get_kinovi_web_client_ref()
+src/generate/generate_image/image_generation_request.rs:471:      Self::KinoviMidjourney7Niji(request) => {
+src/generate/generate_image/image_generation_request.rs:472:        let seedance_client = client.get_kinovi_web_client_ref()
+src/generate/generate_image/image_generation_request.rs:476:      Self::KinoviMidjourney8(request) => {
+src/generate/generate_image/image_generation_request.rs:477:        let seedance_client = client.get_kinovi_web_client_ref()
+src/generate/generate_image/image_generation_request.rs:481:      Self::KinoviSeedream5p0Pro(request) => {
+src/generate/generate_image/image_generation_request.rs:482:        let seedance_client = client.get_kinovi_web_client_ref()
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:4:/// Cost state for Artcraft Midjourney 7. Pricing mirrors the Kinovi
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:11:/// |   3   |   19    |   19¢     |  (interpolated; Kinovi doesn't expose 3)
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:14:/// Kinovi-side math (historical, 22,000-credit package at 193 credits/$1):
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:15:/// 12 Kinovi credits per Midjourney task → batches 1/2/4 land on 6/12/25¢;
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:17:/// 525,000-credit package (243 credits/$1) Kinovi costs only 5/10/20¢ —
+src/generate/generate_image/providers/artcraft/midjourney_7/cost.rs:47:/// models have identical pricing on Kinovi).
+src/generate/generate_image/providers/artcraft/midjourney_7_niji/cost.rs:6:/// and v8 on Kinovi, so we share the per-batch table via
+src/generate/generate_image/providers/artcraft/midjourney_8/cost.rs:6:/// v7-niji on Kinovi; shares the per-batch table via
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:147:  // ── The Artcraft price must cover the Kinovi provider cost ──
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:150:  fn price_covers_kinovi_cost() {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:151:    use kinovi_web_client::generate::image::generate_seedream_5p0_pro::{
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:152:      KinoviSeedream5p0ProBatchCount, KinoviSeedream5p0ProResolution,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:154:    use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::cost::KinoviSeedream5p0ProCostState;
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:157:      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 1u16, KinoviSeedream5p0ProBatchCount::One),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:158:      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:159:      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 1u16, KinoviSeedream5p0ProBatchCount::One),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:160:      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:162:    for (router_res, kinovi_res, batch, kinovi_batch) in cases {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:164:      let kinovi_cents = KinoviSeedream5p0ProCostState {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:165:        resolution: kinovi_res,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:166:        batch_count: kinovi_batch,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:169:        artcraft_cents > kinovi_cents,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:170:        "artcraft price {}¢ must exceed kinovi cost {}¢ ({:?} batch {})",
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro/cost.rs:171:        artcraft_cents, kinovi_cents, router_res, batch,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:168:  // ── The Artcraft price must cover the Kinovi provider cost ──
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:171:  fn price_covers_kinovi_cost() {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:172:    use kinovi_web_client::generate::image::generate_seedream_5p0_pro::{
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:173:      KinoviSeedream5p0ProBatchCount, KinoviSeedream5p0ProResolution,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:175:    use crate::generate::generate_image::providers::kinovi::seedream_5p0_pro::cost::KinoviSeedream5p0ProCostState;
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:178:      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 1u16, KinoviSeedream5p0ProBatchCount::One),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:179:      (RouterResolution::OneK, KinoviSeedream5p0ProResolution::OneK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:180:      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 1u16, KinoviSeedream5p0ProBatchCount::One),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:181:      (RouterResolution::TwoK, KinoviSeedream5p0ProResolution::TwoK, 4u16, KinoviSeedream5p0ProBatchCount::Four),
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:183:    for (router_res, kinovi_res, batch, kinovi_batch) in cases {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:185:      let kinovi_cents = KinoviSeedream5p0ProCostState {
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:186:        resolution: kinovi_res,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:187:        batch_count: kinovi_batch,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:190:        artcraft_cents > kinovi_cents,
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:191:        "artcraft price {}¢ must exceed kinovi cost {}¢ ({:?} batch {})",
+src/generate/generate_image/providers/artcraft/seedream_5p0_pro_ultra/cost.rs:192:        artcraft_cents, kinovi_cents, router_res, batch,
+src/generate/generate_image/providers/mod.rs:3:pub mod kinovi;
+src/generate/generate_image/router_image_request_to_artcraft_prompt.rs:77:    RouterProvider::Midjourney => GenerationProvider::Midjourney,
+src/generate/generate_image/router_image_request_to_artcraft_prompt.rs:80:    RouterProvider::KinoviWeb => GenerationProvider::Artcraft ,
+src/generate/generate_mesh/generate_mesh_request_builder.rs:271:        RouterProvider::KinoviWeb,
+src/generate/generate_splat/generate_splat_request_builder.rs:255:        RouterProvider::KinoviWeb,
+src/generate/generate_video/AGENTS.md:42:  that need media upload/resolution, like Kinovi) or `Request` (for providers that work with
+src/generate/generate_video/AGENTS.md:77:    │   │   ├── cost.rs                ← standalone cost estimation (independent of kinovi_web_client)
+src/generate/generate_video/AGENTS.md:84:    └── kinovi/                         ← Kinovi/KinoviWeb provider
+src/generate/generate_video/AGENTS.md:87:        ├── upload.rs                   ← shared: download + re-upload to KinoviWeb CDN
+src/generate/generate_video/generate_video_request_builder.rs:49:use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::build::build_kinovi_happy_horse_1p0;
+src/generate/generate_video/generate_video_request_builder.rs:50:use crate::generate::generate_video::providers::kinovi::seedance_2p0::build::build_kinovi_seedance_2p0;
+src/generate/generate_video/generate_video_request_builder.rs:75:use crate::generate::generate_video::providers::kinovi::seedance_2p0_fast::build::build_kinovi_seedance_2p0_fast;
+src/generate/generate_video/generate_video_request_builder.rs:76:use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::build::build_kinovi_seedance_2p0_mini;
+src/generate/generate_video/generate_video_request_builder.rs:80:use crate::generate::generate_video::providers::kinovi::seedance_2p5::build::build_kinovi_seedance_2p5;
+src/generate/generate_video/generate_video_request_builder.rs:81:use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::build::build_kinovi_seedance_2p5_preview;
+src/generate/generate_video/generate_video_request_builder.rs:250:      // Kinovi
+src/generate/generate_video/generate_video_request_builder.rs:251:      (RouterProvider::KinoviWeb, RouterVideoModel::HappyHorse1p0) => build_kinovi_happy_horse_1p0(self),
+src/generate/generate_video/generate_video_request_builder.rs:252:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0) => build_kinovi_seedance_2p0(self),
+src/generate/generate_video/generate_video_request_builder.rs:253:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0Fast) => build_kinovi_seedance_2p0_fast(self),
+src/generate/generate_video/generate_video_request_builder.rs:254:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0Mini) => build_kinovi_seedance_2p0_mini(self),
+src/generate/generate_video/generate_video_request_builder.rs:255:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0BytePlusMini) => build_kinovi_seedance_2p0_mini(self),
+src/generate/generate_video/generate_video_request_builder.rs:256:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0BytePlusUltraMini) => build_kinovi_seedance_2p0_mini(self),
+src/generate/generate_video/generate_video_request_builder.rs:257:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p5Preview) => build_kinovi_seedance_2p5_preview(self),
+src/generate/generate_video/generate_video_request_builder.rs:258:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p5) => build_kinovi_seedance_2p5(self),
+src/generate/generate_video/generate_video_response.rs:13:pub struct KinoviWebVideoResponsePayload {
+src/generate/generate_video/generate_video_response.rs:61:  KinoviWeb(KinoviWebVideoResponsePayload),
+src/generate/generate_video/generate_video_response.rs:73:  pub fn get_kinovi_web_payload(&self) -> Option<KinoviWebVideoResponsePayload> {
+src/generate/generate_video/generate_video_response.rs:75:      Self::KinoviWeb(p) => Some(p.clone()),
+src/generate/generate_video/providers/artcraft/seedance_2p5/build.rs:17:  // Parity with the Kinovi build: keyframes and reference media are mutually
+src/generate/generate_video/providers/artcraft/seedance_2p5_preview/build.rs:17:  // Parity with the Kinovi build: 2.5 Preview only operates in reference mode
+src/generate/generate_video/providers/artcraft/seedance_2p5_u/build.rs:17:  // Parity with the Kinovi build: keyframes and reference media are mutually
+src/generate/generate_video/providers/artcraft/seedance_common.rs:6:use kinovi_web_client::generate::video::generate_seedance_2p5::{
+src/generate/generate_video/providers/mod.rs:5:pub mod kinovi;
+src/generate/generate_video/video_generation_draft.rs:4:use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::cost::KinoviHappyHorse1p0CostState;
+src/generate/generate_video/video_generation_draft.rs:5:use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::draft::KinoviHappyHorse1p0DraftState;
+src/generate/generate_video/video_generation_draft.rs:6:use crate::generate::generate_video::providers::kinovi::seedance_2p0::cost::KinoviSeedance2p0CostState;
+src/generate/generate_video/video_generation_draft.rs:7:use crate::generate::generate_video::providers::kinovi::seedance_2p0::draft::KinoviSeedance2p0DraftState;
+src/generate/generate_video/video_generation_draft.rs:8:use crate::generate::generate_video::providers::kinovi::seedance_2p0_fast::cost::KinoviSeedance2p0FastCostState;
+src/generate/generate_video/video_generation_draft.rs:9:use crate::generate::generate_video::providers::kinovi::seedance_2p0_fast::draft::KinoviSeedance2p0FastDraftState;
+src/generate/generate_video/video_generation_draft.rs:10:use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::cost::KinoviSeedance2p0MiniCostState;
+src/generate/generate_video/video_generation_draft.rs:11:use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::draft::KinoviSeedance2p0MiniDraftState;
+src/generate/generate_video/video_generation_draft.rs:12:use crate::generate::generate_video::providers::kinovi::seedance_2p5::cost::KinoviSeedance2p5CostState;
+src/generate/generate_video/video_generation_draft.rs:13:use crate::generate::generate_video::providers::kinovi::seedance_2p5::draft::KinoviSeedance2p5DraftState;
+src/generate/generate_video/video_generation_draft.rs:14:use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::cost::KinoviSeedance2p5PreviewCostState;
+src/generate/generate_video/video_generation_draft.rs:15:use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::draft::KinoviSeedance2p5PreviewDraftState;
+src/generate/generate_video/video_generation_draft.rs:24:  KinoviHappyHorse1p0(KinoviHappyHorse1p0DraftState),
+src/generate/generate_video/video_generation_draft.rs:25:  KinoviSeedance2p0(KinoviSeedance2p0DraftState),
+src/generate/generate_video/video_generation_draft.rs:26:  KinoviSeedance2p0Fast(KinoviSeedance2p0FastDraftState),
+src/generate/generate_video/video_generation_draft.rs:27:  KinoviSeedance2p0Mini(KinoviSeedance2p0MiniDraftState),
+src/generate/generate_video/video_generation_draft.rs:28:  KinoviSeedance2p5Preview(KinoviSeedance2p5PreviewDraftState),
+src/generate/generate_video/video_generation_draft.rs:29:  KinoviSeedance2p5(KinoviSeedance2p5DraftState),
+src/generate/generate_video/video_generation_draft.rs:36:      Self::KinoviHappyHorse1p0(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:37:      Self::KinoviSeedance2p0(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:38:      Self::KinoviSeedance2p0Fast(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:39:      Self::KinoviSeedance2p0Mini(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:40:      Self::KinoviSeedance2p5Preview(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:41:      Self::KinoviSeedance2p5(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_draft.rs:48:      VideoGenerationDraftRequest::KinoviHappyHorse1p0(draft) => Ok(KinoviHappyHorse1p0CostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:49:      VideoGenerationDraftRequest::KinoviSeedance2p0(draft) => Ok(KinoviSeedance2p0CostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:50:      VideoGenerationDraftRequest::KinoviSeedance2p0Fast(draft) => Ok(KinoviSeedance2p0FastCostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:51:      VideoGenerationDraftRequest::KinoviSeedance2p0Mini(draft) => Ok(KinoviSeedance2p0MiniCostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:52:      VideoGenerationDraftRequest::KinoviSeedance2p5Preview(draft) => Ok(KinoviSeedance2p5PreviewCostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:53:      VideoGenerationDraftRequest::KinoviSeedance2p5(draft) => Ok(KinoviSeedance2p5CostState::from_draft(draft).estimate_cost()),
+src/generate/generate_video/video_generation_draft.rs:61:      VideoGenerationDraftRequest::KinoviHappyHorse1p0(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:63:        Ok(VideoGenerationRequest::KinoviHappyHorse1p0(result))
+src/generate/generate_video/video_generation_draft.rs:65:      VideoGenerationDraftRequest::KinoviSeedance2p0(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:67:        Ok(VideoGenerationRequest::KinoviSeedance2p0(result))
+src/generate/generate_video/video_generation_draft.rs:69:      VideoGenerationDraftRequest::KinoviSeedance2p0Fast(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:71:        Ok(VideoGenerationRequest::KinoviSeedance2p0Fast(result))
+src/generate/generate_video/video_generation_draft.rs:73:      VideoGenerationDraftRequest::KinoviSeedance2p0Mini(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:75:        Ok(VideoGenerationRequest::KinoviSeedance2p0Mini(result))
+src/generate/generate_video/video_generation_draft.rs:77:      VideoGenerationDraftRequest::KinoviSeedance2p5Preview(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:79:        Ok(VideoGenerationRequest::KinoviSeedance2p5Preview(result))
+src/generate/generate_video/video_generation_draft.rs:81:      VideoGenerationDraftRequest::KinoviSeedance2p5(mut draft) => {
+src/generate/generate_video/video_generation_draft.rs:83:        Ok(VideoGenerationRequest::KinoviSeedance2p5(result))
+src/generate/generate_video/video_generation_draft_context.rs:2:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+src/generate/generate_video/video_generation_draft_context.rs:20:  /// Optional context: a map of Character Tokens to their respective Kinovi IDs
+src/generate/generate_video/video_generation_draft_context.rs:21:  /// Only necessary if using Kinovi characters
+src/generate/generate_video/video_generation_draft_context.rs:22:  pub character_token_to_kinovi_id_map: Option<&'a HashMap<CharacterToken, String>>,
+src/generate/generate_video/video_generation_draft_context.rs:32:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
+src/generate/generate_video/video_generation_draft_context.rs:34:    client.get_kinovi_web_client_ref()
+src/generate/generate_video/video_generation_draft_context.rs:43:  pub fn get_character_token_to_kinovi_map(&self) -> Result<&HashMap<CharacterToken, String>, ArtcraftRouterError> {
+src/generate/generate_video/video_generation_draft_context.rs:44:    self.character_token_to_kinovi_id_map
+src/generate/generate_video/video_generation_draft_context.rs:45:      .ok_or_else(|| ArtcraftRouterError::Client(ClientError::CharacterTokenToKinoviCharacterIdNotProvided))
+src/generate/generate_video/video_generation_draft_context.rs:54:      .field("character_token_to_kinovi_id_map", &self.character_token_to_kinovi_id_map)
+src/generate/generate_video/video_generation_request.rs:132:use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::cost::KinoviHappyHorse1p0CostState;
+src/generate/generate_video/video_generation_request.rs:133:use crate::generate::generate_video::providers::kinovi::happy_horse_1p0::request::KinoviHappyHorse1p0RequestState;
+src/generate/generate_video/video_generation_request.rs:134:use crate::generate::generate_video::providers::kinovi::seedance_2p0::cost::KinoviSeedance2p0CostState;
+src/generate/generate_video/video_generation_request.rs:135:use crate::generate::generate_video::providers::kinovi::seedance_2p0::request::KinoviSeedance2p0RequestState;
+src/generate/generate_video/video_generation_request.rs:136:use crate::generate::generate_video::providers::kinovi::seedance_2p0_fast::cost::KinoviSeedance2p0FastCostState;
+src/generate/generate_video/video_generation_request.rs:137:use crate::generate::generate_video::providers::kinovi::seedance_2p0_fast::request::KinoviSeedance2p0FastRequestState;
+src/generate/generate_video/video_generation_request.rs:138:use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::cost::KinoviSeedance2p0MiniCostState;
+src/generate/generate_video/video_generation_request.rs:139:use crate::generate::generate_video::providers::kinovi::seedance_2p0_mini::request::KinoviSeedance2p0MiniRequestState;
+src/generate/generate_video/video_generation_request.rs:140:use crate::generate::generate_video::providers::kinovi::seedance_2p5::cost::KinoviSeedance2p5CostState;
+src/generate/generate_video/video_generation_request.rs:141:use crate::generate::generate_video::providers::kinovi::seedance_2p5::request::KinoviSeedance2p5RequestState;
+src/generate/generate_video/video_generation_request.rs:142:use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::cost::KinoviSeedance2p5PreviewCostState;
+src/generate/generate_video/video_generation_request.rs:143:use crate::generate::generate_video::providers::kinovi::seedance_2p5_preview::request::KinoviSeedance2p5PreviewRequestState;
+src/generate/generate_video/video_generation_request.rs:210:  KinoviHappyHorse1p0(KinoviHappyHorse1p0RequestState),
+src/generate/generate_video/video_generation_request.rs:211:  KinoviSeedance2p0(KinoviSeedance2p0RequestState),
+src/generate/generate_video/video_generation_request.rs:212:  KinoviSeedance2p0Fast(KinoviSeedance2p0FastRequestState),
+src/generate/generate_video/video_generation_request.rs:213:  KinoviSeedance2p0Mini(KinoviSeedance2p0MiniRequestState),
+src/generate/generate_video/video_generation_request.rs:214:  KinoviSeedance2p5Preview(KinoviSeedance2p5PreviewRequestState),
+src/generate/generate_video/video_generation_request.rs:215:  KinoviSeedance2p5(KinoviSeedance2p5RequestState),
+src/generate/generate_video/video_generation_request.rs:285:      Self::KinoviHappyHorse1p0(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:286:      Self::KinoviSeedance2p0(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:287:      Self::KinoviSeedance2p0Fast(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:288:      Self::KinoviSeedance2p0Mini(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:289:      Self::KinoviSeedance2p5Preview(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:290:      Self::KinoviSeedance2p5(_) => RouterProvider::KinoviWeb,
+src/generate/generate_video/video_generation_request.rs:360:      VideoGenerationRequest::KinoviHappyHorse1p0(request) => Ok(KinoviHappyHorse1p0CostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:361:      VideoGenerationRequest::KinoviSeedance2p0(request) => Ok(KinoviSeedance2p0CostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:362:      VideoGenerationRequest::KinoviSeedance2p0Fast(request) => Ok(KinoviSeedance2p0FastCostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:363:      VideoGenerationRequest::KinoviSeedance2p0Mini(request) => Ok(KinoviSeedance2p0MiniCostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:364:      VideoGenerationRequest::KinoviSeedance2p5Preview(request) => Ok(KinoviSeedance2p5PreviewCostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:365:      VideoGenerationRequest::KinoviSeedance2p5(request) => Ok(KinoviSeedance2p5CostState::from_request(request).estimate_cost()),
+src/generate/generate_video/video_generation_request.rs:625:      VideoGenerationRequest::KinoviHappyHorse1p0(request) => {
+src/generate/generate_video/video_generation_request.rs:626:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_video/video_generation_request.rs:629:      VideoGenerationRequest::KinoviSeedance2p0(request) => {
+src/generate/generate_video/video_generation_request.rs:630:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_video/video_generation_request.rs:633:      VideoGenerationRequest::KinoviSeedance2p0Fast(request) => {
+src/generate/generate_video/video_generation_request.rs:634:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_video/video_generation_request.rs:637:      VideoGenerationRequest::KinoviSeedance2p0Mini(request) => {
+src/generate/generate_video/video_generation_request.rs:638:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_video/video_generation_request.rs:641:      VideoGenerationRequest::KinoviSeedance2p5Preview(request) => {
+src/generate/generate_video/video_generation_request.rs:642:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_video/video_generation_request.rs:645:      VideoGenerationRequest::KinoviSeedance2p5(request) => {
+src/generate/generate_video/video_generation_request.rs:646:        let client_ref = client.get_kinovi_web_client_ref()?;
+src/generate/generate_audio/providers/:
+artcraft
+fal
+kinovi
+mod.rs
+reject_unsupported.rs
+
+src/generate/generate_image/providers/:
+artcraft
+fal
+kinovi
+midjourney
+mod.rs
+
+src/generate/generate_mesh/providers/:
+artcraft
+fal
+mod.rs
+reject_unsupported.rs
+
+src/generate/generate_splat/providers/:
+artcraft
+fal
+mod.rs
+worldlabs
+
+src/generate/generate_video/providers/:
+artcraft
+fal
+first_party
+grok_api
+kinovi
+mod.rs
+[package]
+name = "artcraft_router"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[lib]
+name = "artcraft_router"
+path = "src/lib.rs"
+
+[dependencies]
+midjourney_client.workspace = true
+browser_emulation.workspace = true
+
+# Internal
+artcraft_api_defs.workspace = true
+enums.workspace = true
+artcraft_client.workspace = true
+fal_client.workspace = true
+gmicloud_client.workspace = true
+grok_api_client.workspace = true
+kinovi_web_client.workspace = true
+tokens.workspace = true
+url_utils.workspace = true
+worldlabs_api_client.workspace = true
+
+# External
+anyhow.workspace = true
+log.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+wreq.workspace = true
+serde_derive.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+test_data.workspace = true
+test_utils.workspace = true
+strum.workspace = true
+serde_json.workspace = true
+

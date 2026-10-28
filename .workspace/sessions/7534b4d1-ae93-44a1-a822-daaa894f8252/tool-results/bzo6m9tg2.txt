@@ -1,0 +1,850 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Guards against the old product name returning to user-facing sources. Only
+// the billing and generative-AI files below may still mention it, because they
+// talk to the upstream account service. Reads the files as text; runs nothing.
+
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { describe, expect, it } from "vitest";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+
+const OLD_NAME = /diffusion|Diffusion Studio/i;
+const CONTRACT_IMPORT = "@diffusionstudio/api-contract";
+
+const SCANNED_FILES = [
+  "apps/web/index.html",
+  "apps/desktop/src/main.ts",
+  "apps/desktop/src/tray.ts",
+  "apps/desktop/src/menu.ts",
+  "apps/desktop/src/mcp-config.ts",
+  "apps/desktop/src/mcp-install.ts",
+];
+
+const SCANNED_DIRS = ["apps/web/src/components", "apps/cli/src", "packages/agent-chat/src/host", "docs"];
+
+const ALLOWED = [
+  /^apps\/web\/src\/components\/upgrade-dialog\.tsx$/,
+  /^apps\/web\/src\/components\/purchase-success\.tsx$/,
+  /^apps\/web\/src\/components\/genai\//,
+  /^apps\/web\/src\/components\/dashboard\/(account|ai-credits|billing-info|plans|invoices)-view\.tsx$/,
+];
+
+function walk(dir: string): string[] {
+  return readdirSync(join(root, dir)).flatMap((name) => {
+    const path = `${dir}/${name}`;
+    if (name === "node_modules") return [];
+    return statSync(join(root, path)).isDirectory() ? walk(path) : [path];
+  });
+}
+
+function isAllowed(path: string): boolean {
+  return ALLOWED.some((pattern) => pattern.test(path));
+}
+
+/** Lines of `text` naming the old product, ignoring imports of the upstream API contract. */
+function matchingLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .filter((line) => !(/\bimport\b|\bfrom\b/.test(line) && line.includes(CONTRACT_IMPORT)))
+    .filter((line) => OLD_NAME.test(line));
+}
+
+function offendingLines(path: string): string[] {
+  return matchingLines(readFileSync(join(root, path), "utf8"));
+}
+
+function offenders(paths: string[], read: (path: string) => string[] = offendingLines): string[] {
+  return paths
+    .filter((path) => !isAllowed(path))
+    .flatMap((path) => read(path).map((line) => `${path}: ${line.trim()}`));
+}
+
+const files = [...SCANNED_FILES, ...SCANNED_DIRS.flatMap(walk)];
+
+describe("branding guard", () => {
+  it("scans a non-trivial set of files", () => {
+    expect(files.length).toBeGreaterThan(100);
+  });
+
+  it("keeps the old product name out of every file outside the allow-list", () => {
+    expect(offenders(files)).toEqual([]);
+  });
+});
+
+describe("branding guard: scanned set", () => {
+  it("every explicitly listed file exists", () => {
+    for (const path of SCANNED_FILES) expect(existsSync(join(root, path)), path).toBe(true);
+  });
+
+  it("every scanned directory contributes at least one file", () => {
+    for (const dir of SCANNED_DIRS) {
+      expect(files.some((path) => path.startsWith(`${dir}/`)), dir).toBe(true);
+    }
+  });
+
+  it("uses forward-slash repo-relative paths on every platform (no Windows backslashes)", () => {
+    for (const path of files) {
+      expect(path.includes("\\")).toBe(false);
+      expect(path).not.toMatch(/^[A-Za-z]:/);
+      expect(path.startsWith("/")).toBe(false);
+    }
+  });
+
+  it("skips node_modules and lists each file once", () => {
+    expect(files.some((path) => path.split("/").includes("node_modules"))).toBe(false);
+    expect(new Set(files).size).toBe(files.length);
+  });
+
+  it("covers React components and the CLI sources", () => {
+    expect(files).toContain("apps/web/src/components/upgrade-dialog.tsx");
+    expect(files.some((path) => path.startsWith("apps/cli/src/") && path.endsWith(".ts"))).toBe(true);
+  });
+});
+
+describe("branding guard: allow-list", () => {
+  it("contains exactly the four agreed entries", () => {
+    expect(ALLOWED).toHaveLength(4);
+  });
+
+  it.each([
+    "apps/web/src/components/upgrade-dialog.tsx",
+    "apps/web/src/components/purchase-success.tsx",
+    "apps/web/src/components/genai/index.ts",
+    "apps/web/src/components/genai/nested/deep/file.tsx",
+    "apps/web/src/components/dashboard/account-view.tsx",
+    "apps/web/src/components/dashboard/ai-credits-view.tsx",
+    "apps/web/src/components/dashboard/billing-info-view.tsx",
+    "apps/web/src/components/dashboard/plans-view.tsx",
+    "apps/web/src/components/dashboard/invoices-view.tsx",
+  ])("allows %s", (path) => {
+    expect(isAllowed(path)).toBe(true);
+  });
+
+  it.each([
+    // Neighbours of allowed files that must stay clean.
+    "apps/web/src/components/dashboard/billing-view.tsx",
+    "apps/web/src/components/dashboard/settings-view.tsx",
+    "apps/web/src/components/dashboard/home-view.tsx",
+    "apps/web/src/components/dashboard/mcp-view.tsx",
+    // Near-miss names.
+    "apps/web/src/components/genai.tsx",
+    "apps/web/src/components/genai-extra/file.tsx",
+    "apps/web/src/components/upgrade-dialog.tsx.bak",
+    "apps/web/src/components/upgrade-dialog.test.tsx",
+    "apps/web/src/components/upgrade-dialogXtsx",
+    "apps/web/src/components/dashboard/account-view.ts",
+    "apps/web/src/components/dashboard/account-view.test.tsx",
+    "apps/web/src/components/dashboard/nested/plans-view.tsx",
+    // Same basename in a different location.
+    "apps/web/src/components/other/upgrade-dialog.tsx",
+    "apps/web/src/pages/purchase-success.tsx",
+    "apps/cli/src/components/genai/index.ts",
+    "docs/apps/web/src/components/upgrade-dialog.tsx",
+    // Scanned non-component files.
+    "apps/web/index.html",
+    "apps/desktop/src/main.ts",
+    "packages/agent-chat/src/host/index.ts",
+    "docs/README.md",
+    // Windows-style separators never match, so they cannot sneak past.
+    "apps\\web\\src\\components\\upgrade-dialog.tsx",
+    "",
+  ])("does not allow %j", (path) => {
+    expect(isAllowed(path)).toBe(false);
+  });
+
+  it("every existing allowed file is actually in the scanned set", () => {
+    const allowedPresent = files.filter(isAllowed);
+    expect(allowedPresent).toContain("apps/web/src/components/upgrade-dialog.tsx");
+    expect(allowedPresent).toContain("apps/web/src/components/purchase-success.tsx");
+    for (const path of allowedPresent) expect(path.startsWith("apps/web/src/components/")).toBe(true);
+  });
+});
+
+describe("branding guard: line matcher", () => {
+  it("returns nothing for empty or clean text", () => {
+    expect(matchingLines("")).toEqual([]);
+    expect(matchingLines("\n\r\n\n")).toEqual([]);
+    expect(matchingLines("Hypergen\nWelcome to Hypergen")).toEqual([]);
+  });
+
+  it.each([
+    "Diffusion Studio",
+    "DIFFUSION STUDIO",
+    "diffusion",
+    "<title>diffusion studio</title>",
+    'icon="diffusion-logo"',
+    "https://app.diffusion.studio/callback",
+    "diffusion://open",
+    "const DIFFUSION_ANALYTICS = 1;",
+    "StableDiffusion",
+  ])("flags %j case-insensitively", (line) => {
+    expect(matchingLines(line)).toEqual([line]);
+  });
+
+  it("ignores import lines of the api contract", () => {
+    expect(matchingLines('import { Plan } from "@diffusionstudio/api-contract";')).toEqual([]);
+    expect(matchingLines('import type { Plan } from "@diffusionstudio/api-contract/plans";')).toEqual([]);
+    expect(matchingLines('} from "@diffusionstudio/api-contract";')).toEqual([]);
+    expect(matchingLines('import "@diffusionstudio/api-contract";')).toEqual([]);
+  });
+
+  it("still flags api-contract mentions that are not import lines", () => {
+    const line = 'const pkg = "@diffusionstudio/api-contract";';
+    expect(matchingLines(line)).toEqual([line]);
+  });
+
+  it("still flags imports of other old-brand packages", () => {
+    const line = 'import x from "@diffusionstudio/core";';
+    expect(matchingLines(line)).toEqual([line]);
+  });
+
+  it("does not let an ignored import hide a match on another line", () => {
+    const text = 'import { A } from "@diffusionstudio/api-contract";\nexport const label = "Diffusion Studio";';
+    expect(matchingLines(text)).toEqual(['export const label = "Diffusion Studio";']);
+  });
+
+  it("splits CRLF and LF line endings without leaking carriage returns", () => {
+    expect(matchingLines("ok\r\nDiffusion Studio\r\nok")).toEqual(["Diffusion Studio"]);
+    expect(matchingLines("a\ndiffusion\nb\ndiffusion")).toEqual(["diffusion", "diffusion"]);
+  });
+});
+
+describe("branding guard: failure reporting", () => {
+  const fake: Record<string, string> = {
+    "apps/cli/src/zz-probe.ts": 'export const name = "Diffusion Studio";',
+    "apps/web/src/components/upgrade-dialog.tsx": "Upgrade your Diffusion Studio plan",
+    "apps/web/src/components/genai/x.tsx": "diffusion",
+    "apps/web/src/components/dashboard/billing-view.tsx": "  Billed by diffusion  ",
+    "docs/clean.md": "Hypergen docs",
+  };
+  const read = (path: string) => matchingLines(fake[path] ?? "");
+
+  it("fails on a non-allowed file and names the file and trimmed line", () => {
+    expect(offenders(Object.keys(fake), read)).toEqual([
+      'apps/cli/src/zz-probe.ts: export const name = "Diffusion Studio";',
+      "apps/web/src/components/dashboard/billing-view.tsx: Billed by diffusion",
+    ]);
+  });
+
+  it("passes when only allowed files match", () => {
+    expect(
+      offenders(["apps/web/src/components/upgrade-dialog.tsx", "apps/web/src/components/genai/x.tsx"], read),
+    ).toEqual([]);
+  });
+
+  it("passes on an empty file set", () => {
+    expect(offenders([], read)).toEqual([]);
+  });
+});
+
+describe("branding guard: no third-party brand leaks", () => {
+  it("no scanned user-facing file mentions LTX or Lightricks", () => {
+    const leaks = files.filter((path) => /\bLTX\b|Lightricks/i.test(readFileSync(join(root, path), "utf8")));
+    expect(leaks).toEqual([]);
+  });
+});
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Brand strings in the main process and in the repo-root files that ship with
+// it (README, .gitignore, Windows CI). main.ts starts Electron on import, so
+// these checks read the sources as text instead of executing them.
+
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const src = __dirname;
+const root = join(src, "..", "..", "..");
+const read = (...p: string[]) => readFileSync(join(...p), "utf8");
+const lines = (text: string) => text.split(/\r?\n/);
+
+// Lines that may still say "dapi": the DapiServer import/identifier, the
+// `dapi` variable and the internal @hypergen/dapi package import.
+const allowedDapi = (line: string) =>
+  /DapiServer|\bdapi\.|const dapi\b|@hypergen\/dapi|\.\/dapi\//.test(line);
+
+const leaks = (text: string) =>
+  lines(text).filter((l) => /diffusion|LTX|Lightricks|\bdapi\b/i.test(l) && !allowedDapi(l));
+
+describe("main.ts", () => {
+  const main = read(src, "main.ts");
+
+  it("names the app Hypergen", () => {
+    expect(main).toMatch(/app\.setName\("Hypergen"\)/);
+    expect(main.match(/app\.setName\(/g)).toHaveLength(1);
+  });
+
+  it("checks for updates against buckleson/hypergen", () => {
+    expect(main).toMatch(/repo:\s*"buckleson\/hypergen"/);
+  });
+
+  it("uses the hypergen deep-link scheme", () => {
+    expect(main).toMatch(/const AUTH_PROTOCOL = "hypergen";/);
+    expect(main).toContain("hypergen://");
+    expect(main).toMatch(/hypergen CLI/);
+  });
+
+  it("has no upstream brand outside the allowed dapi identifiers", () => {
+    expect(leaks(main)).toEqual([]);
+  });
+});
+
+describe("squirrel.ts", () => {
+  const squirrel = read(src, "squirrel.ts");
+
+  it("comment names only the hypergen command", () => {
+    expect(squirrel).toContain("`hypergen`");
+    expect(leaks(squirrel)).toEqual([]);
+  });
+});
+
+describe("squirrel.test.ts fixtures", () => {
+  const t = read(src, "squirrel.test.ts");
+
+  it("use Hypergen install paths and links", () => {
+    expect(t).toContain("\\\\Local\\\\Hypergen\\\\app-1.0.0\\\\Hypergen.exe");
+    expect(t).toContain("hypergen://auth?x=1");
+    expect(t).toContain("/Applications/Hypergen.app/Contents/MacOS/Hypergen");
+    expect(leaks(t)).toEqual([]);
+  });
+});
+
+describe("README.md", () => {
+  const readme = read(root, "README.md");
+
+  it("describes Hypergen and clones from buckleson/hypergen", () => {
+    expect(readme).toMatch(/Hypergen/);
+    expect(readme).toContain("git clone https://github.com/buckleson/hypergen.git");
+  });
+
+  it("shows CLI examples with the hypergen command, never dapi", () => {
+    const fenced = [...readme.matchAll(/```[a-z]*\r?\n([\s\S]*?)```/g)].map((m) => m[1]).join("\n");
+    expect(fenced).not.toMatch(/^\s*\$?\s*dapi\b/m);
+    expect(readme).toMatch(/\bhypergen\s+[a-z-]+/);
+  });
+
+  it("drops upstream links and badges", () => {
+    expect(readme).not.toMatch(/diffusion\.studio/i);
+    expect(readme).not.toMatch(/ycombinator|\bY\s?Combinator\b/i);
+    expect(readme).not.toMatch(/discord\.(gg|com)/i);
+    expect(readme).not.toMatch(/open-projects/i);
+    // X links are allowed only inside sample prompt text, never as brand links.
+    expect(readme).not.toMatch(/\]\(https:\/\/(x|twitter)\.com\/(?!claudeai\/status)/i);
+  });
+
+  it("keeps MPL-2.0 and the ADR-012 credits", () => {
+    expect(readme).toMatch(/MPL-2\.0/);
+    expect(readme).toMatch(/Secured by HyperOx/);
+    expect(readme).toMatch(/Powered by \[Buckleson\]\(https:\/\/buckleson\.com\)/);
+    expect(readme).toMatch(/Managed by \[Pavi\]\(https:\/\/pavi\.tech\)/);
+  });
+
+  it("has no diffusion/dapi/LTX/Lightricks text", () => {
+    expect(readme).not.toMatch(/diffusion|\bdapi\b|LTX|Lightricks/i);
+  });
+});
+
+describe("root .gitignore", () => {
+  const ignore = lines(read(root, ".gitignore")).map((l) => l.trim());
+
+  it("ignores .claude and graphify-out/ on separate lines", () => {
+    expect(ignore).toContain(".claude");
+    expect(ignore).toContain("graphify-out/");
+    expect(ignore).not.toContain(".claudegraphify-out/");
+    expect(ignore.some((l) => /claude.*graphify|graphify.*claude/.test(l))).toBe(false);
+  });
+
+  it("has no upstream brand", () => {
+    expect(ignore.join("\n")).not.toMatch(/diffusion|\bdapi\b/i);
+  });
+});
+
+describe("build.yml", () => {
+  const wf = read(root, ".github", "workflows", "build.yml");
+
+  it("uploads the installers as hypergen-<os>-<arch>", () => {
+    expect(wf).toMatch(/name:\s*hypergen-\$\{\{\s*runner\.os\s*\}\}-\$\{\{\s*runner\.arch\s*\}\}/);
+  });
+
+  it("has no upstream brand", () => {
+    expect(wf).not.toMatch(/diffusion|\bdapi\b|LTX|Lightricks/i);
+  });
+});
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Static checks that the usage-tracking, sign-in and checkout plumbing stays out of
+// the desktop main process, and that the provider channels are wired once.
+
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { MAIN_CHANNELS } from "./main-channels";
+
+const src = __dirname;
+// Built from fragments so this file never matches the repo-wide grep it mirrors.
+const TRACK_WORD = "analy" + "tics";
+const BILLING_WORD = "cred" + "its";
+const API_CONTRACT = "api-" + "contract";
+const read = (file: string) => readFileSync(join(src, file), "utf8");
+
+function sourceFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) return sourceFiles(path);
+    return /\.(ts|tsx)$/.test(name) ? [path] : [];
+  });
+}
+
+describe("main process removals", () => {
+  it("has no usage-tracking module", () => {
+    expect(existsSync(join(src, `${TRACK_WORD}.ts`))).toBe(false);
+  });
+
+  it("main.ts has no tracking, protocol client or deep-link routing", () => {
+    const main = read("main.ts");
+    for (const banned of [
+      new RegExp(TRACK_WORD, "i"),
+      /AUTH_PROTOCOL/,
+      /setAsDefaultProtocolClient/,
+      /pendingDeepLinks/,
+      /deliverDeepLink/,
+      /takePendingDeepLink/,
+      /deepLinkChannel/,
+      /["']open-url["']/,
+      new RegExp(`${TRACK_WORD.toUpperCase()}_CONFIGURE`),
+      /\bAUTH_[A-Z_]+/,
+      /\bCHECKOUT_[A-Z_]+/,
+    ]) {
+      expect(main, String(banned)).not.toMatch(banned);
+    }
+  });
+
+  it("second-instance still focuses the window", () => {
+    const main = read("main.ts");
+    const handler = main.slice(main.indexOf('"second-instance"'));
+    expect(main).toContain('"second-instance"');
+    expect(handler.slice(0, 300)).toMatch(/windows\.show\(\)/);
+  });
+
+  it("main.ts registers the provider handlers exactly once, with keys.json under userData", () => {
+    const main = read("main.ts");
+    const calls = main.match(/registerProviderHandlers\(/g) ?? [];
+    expect(calls).toHaveLength(1);
+    expect(main).toMatch(/registerProviderHandlers\(join\(app\.getPath\("userData"\), "keys\.json"\)\)/);
+  });
+
+  it("main-channels drops tracking, auth, checkout and deep links", () => {
+    const names = Object.keys(MAIN_CHANNELS);
+    expect(names.filter((n) => new RegExp(`^(${TRACK_WORD.toUpperCase()}_|AUTH_|CHECKOUT_)`).test(n))).toEqual([]);
+    const channels = read("main-channels.ts");
+    expect(channels).not.toMatch(/DeepLinkChannel/);
+    expect(channels).not.toMatch(new RegExp(`\\b(${TRACK_WORD.toUpperCase()}_CONFIGURE|AUTH_[A-Z_]+|CHECKOUT_[A-Z_]+)\\b`));
+  });
+
+  it("main-channels has the eight provider channels with unique wire names", () => {
+    const expected = [
+      "PROVIDERS_KEYS_STATUS",
+      "PROVIDERS_KEYS_SET",
+      "PROVIDERS_KEYS_REMOVE",
+      "PROVIDERS_KEYS_TEST",
+      "PROVIDERS_FAL_SUBMIT",
+      "PROVIDERS_FAL_POLL",
+      "PROVIDERS_FAL_CANCEL",
+      "PROVIDERS_GEMINI_GENERATE",
+    ];
+    const channels = MAIN_CHANNELS as Record<string, string>;
+    for (const name of expected) expect(typeof channels[name], name).toBe("string");
+    const values = Object.values(channels);
+    expect(new Set(values).size).toBe(values.length);
+    const source = read("main-channels.ts");
+    for (const name of expected) expect(source).toMatch(new RegExp(`\\[MAIN_CHANNELS\\.${name}\\]:\\s*\\{`));
+  });
+
+  it("dapi/server.ts has no tool-call tracking", () => {
+    const server = read(join("dapi", "server.ts"));
+    expect(server).not.toMatch(/TrackProps/);
+    expect(server).not.toMatch(/onToolCall/);
+  });
+
+  it("projects.ts no longer counts code changes", () => {
+    expect(read("projects.ts")).not.toMatch(/countCodeChange/);
+  });
+
+  it("no desktop source mentions the banned billing/tracking words", () => {
+    const banned = new RegExp(`${TRACK_WORD}|${API_CONTRACT}|${BILLING_WORD}`, "i");
+    const hits = sourceFiles(src).filter((file) => banned.test(readFileSync(file, "utf8")));
+    expect(hits).toEqual([]);
+  });
+
+  it("the provider modules carry no legacy branding or telemetry", () => {
+    const dir = join(src, "providers");
+    for (const file of readdirSync(dir).filter((n) => !n.includes(".test."))) {
+      const text = readFileSync(join(dir, file), "utf8");
+      expect(text, file).not.toMatch(/\b(LTX|Lightricks|sentry|posthog|telemetry)\b/i);
+    }
+  });
+});
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Subtask C (T8-T11): the MCP server, presented files, fallback instructions,
+// bug-report repo and log prefixes say Hypergen, and nothing old or
+// third-party leaks into what agents and users see.
+
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, dirname, join } from "node:path";
+import { afterAll, describe, expect, it } from "vitest";
+import { instructions } from "./docs";
+import { present } from "./present";
+
+const src = join(__dirname, "..");
+const read = (path: string) => readFileSync(join(src, path), "utf8");
+const scratch = mkdtempSync(join(tmpdir(), "hypergen-branding-"));
+afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+
+const FILES = [
+  "mcp-config.ts",
+  "mcp-config.test.ts",
+  "mcp-install.ts",
+  "dapi/server.ts",
+  "dapi/present.ts",
+  "dapi/present.test.ts",
+  "dapi/docs.ts",
+  "dapi/docs.test.ts",
+  "dapi/handlers/report.ts",
+  "dapi/http.ts",
+  "dapi/http.test.ts",
+  "dapi/renderer-calls.ts",
+  "main-channels.ts",
+];
+
+// Lines that may still say dapi/diffusion: package imports, the api-contract
+// import, Dapi*/DAPI_* identifiers, and the dapiBinary export.
+function leftovers(path: string, pattern: RegExp): string[] {
+  return read(path)
+    .split("\n")
+    .filter((line) => pattern.test(line))
+    .filter((line) => !/from "@hypergen\/dapi"|from "@diffusionstudio\/api-contract"/.test(line))
+    .filter((line) => !/^\s*\/\/.*@hypergen\/dapi/.test(line))
+    .filter((line) => pattern.test(line.replace(/\bDapi\w*|\bDAPI_\w+|\bdapiBinary\b|\bisDapiError\b|@hypergen\/dapi|apps\/web\/src\/dapi/g, "")));
+}
+
+describe("source branding", () => {
+  it.each(FILES)("%s never mentions LTX or Lightricks", (path) => {
+    expect(read(path)).not.toMatch(/\bltx\b|lightricks/i);
+  });
+
+  // T8/T9 grep `diffusion|\bdapi\b`; T10/T11 grep `diffusion` only, so the
+  // `dapi:*` IPC channel names and the docs test's own temp prefix may stay.
+  const DAPI_CHECKED = ["mcp-config.ts", "mcp-config.test.ts", "mcp-install.ts", "dapi/server.ts", "dapi/present.ts", "dapi/present.test.ts"];
+
+  it.each(DAPI_CHECKED)("%s has no diffusion or bare dapi outside imports and identifiers", (path) => {
+    expect(leftovers(path, /diffusion|\bdapi\b/i)).toEqual([]);
+  });
+
+  it.each(FILES)("%s has no diffusion outside imports", (path) => {
+    expect(leftovers(path, /diffusion/i)).toEqual([]);
+  });
+
+  it("names the MCP server hypergen and titles it Hypergen", () => {
+    const server = read("dapi/server.ts");
+    expect(server).toContain('const SERVER_NAME = "hypergen";');
+    expect(server).toMatch(/title: "Hypergen"/);
+    expect(server).toContain("mcp__hypergen__<tool>");
+  });
+
+  it("files bug reports against buckleson/hypergen", () => {
+    expect(read("dapi/handlers/report.ts")).toContain('const REPO = "buckleson/hypergen";');
+  });
+
+  it.each(["dapi/server.ts", "dapi/http.ts", "dapi/renderer-calls.ts"])("%s logs under [hypergen], never [dapi]", (path) => {
+    const text = read(path);
+    expect(text).not.toContain("[dapi]");
+    for (const call of text.match(/console\.(?:log|warn|error|info)\([^)]*/g) ?? []) {
+      expect(call).toMatch(/\[hypergen\]/);
+    }
+  });
+
+  it("keeps the DAPI_WIRE name in main-channels while its comments say hypergen", () => {
+    const channels = read("main-channels.ts");
+    expect(channels).toContain("DAPI_WIRE");
+    expect(channels).toContain("`hypergen://`");
+    expect(channels).toContain("`hypergen` field of its package.json");
+  });
+
+  it("uses hypergen:// in the http test resource", () => {
+    expect(read("dapi/http.test.ts")).toContain("hypergen://note");
+  });
+});
+
+describe("fallback instructions", () => {
+  const FALLBACK = "Hypergen, a video editor, is running on this machine";
+
+  it("starts with Hypergen when no docs are staged", () => {
+    expect(instructions(null).startsWith(FALLBACK)).toBe(true);
+  });
+
+  it("falls back when the docs dir has no INSTRUCTIONS.md, but still names the dir", () => {
+    const dir = join(scratch, "no-instructions");
+    mkdirSync(dir, { recursive: true });
+    const text = instructions(dir);
+    expect(text.startsWith(FALLBACK)).toBe(true);
+    expect(text).toContain(dir);
+  });
+
+  it("falls back when INSTRUCTIONS.md is empty or whitespace", () => {
+    for (const [name, body] of [["empty", ""], ["blank", " \n\t\n"]] as const) {
+      const dir = join(scratch, name);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, "INSTRUCTIONS.md"), body);
+      expect(instructions(dir).startsWith(FALLBACK)).toBe(true);
+    }
+  });
+
+  it("handles a Windows-style docs dir with spaces", () => {
+    const dir = "C:\\Program Files\\Hypergen\\resources\\docs";
+    const text = instructions(dir);
+    expect(text.startsWith(FALLBACK)).toBe(true);
+    expect(text).toContain(`\`${dir}\``);
+  });
+
+  it("never mentions Diffusion, LTX or Lightricks", () => {
+    expect(instructions(null)).not.toMatch(/diffusion|ltx|lightricks|\bdapi\b/i);
+    expect(instructions("/docs")).not.toMatch(/diffusion|ltx|lightricks|\bdapi\b/i);
+  });
+});
+
+describe("presented file names", () => {
+  const png = (byte: number) => new Uint8Array(8).fill(byte);
+
+  it.each(["capture", "grab"] as const)("puts %s frames in a hypergen-<kind>- temp dir", async (kind) => {
+    const args = kind === "capture" ? { id: "intro" } : { path: "/c.mp4" };
+    const presented = await present(kind, args, [{ timecode: "0f", png: png(1) }]);
+    const path = (presented.output as { images: Array<{ path: string }> }).images[0]!.path;
+    expect(basename(dirname(path))).toMatch(new RegExp(`^hypergen-${kind}-`));
+    rmSync(dirname(path), { recursive: true, force: true });
+  });
+
+  it("names a preview and a transcript hypergen-* in an output directory", async () => {
+    const out = join(scratch, "out");
+    mkdirSync(out, { recursive: true });
+    const film = await present("filmstrip", { path: "/c.mp4", output: out }, { png: png(2) });
+    expect(basename((film.output as { path: string }).path)).toMatch(/^hypergen-filmstrip-[0-9a-f-]{36}\.png$/);
+    const transcript = await present("transcribe", { path: "/c.mp4", output: out }, { segments: [] });
+    expect(basename((transcript.output as { path: string }).path)).toMatch(/^hypergen-transcript-[0-9a-f-]{36}\.json$/);
+    expect(readdirSync(out).every((name) => name.startsWith("hypergen-"))).toBe(true);
+  });
+
+  it("names screenshots hypergen_<date>_<time> and numbers a clash", async () => {
+    const out = join(scratch, "shots");
+    mkdirSync(out, { recursive: true });
+    const names: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const shot = await present("screenshot", { output: out }, { png: png(3 + i), width: 1, height: 1 });
+      names.push(basename((shot.output as { path: string }).path));
+    }
+    for (const name of names) expect(name).toMatch(/^hypergen_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(-\d+)?\.png$/);
+    expect(new Set(names).size).toBe(3);
+  });
+
+  it("writes a local job's picture as hypergen-<job id>.png", async () => {
+    const job = { id: "job-edge-1", status: "running", assets: [], details: {} };
+    const presented = await present("job", {}, { job, saveTo: null, image: png(9) });
+    const image = (presented.output as { details: { image: string } }).details.image;
+    expect(basename(image)).toBe("hypergen-job-edge-1.png");
+    rmSync(image, { force: true });
+  });
+
+  it("never names a file after dapi or diffusion", async () => {
+    const out = join(scratch, "names");
+    mkdirSync(out, { recursive: true });
+    await present("waveform", { path: "/c.mp4", output: out }, { png: png(4), silences: [] });
+    await present("screenshot", { output: out }, { png: png(5), width: 1, height: 1 });
+    for (const name of readdirSync(out)) expect(name).not.toMatch(/dapi|diffusion|ltx|lightricks/i);
+  });
+});
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Packaging identity: the Forge config, the Windows manifest and the
+// desktop/root package.json files carry the Hypergen / Buckleson brand and
+// nothing from the upstream product. The makers and publisher are replaced
+// with recorders so the real config object is evaluated without touching
+// electron-forge, the network or any signing tool.
+
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("@electron-forge/maker-zip", () => ({
+  MakerZIP: class { kind = "zip"; constructor(public config: unknown, public platforms?: string[]) {} },
+}));
+vi.mock("@electron-forge/maker-squirrel", () => ({
+  MakerSquirrel: class { kind = "squirrel"; constructor(public config: any) {} },
+}));
+vi.mock("@electron-forge/maker-dmg", () => ({
+  MakerDMG: class { kind = "dmg"; constructor(public config: any) {} },
+}));
+vi.mock("@electron-forge/publisher-github", () => ({
+  PublisherGithub: class { kind = "github"; constructor(public config: any) {} },
+}));
+
+const desktop = __dirname;
+const root = join(desktop, "..", "..");
+const read = (...p: string[]) => readFileSync(join(...p), "utf8");
+const FORBIDDEN = /diffusion|\bdapi\b|LTX|Lightricks/i;
+
+let config: any;
+const savedSkip = process.env.SKIP_SIGN;
+
+beforeAll(async () => {
+  // Never let the config look for a real signing setup.
+  process.env.SKIP_SIGN = "1";
+  config = (await import("./forge.config")).default;
+});
+afterAll(() => {
+  if (savedSkip === undefined) delete process.env.SKIP_SIGN;
+  else process.env.SKIP_SIGN = savedSkip;
+});
+
+const maker = (kind: string) => config.makers.find((m: any) => m.kind === kind);
+
+describe("forge packagerConfig", () => {
+  it("names the app and bundle id after Hypergen / Buckleson", () => {
+    expect(config.packagerConfig.name).toBe("Hypergen");
+    expect(config.packagerConfig.appBundleId).toBe("com.buckleson.hypergen");
+  });
+
+  it("sets the Windows version-info strings", () => {
+    const meta = config.packagerConfig.win32metadata;
+    expect(meta.CompanyName).toBe("Buckleson");
+    expect(meta.ProductName).toBe("Hypergen");
+    expect(meta.FileDescription).toBe("Hypergen");
+    expect(meta["application-manifest"]).toMatch(/assets[\\/]app\.manifest$/);
+    expect(existsSync(meta["application-manifest"])).toBe(true);
+  });
+
+  it("registers exactly the hypergen:// protocol", () => {
+    expect(config.packagerConfig.protocols).toEqual([{ name: "Hypergen", schemes: ["hypergen"] }]);
+  });
+
+  it("takes the app version from the root package.json", () => {
+    expect(config.packagerConfig.appVersion).toBe(JSON.parse(read(root, "package.json")).version);
+  });
+
+  it("leaves signing off when SKIP_SIGN is set", () => {
+    expect(config.packagerConfig.windowsSign).toBeUndefined();
+    expect(config.packagerConfig.osxSign).toBeUndefined();
+  });
+});
+
+describe("forge makers and publisher", () => {
+  it("builds the Squirrel installer as Hypergen by Buckleson", () => {
+    const sq = maker("squirrel").config;
+    expect(sq.name).toBe("Hypergen");
+    expect(sq.authors).toBe("Buckleson");
+    expect(sq.exe).toBe("Hypergen.exe");
+    expect(sq.setupExe).toBe(`Hypergen-${process.arch}-Setup.exe`);
+    expect(sq.iconUrl).toBe(
+      "https://raw.githubusercontent.com/buckleson/hypergen/main/apps/desktop/assets/icon.ico",
+    );
+  });
+
+  it("points iconUrl at an icon that exists at that repo path", () => {
+    const sq = maker("squirrel").config;
+    const rel = new URL(sq.iconUrl).pathname.split("/main/")[1];
+    expect(existsSync(join(root, ...rel.split("/")))).toBe(true);
+  });
+
+  it("names the setup exe safely (no spaces, ends .exe) for every arch", () => {
+    const sq = maker("squirrel").config;
+    expect(sq.setupExe).not.toMatch(/\s/);
+    expect(sq.setupExe).toMatch(/^Hypergen-[a-z0-9]+-Setup\.exe$/);
+  });
+
+  it("names the DMG per arch", () => {
+    expect(maker("dmg").config.name).toBe(`Hypergen-${process.arch}`);
+  });
+
+  it("publishes to buckleson/hypergen", () => {
+    expect(config.publishers).toHaveLength(1);
+    expect(config.publishers[0].config.repository).toEqual({ owner: "buckleson", name: "hypergen" });
+  });
+
+  it("has no upstream brand in any string value of the evaluated config", () => {
+    const strings: string[] = [];
+    const walk = (v: unknown) => {
+      if (typeof v === "string") strings.push(v);
+      else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") Object.values(v).forEach(walk);
+    };
+    walk(config.packagerConfig);
+    config.makers.forEach((m: any) => walk(m.config));
+    config.publishers.forEach((p: any) => walk(p.config));
+    expect(strings.filter((s) => FORBIDDEN.test(s))).toEqual([]);
+  });
+});
+
+describe("brand text in packaging files", () => {
+  it("forge.config.ts and app.manifest have no upstream brand", () => {
+    expect(read(desktop, "forge.config.ts")).not.toMatch(FORBIDDEN);
+    expect(read(desktop, "assets", "app.manifest")).not.toMatch(FORBIDDEN);
+  });
+
+  it("app.manifest comment names Hypergen.exe and stays valid XML-ish", () => {
+    const manifest = read(desktop, "assets", "app.manifest");
+    expect(manifest).toContain('"Hypergen.exe"');
+    expect(manifest).toMatch(/<assembly[\s>]/);
+    expect(manifest).toMatch(/<\/assembly>\s*$/);
+    expect(manifest).toMatch(/longPathAware/);
+  });
+});
+
+describe("superseded brand-asset scripts", () => {
+  it("are deleted", () => {
+    expect(existsSync(join(desktop, "scripts", "win-assets.py"))).toBe(false);
+    expect(existsSync(join(desktop, "scripts", "make-icns.sh"))).toBe(false);
+  });
+
+  it("are no longer referenced by any desktop script", () => {
+    const pkg = JSON.parse(read(desktop, "package.json"));
+    for (const name of ["make:icns", "make:ico", "make:spinner"]) {
+      expect(pkg.scripts).not.toHaveProperty(name);
+    }
+    const all = Object.values<string>(pkg.scripts).join("\n");
+    expect(all).not.toMatch(/win-assets\.py|make-icns\.sh/);
+  });
+});
+
+describe("package.json files", () => {
+  it("desktop repository url is buckleson/hypergen", () => {
+    const pkg = JSON.parse(read(desktop, "package.json"));
+    expect(pkg.repository.url).toBe("https://github.com/buckleson/hypergen.git");
+    expect(pkg.name).toBe("@hypergen/desktop");
+  });
+
+  it("root has the brand script", () => {
+    const pkg = JSON.parse(read(root, "package.json"));
+    expect(pkg.scripts.brand).toBe("python scripts/brand/generate.py");
+  });
+
+  it("neither package.json mentions diffusion", () => {
+    expect(read(desktop, "package.json")).not.toMatch(/diffusion/i);
+    expect(read(root, "package.json")).not.toMatch(/diffusion/i);
+  });
+});
+36:    protocols: [{ name: 'Hypergen', schemes: ['hypergen'] }],
+src/main.ts:305:  app.on("second-instance", (_event, argv) => {

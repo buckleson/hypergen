@@ -1,0 +1,568 @@
+     1	//! The provider accounts, in the same files as the Tauri app (`~/Artcraft/credentials`), so an
+     2	//! account connected in either app works in both: the Midjourney login
+     3	//! (`midjourney_cookies.toml`) and the fal API key (`fal.api_key.txt`).
+     4	
+     5	use std::path::{Path, PathBuf};
+     6	use std::sync::Arc;
+     7	
+     8	use log::warn;
+     9	use midjourney_client::credentials::credential_manager::MidjourneyCredentialManager;
+    10	
+    11	const MIDJOURNEY_FILENAME: &str = "midjourney_cookies.toml";
+    12	/// The Tauri app's pre-TOML Midjourney state, removed on disconnect so it can't come back.
+    13	const MIDJOURNEY_LEGACY_FILENAME: &str = "midjourney_state.json";
+    14	const FAL_KEY_FILENAME: &str = "fal.api_key.txt";
+    15	
+    16	#[derive(Clone)]
+    17	pub struct ProviderAccounts {
+    18	  pub midjourney: MidjourneyCredentialManager,
+    19	  fal_key_path: Arc<PathBuf>,
+    20	}
+    21	
+    22	impl ProviderAccounts {
+    23	  pub fn load(data_root: &Path) -> Self {
+    24	    let dir = data_root.join("credentials");
+    25	    if let Err(err) = std::fs::create_dir_all(&dir) {
+    26	      warn!("Couldn't create {}: {err}", dir.display());
+    27	    }
+    28	    let (path, legacy) = (dir.join(MIDJOURNEY_FILENAME), vec![dir.join(MIDJOURNEY_LEGACY_FILENAME)]);
+    29	    let midjourney = MidjourneyCredentialManager::load(path.clone(), legacy.clone()).unwrap_or_else(|err| {
+    30	      warn!("Couldn't load the Midjourney login: {err}");
+    31	      MidjourneyCredentialManager::new(path, legacy, None)
+    32	    });
+    33	    Self { midjourney, fal_key_path: Arc::new(dir.join(FAL_KEY_FILENAME)) }
+    34	  }
+    35	
+    36	  /// The connected Midjourney account's email ("" when it's connected but unknown), or `None`.
+    37	  pub fn midjourney_account(&self) -> Option<String> {
+    38	    match (self.midjourney.maybe_copy_cookie_store(), self.midjourney.maybe_account_info()) {
+    39	      (Ok(None), Ok(None)) | (Err(_), _) | (_, Err(_)) => None,
+    40	      (_, Ok(info)) => Some(info.and_then(|i| i.maybe_email).unwrap_or_default()),
+    41	    }
+    42	  }
+    43	
+    44	  pub fn fal_key(&self) -> Option<String> {
+    45	    std::fs::read_to_string(&*self.fal_key_path).ok().map(|k| k.trim().to_owned()).filter(|k| !k.is_empty())
+    46	  }
+    47	
+    48	  /// The key as Settings shows it (`first6********`).
+    49	  pub fn fal_key_hint(&self) -> Option<String> {
+    50	    self.fal_key().map(|k| mask_key(&k))
+    51	  }
+    52	
+    53	  pub fn set_fal_key(&self, key: &str) -> std::io::Result<()> {
+    54	    std::fs::write(&*self.fal_key_path, key.trim())
+    55	  }
+    56	
+    57	  pub fn clear_fal_key(&self) -> std::io::Result<()> {
+    58	    match std::fs::remove_file(&*self.fal_key_path) {
+    59	      Err(err) if err.kind() != std::io::ErrorKind::NotFound => Err(err),
+    60	      _ => Ok(()),
+    61	    }
+    62	  }
+    63	}
+    64	
+    65	/// `first6********`, or just the stars for short keys (`provider_list_command`).
+    66	fn mask_key(key: &str) -> String {
+    67	  if key.chars().count() > 6 {
+    68	    format!("{}********", key.chars().take(6).collect::<String>())
+    69	  } else {
+    70	    "********".to_owned()
+    71	  }
+    72	}
+    73	
+    74	#[cfg(test)]
+    75	mod tests {
+    76	  use super::*;
+    77	
+    78	  #[test]
+    79	  fn fal_keys_are_trimmed_masked_and_cleared() {
+    80	    let dir = std::env::temp_dir().join(format!("artcraft-native-accounts-{}", uuid::Uuid::new_v4()));
+    81	    let accounts = ProviderAccounts::load(&dir);
+    82	    assert_eq!(accounts.fal_key(), None);
+    83	    accounts.set_fal_key("  abcdef123456:secret \n").unwrap();
+    84	    assert_eq!(accounts.fal_key().as_deref(), Some("abcdef123456:secret"));
+    85	    assert_eq!(accounts.fal_key_hint().as_deref(), Some("abcdef********"));
+    86	    accounts.clear_fal_key().unwrap();
+    87	    accounts.clear_fal_key().unwrap();
+    88	    assert_eq!(accounts.fal_key(), None);
+    89	    assert_eq!(mask_key("short"), "********");
+    90	    assert_eq!(accounts.midjourney_account(), None);
+    91	    let _ = std::fs::remove_dir_all(dir);
+    92	  }
+    93	}
+    94	//! Starting an image generation at Midjourney or fal (the Tauri app's `handle_midjourney` and
+    95	//! `handle_fal`): the ArtCraft prompt record, then the provider's request through the router.
+    96	
+    97	use artcraft_client::credentials::storyteller_credential_set::StorytellerCredentialSet;
+    98	use artcraft_client::endpoints::prompts::create_prompt::create_prompt;
+    99	use artcraft_client::utils::api_host::ApiHost;
+   100	use artcraft_router::api::image_list_ref::ImageListRef;
+   101	use artcraft_router::api::router_image_model::RouterImageModel;
+   102	use artcraft_router::api::router_provider::RouterProvider;
+   103	use artcraft_router::client::generation_mode_mismatch_strategy::GenerationModeMismatchStrategy;
+   104	use artcraft_router::client::request_mismatch_mitigation_strategy::RequestMismatchMitigationStrategy;
+   105	use artcraft_router::client::router_client::RouterClient;
+   106	use artcraft_router::client::router_fal_client::RouterFalClient;
+   107	use artcraft_router::client::router_midjourney_client::RouterMidjourneyClient;
+   108	use artcraft_router::errors::artcraft_router_error::ArtcraftRouterError;
+   109	use artcraft_router::generate::generate_image::generate_image_request_builder::GenerateImageRequestBuilder;
+   110	use artcraft_router::generate::generate_image::generate_image_response::GenerateImageResponse;
+   111	use artcraft_router::generate::generate_image::image_generation_draft_or_request::ImageGenerationDraftOrRequest;
+   112	use artcraft_router::generate::generate_image::router_image_request_to_artcraft_prompt::router_image_request_to_artcraft_prompt;
+   113	use log::warn;
+   114	use serde::de::DeserializeOwned;
+   115	use serde_json::{Map, Value};
+   116	use tokens::tokens::batch_generations::BatchGenerationToken;
+   117	
+   118	use super::accounts::ProviderAccounts;
+   119	use super::jobs::ProviderJob;
+   120	use super::{Provider, is_midjourney};
+   121	use crate::backend::api_message;
+   122	
+   123	/// Direct Midjourney jobs always make this many images.
+   124	const MIDJOURNEY_BATCH: u16 = 4;
+   125	
+   126	/// Why a generation couldn't start.
+   127	#[derive(Debug, PartialEq)]
+   128	pub enum SubmitError {
+   129	  /// The provider's account isn't connected (or its login expired).
+   130	  NeedsAccount(Provider),
+   131	  Message(String),
+   132	}
+   133	
+   134	impl From<String> for SubmitError {
+   135	  fn from(message: String) -> Self {
+   136	    SubmitError::Message(message)
+   137	  }
+   138	}
+   139	
+   140	impl From<&str> for SubmitError {
+   141	  fn from(message: &str) -> Self {
+   142	    SubmitError::Message(message.to_owned())
+   143	  }
+   144	}
+   145	
+   146	/// Starts `fields` (the image page's OmniGen request) at `provider`; `image_urls` are the
+   147	/// references' CDN links.
+   148	pub async fn submit(host: &ApiHost, creds: Option<&StorytellerCredentialSet>, accounts: &ProviderAccounts, provider: Provider, fields: &Map<String, Value>, image_urls: Vec<String>) -> Result<ProviderJob, SubmitError> {
+   149	  match provider {
+   150	    Provider::Midjourney => submit_midjourney(host, creds, accounts, fields, image_urls).await,
+   151	    Provider::Fal => submit_fal(host, creds, accounts, fields, image_urls).await,
+   152	    Provider::Artcraft => Err("ArtCraft generations go through OmniGen".into()),
+   153	  }
+   154	}
+   155	
+   156	async fn submit_midjourney(host: &ApiHost, creds: Option<&StorytellerCredentialSet>, accounts: &ProviderAccounts, fields: &Map<String, Value>, image_urls: Vec<String>) -> Result<ProviderJob, SubmitError> {
+   157	  let model_id = model_id(fields);
+   158	  if !is_midjourney(model_id) {
+   159	    return Err("This model cannot use a Midjourney account".into());
+   160	  }
+   161	  if !image_urls.is_empty() {
+   162	    return Err("Direct Midjourney does not support image references yet".into());
+   163	  }
+   164	  if fields.get("image_batch_count").and_then(Value::as_u64).is_some_and(|n| n != u64::from(MIDJOURNEY_BATCH)) {
+   165	    return Err("Direct Midjourney generates four images per job".into());
+   166	  }
+   167	  let mut builder = request_builder(RouterProvider::Midjourney, fields, Vec::new())?;
+   168	  builder.resolution = None;
+   169	  builder.quality = None;
+   170	  builder.image_batch_count = Some(MIDJOURNEY_BATCH);
+   171	  let prompt_request = router_image_request_to_artcraft_prompt(&builder);
+   172	  let Ok(ImageGenerationDraftOrRequest::Request(generation)) = builder.build2() else {
+   173	    return Err("Unexpected Midjourney request draft".into());
+   174	  };
+   175	  let session = accounts.midjourney.session().await.map_err(|err| err.to_string())?.ok_or(SubmitError::NeedsAccount(Provider::Midjourney))?;
+   176	  // The prompt comes first, so the results can be attributed to it after a restart.
+   177	  let creds = creds.ok_or("Please sign in to generate.")?;
+   178	  let prompt = create_prompt(host, Some(creds), prompt_request).await.map_err(|err| api_message(&err))?;
+   179	  let client = RouterClient::Midjourney(RouterMidjourneyClient::new(session.cookie_header, session.user_id, session.browser));
+   180	  let GenerateImageResponse::Midjourney(response) = generation.send_request(&client).await.map_err(router_message(Provider::Midjourney))? else {
+   181	    return Err("Unexpected Midjourney response".into());
+   182	  };
+   183	  Ok(new_job(Provider::Midjourney, fields, u32::from(MIDJOURNEY_BATCH), response.job_id, None, None, Some(prompt.prompt_token.to_string())))
+   184	}
+   185	
+   186	async fn submit_fal(host: &ApiHost, creds: Option<&StorytellerCredentialSet>, accounts: &ProviderAccounts, fields: &Map<String, Value>, image_urls: Vec<String>) -> Result<ProviderJob, SubmitError> {
+   187	  let key = accounts.fal_key().ok_or(SubmitError::NeedsAccount(Provider::Fal))?;
+   188	  let builder = request_builder(RouterProvider::Fal, fields, image_urls)?;
+   189	  // The prompt record is a nicety here: the generation goes ahead without it.
+   190	  let maybe_prompt_token = match creds {
+   191	    Some(creds) => create_prompt(host, Some(creds), router_image_request_to_artcraft_prompt(&builder)).await.map(|p| p.prompt_token.to_string()).map_err(|err| warn!("Couldn't create the prompt record: {}", api_message(&err))).ok(),
+   192	    None => None,
+   193	  };
+   194	  let generation = match builder.build2() {
+   195	    Ok(ImageGenerationDraftOrRequest::Request(generation)) => generation,
+   196	    Ok(ImageGenerationDraftOrRequest::Draft(_)) => return Err("Fal should not be sending draft requests".into()),
+   197	    Err(err) => return Err(err.to_string().into()),
+   198	  };
+   199	  let client = RouterClient::Fal(RouterFalClient::new_polling_only_from_raw_key(&key));
+   200	  let GenerateImageResponse::Fal(response) = generation.send_request(&client).await.map_err(router_message(Provider::Fal))? else {
+   201	    return Err("Unexpected FAL response".into());
+   202	  };
+   203	  let request_id = response.request_id.or(response.gateway_request_id).ok_or("FAL didn't return a request id")?;
+   204	  let count = fields.get("image_batch_count").and_then(Value::as_u64).map_or(1, |n| n.max(1) as u32);
+   205	  Ok(new_job(Provider::Fal, fields, count, request_id, response.maybe_status_url, response.maybe_response_url, maybe_prompt_token))
+   206	}
+   207	
+   208	/// The router's request for the page's fields. The setting values are the router's own names
+   209	/// (`wide_sixteen_by_nine`, `one_k`, `high`).
+   210	fn request_builder(provider: RouterProvider, fields: &Map<String, Value>, image_urls: Vec<String>) -> Result<GenerateImageRequestBuilder, String> {
+   211	  let model = match (parse::<RouterImageModel>(fields.get("model")), model_id(fields)) {
+   212	    (Some(model), _) => model,
+   213	    // The generic Midjourney model is the newest version.
+   214	    (None, "midjourney") => RouterImageModel::Midjourney8,
+   215	    (None, id) => return Err(format!("{id} isn't available on this provider")),
+   216	  };
+   217	  let mismatch = if matches!(provider, RouterProvider::Midjourney) { GenerationModeMismatchStrategy::AbortGeneration } else { GenerationModeMismatchStrategy::GenerateAnyway };
+   218	  Ok(GenerateImageRequestBuilder { model, provider, prompt: fields.get("prompt").and_then(Value::as_str).map(str::to_owned), image_inputs: (!image_urls.is_empty()).then_some(ImageListRef::Urls(image_urls)), resolution: parse(fields.get("resolution")), aspect_ratio: parse(fields.get("aspect_ratio")), quality: parse(fields.get("quality")), image_batch_count: fields.get("image_batch_count").and_then(Value::as_u64).map(|n| n as u16), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, generation_mode_mismatch_strategy: Some(mismatch), idempotency_token: None })
+   219	}
+   220	
+   221	fn new_job(provider: Provider, fields: &Map<String, Value>, batch_count: u32, provider_job_id: String, maybe_status_url: Option<String>, maybe_response_url: Option<String>, maybe_prompt_token: Option<String>) -> ProviderJob {
+   222	  ProviderJob { id: format!("local_{}", uuid::Uuid::new_v4()), provider, model_id: model_id(fields).to_owned(), prompt: fields.get("prompt").and_then(Value::as_str).unwrap_or_default().to_owned(), created_at: chrono::Utc::now().timestamp(), batch_count, provider_job_id, maybe_status_url, maybe_response_url, maybe_prompt_token, batch_token: BatchGenerationToken::generate().to_string(), upload_tokens: Vec::new(), uploaded: Vec::new() }
+   223	}
+   224	
+   225	/// What the user sees for a router error: billing problems point at the provider's website
+   226	/// (`GenericProviderBillingBlock`).
+   227	fn router_message(provider: Provider) -> impl Fn(ArtcraftRouterError) -> SubmitError {
+   228	  move |err| match err {
+   229	    ArtcraftRouterError::ProviderBillingError(_) => SubmitError::Message(format!("Please set up {} on their website to use it with ArtCraft.", provider.label())),
+   230	    other => SubmitError::Message(other.to_string()),
+   231	  }
+   232	}
+   233	
+   234	fn model_id(fields: &Map<String, Value>) -> &str {
+   235	  fields.get("model").and_then(Value::as_str).unwrap_or_default()
+   236	}
+   237	
+   238	fn parse<T: DeserializeOwned>(value: Option<&Value>) -> Option<T> {
+   239	  value.cloned().and_then(|v| serde_json::from_value(v).ok())
+   240	}
+   241	
+   242	#[cfg(test)]
+   243	mod tests {
+   244	  use serde_json::json;
+   245	
+   246	  use super::*;
+   247	
+   248	  #[test]
+   249	  fn page_fields_become_the_routers_request() {
+   250	    let fields = json!({ "model": "nano_banana_pro", "prompt": "a fox", "aspect_ratio": "wide_sixteen_by_nine", "resolution": "two_k", "quality": "high", "image_batch_count": 2 });
+   251	    let b = request_builder(RouterProvider::Fal, fields.as_object().unwrap(), vec!["https://cdn/x.png".into()]).unwrap();
+   252	    assert_eq!(b.model, RouterImageModel::NanoBananaPro);
+   253	    assert_eq!((b.prompt.as_deref(), b.image_batch_count), (Some("a fox"), Some(2)));
+   254	    assert!(b.aspect_ratio.is_some() && b.resolution.is_some() && b.quality.is_some() && b.image_inputs.is_some());
+   255	    let generic = request_builder(RouterProvider::Midjourney, json!({ "model": "midjourney" }).as_object().unwrap(), Vec::new()).unwrap();
+   256	    assert_eq!(generic.model, RouterImageModel::Midjourney8);
+   257	    assert!(request_builder(RouterProvider::Fal, json!({ "model": "seedance_2p0" }).as_object().unwrap(), Vec::new()).is_err());
+   258	  }
+   259	
+   260	  #[tokio::test]
+   261	  async fn direct_midjourney_checks_its_limits_before_anything_else() {
+   262	    let dir = std::env::temp_dir().join(format!("artcraft-native-submit-{}", uuid::Uuid::new_v4()));
+   263	    let accounts = ProviderAccounts::load(&dir);
+   264	    let host = ApiHost::Storyteller;
+   265	    let run = |fields: Value, urls: Vec<String>| {
+   266	      let (host, accounts) = (&host, &accounts);
+   267	      async move { submit(host, None, accounts, Provider::Midjourney, fields.as_object().unwrap(), urls).await }
+   268	    };
+   269	    assert_eq!(run(json!({ "model": "flux_1_dev" }), Vec::new()).await.unwrap_err(), SubmitError::Message("This model cannot use a Midjourney account".into()));
+   270	    assert_eq!(run(json!({ "model": "midjourney_7" }), vec!["u".into()]).await.unwrap_err(), SubmitError::Message("Direct Midjourney does not support image references yet".into()));
+   271	    assert_eq!(run(json!({ "model": "midjourney_7", "image_batch_count": 2 }), Vec::new()).await.unwrap_err(), SubmitError::Message("Direct Midjourney generates four images per job".into()));
+   272	    assert_eq!(run(json!({ "model": "midjourney_7", "prompt": "a fox", "image_batch_count": 4 }), Vec::new()).await.unwrap_err(), SubmitError::NeedsAccount(Provider::Midjourney), "no login yet");
+   273	    let fal = submit(&host, None, &accounts, Provider::Fal, json!({ "model": "flux_1_dev" }).as_object().unwrap(), Vec::new()).await;
+   274	    assert_eq!(fal.unwrap_err(), SubmitError::NeedsAccount(Provider::Fal));
+   275	    let _ = std::fs::remove_dir_all(dir);
+   276	  }
+   277	}
+   278	//! Generating through another provider (`ClassyModelSelector`'s "Select Provider"): Midjourney
+   279	//! with the user's own account, or fal with their API key, instead of ArtCraft. Images only;
+   280	//! video always runs on ArtCraft. Jobs are tracked here (they aren't ArtCraft jobs) and their
+   281	//! results uploaded into the user's library, like the Tauri app.
+   282	
+   283	pub mod accounts;
+   284	pub mod jobs;
+   285	pub mod submit;
+   286	pub mod worker;
+   287	
+   288	use serde::{Deserialize, Serialize};
+   289	
+   290	use crate::models::ModelInfo;
+   291	
+   292	/// Midjourney's models; direct jobs always make four images and take no references.
+   293	const MIDJOURNEY_MODELS: [&str; 4] = ["midjourney", "midjourney_7", "midjourney_7_niji", "midjourney_8"];
+   294	const MIDJOURNEY_BATCH: u16 = 4;
+   295	
+   296	/// Who runs a generation.
+   297	#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+   298	#[serde(rename_all = "snake_case")]
+   299	pub enum Provider {
+   300	  #[default]
+   301	  Artcraft,
+   302	  Midjourney,
+   303	  Fal,
+   304	}
+   305	
+   306	impl Provider {
+   307	  /// The picker's name (`getProviderDisplayName`).
+   308	  pub fn label(self) -> &'static str {
+   309	    match self {
+   310	      Provider::Artcraft => "ArtCraft",
+   311	      Provider::Midjourney => "Midjourney",
+   312	      Provider::Fal => "FAL",
+   313	    }
+   314	  }
+   315	
+   316	  /// The logo's key in the creator icons.
+   317	  pub fn icon(self) -> &'static str {
+   318	    match self {
+   319	      Provider::Artcraft => "artcraft",
+   320	      Provider::Midjourney => "midjourney",
+   321	      Provider::Fal => "fal",
+   322	    }
+   323	  }
+   324	
+   325	  /// The providers `model_id` can run on, the default first (`ImageModels.ts`,
+   326	  /// `buildModelsFromListing.ts`): fal for four ArtCraft models, Midjourney directly for
+   327	  /// Midjourney's.
+   328	  pub fn for_model(model_id: &str) -> &'static [Provider] {
+   329	    match model_id {
+   330	      "flux_1_dev" | "flux_1_schnell" | "nano_banana_2" | "nano_banana_pro" => &[Provider::Artcraft, Provider::Fal],
+   331	      "midjourney" => &[Provider::Midjourney, Provider::Artcraft],
+   332	      "midjourney_7" | "midjourney_7_niji" | "midjourney_8" => &[Provider::Artcraft, Provider::Midjourney],
+   333	      _ => &[Provider::Artcraft],
+   334	    }
+   335	  }
+   336	
+   337	  /// `picked` if `model_id` runs there, else the model's default.
+   338	  pub fn resolve(model_id: &str, picked: Option<Provider>) -> Provider {
+   339	    let allowed = Provider::for_model(model_id);
+   340	    picked.filter(|p| allowed.contains(p)).unwrap_or(allowed[0])
+   341	  }
+   342	
+   343	  /// What the model can do on this provider (`imageModelForProvider`): direct Midjourney makes
+   344	  /// four images, without references, resolution or quality choices.
+   345	  pub fn adapt(self, model: &ModelInfo) -> ModelInfo {
+   346	    let mut m = model.clone();
+   347	    if self == Provider::Midjourney && is_midjourney(&model.id) {
+   348	      m.batch_sizes = vec![MIDJOURNEY_BATCH];
+   349	      m.batch_default = MIDJOURNEY_BATCH;
+   350	      m.image_refs_max = 0;
+   351	      m.resolutions.clear();
+   352	      m.resolution_default = None;
+   353	      m.qualities.clear();
+   354	      m.quality_default = None;
+   355	    }
+   356	    m
+   357	  }
+   358	}
+   359	
+   360	pub fn is_midjourney(model_id: &str) -> bool {
+   361	  MIDJOURNEY_MODELS.contains(&model_id)
+   362	}
+   363	
+   364	#[cfg(test)]
+   365	mod tests {
+   366	  use super::*;
+   367	
+   368	  #[test]
+   369	  fn models_offer_their_providers_default_first() {
+   370	    assert_eq!(Provider::for_model("nano_banana_pro"), [Provider::Artcraft, Provider::Fal]);
+   371	    assert_eq!(Provider::for_model("midjourney"), [Provider::Midjourney, Provider::Artcraft]);
+   372	    assert_eq!(Provider::for_model("midjourney_8"), [Provider::Artcraft, Provider::Midjourney]);
+   373	    assert_eq!(Provider::for_model("seedream_4"), [Provider::Artcraft]);
+   374	    assert_eq!(Provider::resolve("seedream_4", Some(Provider::Fal)), Provider::Artcraft, "a pick the model can't use falls back");
+   375	    assert_eq!(Provider::resolve("flux_1_dev", Some(Provider::Fal)), Provider::Fal);
+   376	  }
+   377	
+   378	  #[test]
+   379	  fn direct_midjourney_makes_four_images_without_options() {
+   380	    let model = ModelInfo { id: "midjourney_7".into(), batch_sizes: vec![1, 2, 4], batch_default: 1, image_refs_max: 1, resolutions: vec!["one_k".into()], aspect_ratios: vec!["square".into()], ..Default::default() };
+   381	    let direct = Provider::Midjourney.adapt(&model);
+   382	    assert_eq!((direct.batch_sizes.as_slice(), direct.batch_default, direct.image_refs_max), ([4].as_slice(), 4, 0));
+   383	    assert!(direct.resolutions.is_empty());
+   384	    assert_eq!(direct.aspect_ratios, model.aspect_ratios, "aspect ratios stay");
+   385	    assert_eq!(Provider::Artcraft.adapt(&model).batch_sizes, model.batch_sizes);
+   386	  }
+   387	}
+src/app.rs:24:use crate::overlays::providers::{AccountAction, AccountsView, LoginEvent, MidjourneyLogin, SetupAction, setup_dialog};
+src/app.rs:109:  midjourney_login: Option<MidjourneyLogin>,
+src/app.rs:135:    let mut app = Self { cache, player, toasts: Toasts::default(), catalog: Catalog::default(), user: None, credits: None, page: saved.page, enter_to_generate: saved.enter_to_generate, view_mode: saved.view_mode, autoplay: saved.autoplay, sidebar_open: saved.sidebar_open, image: CreateImagePage::new(saved.image), video: CreateVideoPage::new(saved.video), audio: CreateAudioPage::new(saved.audio), library: FeedStore::default(), ratios: RatioCache::default(), prompts: HashMap::new(), prompt_records: HashMap::new(), requested_prompts: HashSet::new(), pending_recreate: None, batch_kinds: HashMap::new(), lightbox: None, picker: None, login: None, characters_modal: None, characters: Vec::new(), pending_characters: Vec::new(), settings_open: false, provider_setup: None, midjourney_login: None, fal_key_input: String::new(), preview: None, requests: Vec::new(), screenshot: ScreenshotRequest::from_env(), next_poll: 0.0, next_credits: CREDITS_INTERVAL, models_retry_at: None, backend };
+src/app.rs:137:    // Diagnostics: `ARTCRAFT_OPEN=settings` or `midjourney-login` opens that dialog at launch.
+src/app.rs:140:      Ok("midjourney-login") => app.account_action(AccountAction::ConnectMidjourney),
+src/app.rs:146:  /// Pending cards for the Midjourney and fal jobs still running.
+src/app.rs:747:    if self.settings_open && self.midjourney_login.is_none() {
+src/app.rs:750:      let view = AccountsView { midjourney: accounts.midjourney_account(), fal_key_hint: accounts.fal_key_hint() };
+src/app.rs:765:    if let Some(provider) = self.provider_setup.filter(|_| self.midjourney_login.is_none()) {
+src/app.rs:768:        Some(SetupAction::ConnectMidjourney) => {
+src/app.rs:770:          self.account_action(AccountAction::ConnectMidjourney);
+src/app.rs:779:    if let Some(login) = &mut self.midjourney_login {
+src/app.rs:781:        Some(LoginEvent::Captured(cookies)) => {
+src/app.rs:782:          self.midjourney_login = None;
+src/app.rs:783:          self.backend.save_midjourney_login(cookies);
+src/app.rs:784:          self.toasts.success("Midjourney connected");
+src/app.rs:786:        Some(LoginEvent::Closed) => self.midjourney_login = None,
+src/app.rs:812:      AccountAction::ConnectMidjourney => self.midjourney_login = Some(MidjourneyLogin::new(self.backend.data_root())),
+src/app.rs:813:      AccountAction::DisconnectMidjourney => self.backend.disconnect_midjourney(),
+src/backend/mod.rs:33:use cookie_store_wrapper::cookie_store::CookieStore;
+src/backend/mod.rs:150:  /// A Midjourney or fal job's results are in the library, as `batch_token`.
+src/backend/mod.rs:274:        let (response, set_cookie) = client.password_login(&PasswordLoginRequest { username_or_email, password }).await.map_err(login_error)?;
+src/backend/mod.rs:275:        response.signed_session.filter(|s| !s.is_empty()).or_else(|| set_cookie.as_deref().and_then(session_from_set_cookie)).ok_or_else(|| "The server didn't return a session.".to_owned())
+src/backend/mod.rs:327:            let signed = result.response.maybe_signed_session.or_else(|| result.session_set_cookie.as_deref().and_then(session_from_set_cookie));
+src/backend/mod.rs:442:  /// Starts an image generation at Midjourney or fal; `image_urls` are the references' links.
+src/backend/mod.rs:462:  /// What an image generation costs at `provider`: nothing extra for direct Midjourney (it uses
+src/backend/mod.rs:467:      Provider::Midjourney => {
+src/backend/mod.rs:490:  /// Midjourney and fal jobs still running (they get pending cards at startup).
+src/backend/mod.rs:495:  /// Keeps the Midjourney login captured by the sign-in window.
+src/backend/mod.rs:496:  pub fn save_midjourney_login(&self, cookies: CookieStore) {
+src/backend/mod.rs:499:      if let Err(err) = accounts.midjourney.save_login(cookies).await {
+src/backend/mod.rs:500:        let _ = tx.send(Event::Toast { error: true, message: format!("Couldn't save the Midjourney login: {err}") });
+src/backend/mod.rs:506:  pub fn disconnect_midjourney(&self) {
+src/backend/mod.rs:509:      if let Err(err) = accounts.midjourney.clear_credentials().await {
+src/backend/mod.rs:510:        let _ = tx.send(Event::Toast { error: true, message: format!("Couldn't disconnect Midjourney: {err}") });
+src/backend/mod.rs:800:  /// A GET with the desktop app's identity headers and cookies, decoded leniently.
+src/backend/mod.rs:805:  /// Any JSON call with the desktop app's identity headers and cookies, decoded leniently.
+src/backend/mod.rs:812:    if let Some(cookie) = self.creds.as_ref().and_then(StorytellerCredentialSet::maybe_as_cookie_header) {
+src/backend/mod.rs:813:      request = request.header("Cookie", cookie);
+src/backend/mod.rs:840:    if let Some(cookie) = self.creds.as_ref().and_then(StorytellerCredentialSet::maybe_as_cookie_header) {
+src/backend/mod.rs:841:      request = request.header("Cookie", cookie);
+src/backend/mod.rs:878:/// The `session` value out of a raw `Set-Cookie` header.
+src/backend/mod.rs:879:fn session_from_set_cookie(header: &str) -> Option<String> {
+src/backend/mod.rs:880:  cookie::Cookie::parse(header).ok().filter(|c| c.name() == "session").map(|c| c.value().to_owned())
+src/backend/mod.rs:982:  fn takes_the_session_from_set_cookie() {
+src/backend/mod.rs:983:    assert_eq!(session_from_set_cookie("session=abc.def; Path=/; Secure").as_deref(), Some("abc.def"));
+src/backend/mod.rs:984:    assert_eq!(session_from_set_cookie("visitor=x; Path=/"), None);
+src/backend/providers/jobs.rs:1://! Generations running at Midjourney or fal, saved (`state/native_provider_jobs.json`) so they
+src/backend/providers/jobs.rs:27:  /// The provider's job: Midjourney's job id, or fal's request id.
+src/backend/providers/jobs.rs:111:    let mut job = ProviderJob { id: "local_1".into(), provider: Provider::Midjourney, model_id: "midjourney_7".into(), prompt: "a fox".into(), created_at: 1, batch_count: 4, provider_job_id: "mj".into(), maybe_status_url: None, maybe_response_url: None, maybe_prompt_token: None, batch_token: "batch_1".into(), upload_tokens: Vec::new(), uploaded: Vec::new() };
+src/backend/providers/mod.rs:1://! Generating through another provider (`ClassyModelSelector`'s "Select Provider"): Midjourney
+src/backend/providers/mod.rs:15:/// Midjourney's models; direct jobs always make four images and take no references.
+src/backend/providers/mod.rs:16:const MIDJOURNEY_MODELS: [&str; 4] = ["midjourney", "midjourney_7", "midjourney_7_niji", "midjourney_8"];
+src/backend/providers/mod.rs:17:const MIDJOURNEY_BATCH: u16 = 4;
+src/backend/providers/mod.rs:25:  Midjourney,
+src/backend/providers/mod.rs:34:      Provider::Midjourney => "Midjourney",
+src/backend/providers/mod.rs:43:      Provider::Midjourney => "midjourney",
+src/backend/providers/mod.rs:49:  /// `buildModelsFromListing.ts`): fal for four ArtCraft models, Midjourney directly for
+src/backend/providers/mod.rs:50:  /// Midjourney's.
+src/backend/providers/mod.rs:54:      "midjourney" => &[Provider::Midjourney, Provider::Artcraft],
+src/backend/providers/mod.rs:55:      "midjourney_7" | "midjourney_7_niji" | "midjourney_8" => &[Provider::Artcraft, Provider::Midjourney],
+src/backend/providers/mod.rs:66:  /// What the model can do on this provider (`imageModelForProvider`): direct Midjourney makes
+src/backend/providers/mod.rs:70:    if self == Provider::Midjourney && is_midjourney(&model.id) {
+src/backend/providers/mod.rs:71:      m.batch_sizes = vec![MIDJOURNEY_BATCH];
+src/backend/providers/mod.rs:72:      m.batch_default = MIDJOURNEY_BATCH;
+src/backend/providers/mod.rs:83:pub fn is_midjourney(model_id: &str) -> bool {
+src/backend/providers/mod.rs:84:  MIDJOURNEY_MODELS.contains(&model_id)
+src/backend/providers/mod.rs:94:    assert_eq!(Provider::for_model("midjourney"), [Provider::Midjourney, Provider::Artcraft]);
+src/backend/providers/mod.rs:95:    assert_eq!(Provider::for_model("midjourney_8"), [Provider::Artcraft, Provider::Midjourney]);
+src/backend/providers/mod.rs:102:  fn direct_midjourney_makes_four_images_without_options() {
+src/backend/providers/mod.rs:103:    let model = ModelInfo { id: "midjourney_7".into(), batch_sizes: vec![1, 2, 4], batch_default: 1, image_refs_max: 1, resolutions: vec!["one_k".into()], aspect_ratios: vec!["square".into()], ..Default::default() };
+src/backend/providers/mod.rs:104:    let direct = Provider::Midjourney.adapt(&model);
+src/backend/session.rs:2://! first run from the Tauri app's cookie jar so an existing ArtCraft login carries over.
+src/backend/session.rs:7:use artcraft_client::credentials::storyteller_avt_cookie::StorytellerAvtCookie;
+src/backend/session.rs:9:use artcraft_client::credentials::storyteller_session_cookie::StorytellerSessionCookie;
+src/backend/session.rs:14:/// The Tauri app's identifier: its cookie jar lives in `<cache dir>/<identifier>/.cookies`.
+src/backend/session.rs:16:const TAURI_COOKIES_FILENAME: &str = ".cookies";
+src/backend/session.rs:19:/// The two ArtCraft cookies, as sent on every request (`Cookie: visitor=…; session=…`).
+src/backend/session.rs:29:    StorytellerCredentialSet::initialize(self.visitor.clone().map(StorytellerAvtCookie::new), Some(StorytellerSessionCookie::new(self.session.clone())))
+src/backend/session.rs:64:  let imported = import_tauri_cookies()?;
+src/backend/session.rs:65:  info!("Imported the ArtCraft login from the desktop app's cookie jar");
+src/backend/session.rs:92:/// array of `cookie_store` cookies (`{"raw_cookie": "...", "domain": {...}, "expires": {...}}`).
+src/backend/session.rs:93:fn import_tauri_cookies() -> Option<Credentials> {
+src/backend/session.rs:94:  let path = directories::BaseDirs::new()?.cache_dir().join(TAURI_APP_IDENTIFIER).join(TAURI_COOKIES_FILENAME);
+src/backend/session.rs:96:  let cookies: Vec<serde_json::Value> = serde_json::from_str(&text).ok()?;
+src/backend/session.rs:99:  for entry in &cookies {
+src/backend/session.rs:102:    let Some(raw) = entry.get("raw_cookie").and_then(|v| v.as_str()) else {
+src/backend/session.rs:108:    let Ok(cookie) = cookie::Cookie::parse(raw) else {
+src/backend/session.rs:111:    match cookie.name() {
+src/backend/session.rs:112:      "session" => creds.session = cookie.value().to_owned(),
+src/backend/session.rs:113:      "visitor" => creds.visitor = Some(cookie.value().to_owned()),
+src/feed/store.rs:147:  /// Pending cards for the Midjourney and fal jobs still running (after a restart).
+src/feed/store.rs:158:  /// A Midjourney or fal job's results are in: its card goes (the batch brings the images).
+src/feed/store.rs:166:  /// A Midjourney or fal job failed: its card shows the reason until dismissed.
+src/feed/store.rs:366:    let meta = EnqueueMeta { prompt: "p".into(), model_id: "midjourney_7".into(), batch_count: 4, ref_image: None, provider: Provider::Midjourney };
+src/feed/store.rs:372:    assert!(store.fail_local("local_b", "Midjourney didn't finish this job"));
+src/feed/store.rs:375:    assert_eq!(store.failed[0].message.as_deref(), Some("Midjourney didn't finish this job"), "the failure stays until dismissed");
+src/feed/types.rs:65:  /// Running at Midjourney or fal (tracked here, not in the server's job list).
+src/feed/types.rs:80:  /// A Midjourney or fal job (tracked here, not in the server's job list).
+src/models.rs:268:  const PREFIXES: [&str; 13] = ["flux_", "nano_banana", "gpt_image", "seedream", "seedance", "kling", "veo_", "sora", "happy_horse", "grok_imagine", "qwen", "suno", "seed_audio"];
+src/models.rs:277:    "grok_image" => "Grok Image",
+src/models.rs:278:    "grok_imagine_image" => "Grok",
+src/models.rs:279:    "grok_imagine_video" => "Grok Video",
+src/models.rs:280:    "grok_imagine_image_q" => "Grok Imagine Quality",
+src/models.rs:324:  const LIMITS: [(&str, Option<usize>); 15] = [("nano_banana", None), ("gpt_image", None), ("seedance_2", None), ("seedance_1", Some(3000)), ("grok_imagine_video", Some(4096)), ("grok_video", Some(4096)), ("grok", Some(8000)), ("midjourney", Some(6000)), ("flux", Some(4000)), ("seedream", Some(4000)), ("qwen", Some(800)), ("kling", Some(2500)), ("happy_horse", Some(2500)), ("sora", Some(2000)), ("veo", Some(5000))];
+src/models.rs:331:    "grok_image" | "grok_imagine_image" => "Fast af",
+src/models.rs:332:    "midjourney" | "midjourney_7" | "midjourney_7_niji" | "midjourney_8" => "Stunning style and quality",
+src/models.rs:345:    "grok_video" | "grok_imagine_video" => "Fastest video model",
+src/models.rs:346:    "sora_2" => "Smart video model",
+src/models.rs:360:    "grok_image" | "grok_imagine_image" | "flux_pro_1p1" | "flux_1_dev" | "flux_1_schnell" => 10.0,
+src/models.rs:361:    "grok_video" | "grok_imagine_video" => 50.0,
+src/models.rs:364:    "midjourney" | "midjourney_7" | "midjourney_7_niji" | "midjourney_8" => 45.0,
+src/models.rs:375:  const PREFIXES: [(&str, &str); 18] = [("suno", "suno"), ("seed_audio", "bytedance"), ("flux", "black_forest_labs"), ("nano_banana", "google"), ("gemini", "google"), ("veo", "google"), ("imagen", "google"), ("gpt_image", "openai"), ("sora", "openai"), ("seedream", "bytedance"), ("seedance", "bytedance"), ("seededit", "bytedance"), ("kling", "kling"), ("grok", "grok"), ("midjourney", "midjourney"), ("qwen", "alibaba"), ("happy_horse", "alibaba"), ("minimax", "minimax")];
+src/models.rs:381:  const FAMILIES: [(&str, &str); 23] = [("seed_audio", "Seed Audio"), ("seedance", "Seedance"), ("kling", "Kling"), ("veo", "Veo"), ("sora", "Sora"), ("happy_horse", "Happy Horse"), ("wan", "Wan"), ("vidu", "Vidu"), ("preview", "Preview"), ("nano_banana", "Nano Banana"), ("gemini_25_flash", "Nano Banana"), ("seedream", "Seedream"), ("seededit", "SeedEdit"), ("gpt_image", "GPT Image"), ("flux", "Flux"), ("midjourney", "Midjourney"), ("grok", "Grok"), ("qwen", "Qwen"), ("recraft", "Recraft"), ("imagen", "Imagen"), ("minimax", "MiniMax"), ("marble", "World Labs"), ("suno", "Suno")];
+src/models.rs:388:  const ORDER: [&str; 17] = ["Seedance", "Kling", "Veo", "Sora", "Happy Horse", "Wan", "Vidu", "Grok", "Nano Banana", "Seedream", "GPT Image", "Flux", "Midjourney", "Qwen", "SeedEdit", "Recraft", "Imagen"];
+src/models.rs:622:      let mj = base("midjourney_7_niji", MediaKind::Image, Some("Midjourney v7 Niji (Anime)"), Some("midjourney".into()));
+src/models.rs:623:      assert_eq!((mj.name.as_str(), mj.creator.as_str()), ("Midjourney v7 Niji (Anime)", "midjourney"));
+src/models.rs:640:      assert_eq!(default_prompt_max("grok_imagine_video_1p5"), Some(4096));
+src/models.rs:641:      assert_eq!(default_prompt_max("grok_imagine_image"), Some(8000));
+src/models.rs:676:      let mut m = model("grok_imagine_image");
+src/models.rs:698:      let mut m = model("sora_2");
+src/models.rs:723:      let models: Vec<ModelInfo> = ["veo_3", "sora_2"].iter().map(|id| model(id)).collect();
+src/overlays/providers.rs:2://! Midjourney sign-in window (a system webview, used only to capture the login cookies, like
+src/overlays/providers.rs:7:use cookie_store_wrapper::cookie_store::CookieStore;
+src/overlays/providers.rs:10:use midjourney_client::credentials::cookie_store_has_auth_cookies::cookie_store_has_auth_cookies;
+src/overlays/providers.rs:11:use midjourney_client::utils::midjourney_browser_profile::MIDJOURNEY_USER_AGENT;
+src/overlays/providers.rs:13:use wry::raw_window_handle::HasWindowHandle;
+src/overlays/providers.rs:14:use wry::{WebContext, WebView, WebViewBuilder};
+src/overlays/providers.rs:22:const MIDJOURNEY_URL: &str = "https://www.midjourney.com/";
+src/overlays/providers.rs:23:/// The login cookies live on both hosts.
+src/overlays/providers.rs:24:const MIDJOURNEY_ORIGINS: [&str; 2] = ["https://www.midjourney.com/", "https://midjourney.com/"];
+src/overlays/providers.rs:25:/// How often the sign-in window is checked for the login cookies.
+src/overlays/providers.rs:26:const COOKIE_CHECK_SECS: f64 = 2.0;
+src/overlays/providers.rs:33:  ConnectMidjourney,
+src/overlays/providers.rs:37:/// "Set up {provider}": Midjourney signs in through its window; fal takes an API key here (the
+src/overlays/providers.rs:68:      action = Some(if provider == Provider::Fal { SetupAction::SaveFalKey } else { SetupAction::ConnectMidjourney });
+src/overlays/providers.rs:79:  /// The Midjourney account's email ("" when unknown), when one is connected.
+src/overlays/providers.rs:80:  pub midjourney: Option<String>,
+src/overlays/providers.rs:87:  ConnectMidjourney,
+src/overlays/providers.rs:88:  DisconnectMidjourney,
+src/overlays/providers.rs:93:/// The provider accounts in Settings (`MidjourneyAccountBlock`, plus the fal key).
+src/overlays/providers.rs:96:  let detail = match view.midjourney.as_deref() {
+src/overlays/providers.rs:101:  let (label, kind) = if view.midjourney.is_some() { ("Disconnect", widgets::Kind::Danger) } else { ("Connect", widgets::Kind::Secondary) };
+src/overlays/providers.rs:102:  if account_row(ui, "Midjourney account", detail, |ui| widgets::button(ui, None, label, kind, 0.0, theme::CONTROL_H).clicked()) {
+src/overlays/providers.rs:103:    action = Some(if view.midjourney.is_some() { AccountAction::DisconnectMidjourney } else { AccountAction::ConnectMidjourney });
+src/overlays/providers.rs:141:/// The Midjourney sign-in window: a webview over a modal, checked every two seconds for the
+src/overlays/providers.rs:142:/// login cookies (both auth tokens), which it hands back once present.
+src/overlays/providers.rs:143:pub struct MidjourneyLogin {
+src/overlays/providers.rs:152:  Captured(CookieStore),
+src/overlays/providers.rs:156:impl MidjourneyLogin {
+src/overlays/providers.rs:159:    Self { context: WebContext::new(Some(data_root.join("webview").join("midjourney"))), webview: None, error: None, next_check: 0.0 }
+src/overlays/providers.rs:166:    let dismissed = widgets::modal(ctx, Id::new("midjourney-login"), LOGIN_WIDTH, |ui| {
+src/overlays/providers.rs:168:        ui.label(widgets::heading("Login to Midjourney", 22.0));
+src/overlays/providers.rs:208:    ctx.request_repaint_after(std::time::Duration::from_secs_f64(COOKIE_CHECK_SECS));
+src/overlays/providers.rs:212:    self.next_check = now + COOKIE_CHECK_SECS;
+src/overlays/providers.rs:213:    let cookies = self.webview.as_ref().and_then(login_cookies)?;
+src/overlays/providers.rs:215:    Some(LoginEvent::Captured(cookies))
+src/overlays/providers.rs:218:  /// Opens on a blank page, clears what an earlier sign-in left behind, then goes to Midjourney
+src/overlays/providers.rs:219:  /// (with the user agent the saved cookies will be replayed with).
+src/overlays/providers.rs:220:  fn open(&mut self, window: &impl HasWindowHandle, bounds: wry::Rect) -> wry::Result<WebView> {
+src/overlays/providers.rs:221:    let webview = WebViewBuilder::new_with_web_context(&mut self.context).with_user_agent(MIDJOURNEY_USER_AGENT).with_url("about:blank").with_bounds(bounds).build_as_child(window)?;
+src/overlays/providers.rs:223:    webview.load_url(MIDJOURNEY_URL)?;
+src/overlays/providers.rs:235:/// The login cookies, once the page is on Midjourney and both auth tokens are set.
+src/overlays/providers.rs:236:fn login_cookies(webview: &WebView) -> Option<CookieStore> {
+src/overlays/providers.rs:238:  log::debug!("The Midjourney sign-in window is on {host}");
+src/overlays/providers.rs:239:  if host != "www.midjourney.com" && host != "midjourney.com" {
+src/overlays/providers.rs:242:  let mut store = CookieStore::empty();
+src/overlays/providers.rs:243:  for origin in MIDJOURNEY_ORIGINS {
+src/overlays/providers.rs:247:    match webview.cookies_for_url(origin.as_str()) {
+src/overlays/providers.rs:248:      // The cookie's own text keeps its path, domain, Secure, HttpOnly, SameSite and expiry.
+src/overlays/providers.rs:249:      Ok(cookies) => cookies.iter().for_each(|c| {
+src/overlays/providers.rs:250:        store.apply_set_cookie_header(&c.to_string(), &origin);
+src/overlays/providers.rs:252:      Err(err) => warn!("Couldn't read the sign-in cookies: {err}"),
+src/overlays/providers.rs:255:  cookie_store_has_auth_cookies(&store).then_some(store)
+src/overlays/providers.rs:258:fn physical_bounds(rect: Rect, pixels_per_point: f32) -> wry::Rect {
+src/overlays/providers.rs:260:  wry::Rect { position: wry::dpi::PhysicalPosition::new(r.left().round() as i32, r.top().round() as i32).into(), size: wry::dpi::PhysicalSize::new(r.width().round().max(1.0) as u32, r.height().round().max(1.0) as u32).into() }
+src/pages/create_image.rs:62:    // What the model can do on its provider (direct Midjourney: four images, no references).
+src/ui/creator_icons.rs:27:    "grok" | "xai" => service_svg!("grok"),
+src/ui/creator_icons.rs:31:    "midjourney" => service_svg!("midjourney"),
+src/ui/creator_icons.rs:39:    "tensor_art" | "tensorart" => service_svg!("tensorart"),
+src/ui/creator_icons.rs:41:    "world_labs" | "worldlabs" => service_svg!("worldlabs"),

@@ -102,3 +102,76 @@ Every agent reads the **latest entry** before starting. The orchestrator appends
   3. P5: README rewrite (remove "Pi", third-party prompt links; add the AI-provider keys section) and credits UI.
   4. P6: audit.
   5. P7: website.
+
+## 2026-10-28 — Paused for a laptop restart (RESUME HERE)
+- **State:**
+  - **main** (`E:/research-clones/hypergen`, local, ahead of origin by 4 commits, NOT pushed):
+    - `97aff6f`: Dock tests per platform, branding test reads `build.yml`.
+    - `d8e647f`: README rewrite (UI labels checked: "MCP & CLI → Agents" switch, "CLI → Install"; "Settings → AI providers" must be checked after the P3 merge).
+    - `eb88f84`: Windows drafts tests isolated (LOCALAPPDATA). Windows now has no known test failures.
+    - origin/main = `3d23b6f` (Initial commit + Add build workflow).
+  - **CI:** run 40544596773 failed.
+    - (a) Dock tests: fixed in `97aff6f`.
+    - (b) `main.branding.test` read a deleted `build-windows.yml`: fixed in `97aff6f`.
+    - (c) macOS/Linux make: vite.config needs `VITE_SUPABASE_URL`. P3 removes it. Windows make: same cause.
+    - Nothing is running on GitHub now.
+  - **P3:** worktree `E:/research-clones/hypergen-p3`, branch `p3-backend`, WIP commit `e126c84`.
+    - Workflow run `wf_2a5e67c0-20b` stopped during `run:WP6`. WP1–WP5 green (WP5 after one fix round); WP6 and WP7 developed, with WP6 tests being run.
+    - The P3 branch is based on the old local history (`6f1f270`). Main was squashed. The old history is kept in local branch `pre-squash`.
+- **Resume steps:**
+  1. Resume P3 with the Workflow tool: `scriptPath` `E:/research-clones/.claude/workflows/hypergen-phase.js`, `resumeFromRunId` `wf_2a5e67c0-20b`, `args` = `{date:"2026-10-27", maxDevs:3, subtasksFile:"E:/temp/claude/E--research-clones/7534b4d1-ae93-44a1-a822-daaa894f8252/scratchpad/p3-packages.json", goal:"P3 CUT THE VENDOR BACKEND in the git worktree E:/research-clones/hypergen-p3 (branch p3-backend). ALL reads, edits and test runs happen ONLY under E:/research-clones/hypergen-p3. Brief: E:/research-clones/docs/agents/P3-providers.md; ADR-011 and ADR-015. Commit nothing; the orchestrator commits."}`.
+     - The args must be identical for the cache to replay.
+     - If the scratchpad file is gone, use the copy at `E:/research-clones/docs/agents/p3-packages.json` and expect the replay to miss the cache. WIP commits `bcf1135`/`e126c84` keep the code.
+  2. When P3 is green, merge it onto main: in `hypergen`, run `git diff 6f1f270 p3-backend -- . ':!.workspace' | git apply -3`. Resolve conflicts (likely: dashboard `sidebar.tsx`, `app.tsx`, `help-view.tsx`, `desktop-app.ts`, `main.ts`, docs). Keep the Hypergen names from main and the backend removals from P3. Update `apps/web/src/hypergen-web-ui.test.ts` (it asserts on `login.tsx`, which P3 deletes).
+  3. Run full `npm test`, `npm run check` and `npm run lint`. Commit. Push main. Watch CI until green.
+  4. P5: credits UI (Secured by HyperOx · Powered by Buckleson → buckleson.com · Managed by Pavi → pavi.tech) in the dashboard footer and help.
+  5. P6: audit (every link, button and menu; agent connect shows "hypergen"; branding grep).
+  6. Run `python scripts/workspace/sync.py`, commit, push.
+  7. P7: website. Ask the user for the design links.
+- **Waiting on the user:**
+  - OK to delete 84 test-draft folders in `%LOCALAPPDATA%\userData\Drafts` (made by earlier test runs).
+  - Website design links.
+
+## 2026-10-28 — P3 cut vendor backend (hypergen-phase run `wf_2a5e67c0-20b`, args date 2026-10-27)
+- **Goal:** P3 in worktree `E:/research-clones/hypergen-p3` (branch `p3-backend`). Brief `docs/agents/P3-providers.md`, ADR-011, ADR-015.
+- **Done (uncommitted in the worktree; the orchestrator commits):**
+  - WP1 `packages/dapi`: Hypergen model catalog, job/transcript types, `MISSING_KEY`, Whisper mapping. `@diffusionstudio/api-contract` removed from dapi and CLI.
+  - WP2 `apps/desktop`: analytics and auth/checkout deep links removed. `safeStorage` key store, fal/Gemini IPC (`src/providers/`). `fal.ts:31` has a dot-segment guard on the endpoint.
+  - WP3 `apps/web`: Supabase auth, AuthGate, login, Sentry, `lib/analytics.ts` removed.
+  - WP4: billing/plans/credits/invoices/account views removed. Settings → AI providers panel added.
+  - WP5: tRPC api/jobs/uploads replaced by main-IPC fal jobs. Upgrade dialog removed.
+  - WP6: genai UI and AI commands on the new catalog. No credits.
+  - WP7: local Whisper transcribe (dapi handler + auto-captions). Gemini listen.
+  - WP8: docs and tool descriptions. Repo-wide acceptance grep test.
+- **Tests (all green):**
+  - `packages/dapi`: vitest 10 files, 234/234. `tsc --noEmit` clean.
+  - `apps/web`: vitest `test/` 5 files (wp3–wp7), 403/403. `tsc -p tsconfig.app.json --noEmit` clean.
+  - `apps/desktop`: 9 files, 136/136. `tsc --noEmit` clean.
+  - WP8 repo-wide git grep (word-bounded, ADR-015): clean.
+  - Fix rounds: WP2 (fal endpoint guard), WP5 (one round).
+  - Not run: full repo `npm test`, `npm run lint`.
+- **Decisions:** none new.
+- **Open issues:**
+  - `apps/web` vitest exits 1 with all tests passing: "MISSING DEPENDENCY jsdom". CI that checks the exit code fails. Install jsdom or drop the jsdom environment in `apps/web/vite.config.ts`.
+  - Flaky: `apps/web/test/wp5-fal-generation-core.test.ts:347` timed out at 5000 ms once under parallel load. Raise its timeout.
+  - `pnpm check` in `apps/web` cannot find `tsc` on PATH. Use `../../node_modules/.bin/tsc`.
+  - "no credits" wording in dapi `check.ts`, `filmstrip.ts`, `grab.ts`, `probe.ts`, `waveform.ts` has no direct test (only the WP8 grep).
+  - Open (needs user): ADR rule 4 (no third-party AI APIs) conflicts with ADR-011 (fal.ai, Gemini). Confirm ADR-011 supersedes rule 4.
+- **Next step:** Commit P3 on `p3-backend`. Then follow steps 2–7 of the "RESUME HERE" entry (merge onto main, full `npm test`/`check`/`lint`, push, CI green, P5, P6, P7).
+
+## 2026-10-28 — P3 merged into main
+- **Done:**
+  - P3 workflow `wf_2a5e67c0-20b` finished green (8/8 WP).
+  - P3 normalized to LF. `.gitattributes` forces LF.
+  - Cherry-picked the P3 squash onto main and resolved 12 conflicts. Rule: Hypergen names from main, backend removals from P3; the help menu keeps Issues + pavi.tech.
+  - 3 developer agents fixed the stale guard tests. Allow-lists for the deleted files are gone. The `hypergen://` protocol is removed (no deep links left).
+  - `apps/web` now has a `test` script, and its vitest includes `test/`. The `@desktop` alias was added. ESLint ignores `apps/web/test`. CI runs lint.
+  - Credits in Help → About. README fixed (Settings → MCP & CLI / AI providers).
+  - ADR rule 4 updated to match ADR-011.
+  - Commit `c894ba4`.
+- **Tests:** `npm test` 1,363 pass (desktop 476, web 543, agent-chat 63, dapi 281). `npm run check` clean. `npm run lint` 0 errors.
+- **Next step:**
+  1. Push. Watch CI.
+  2. P6 audit (every link, button, menu; agent connect shows "hypergen"; packaged-app smoke test on Windows).
+  3. P7 website: ask the user for the design links.
+- **Waiting on the user:** OK to delete 84 test drafts in `%LOCALAPPDATA%\userData\Drafts`; website design links.

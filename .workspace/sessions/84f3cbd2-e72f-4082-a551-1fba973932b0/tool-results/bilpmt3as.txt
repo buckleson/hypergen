@@ -1,0 +1,251 @@
+artcraft-native/src/backend/providers/submit.rs:14:use artcraft_router::client::router_midjourney_client::RouterMidjourneyClient;
+artcraft-native/src/backend/providers/submit.rs:74:  let mut builder = request_builder(RouterProvider::Midjourney, fields, Vec::new())?;
+artcraft-native/src/backend/providers/submit.rs:86:  let client = RouterClient::Midjourney(RouterMidjourneyClient::new(session.cookie_header, session.user_id, session.browser));
+artcraft-native/src/backend/providers/submit.rs:124:  let mismatch = if matches!(provider, RouterProvider::Midjourney) { GenerationModeMismatchStrategy::AbortGeneration } else { GenerationModeMismatchStrategy::GenerateAnyway };
+artcraft-native/src/backend/providers/submit.rs:162:    let generic = request_builder(RouterProvider::Midjourney, json!({ "model": "midjourney" }).as_object().unwrap(), Vec::new()).unwrap();
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:1:use crate::client::router_midjourney_client::RouterMidjourneyClient;
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:6:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:11:  pub(crate) midjourney_client: Option<RouterMidjourneyClient>,
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:16:  pub(crate) kinovi_web_client: Option<RouterKinoviWebClient>,
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:21:  pub fn get_midjourney_client_ref(&self) -> Result<&RouterMidjourneyClient, ClientError> {
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:23:      .ok_or(ClientError::ClientNotConfigured(ClientType::Midjourney))
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:46:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ClientError> {
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client.rs:48:      .ok_or(ClientError::ClientNotConfigured(ClientType::KinoviWeb))
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:1:use crate::client::router_midjourney_client::RouterMidjourneyClient;
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:7:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:11:  midjourney_client: Option<RouterMidjourneyClient>,
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:16:  kinovi_web_client: Option<RouterKinoviWebClient>,
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:53:  pub fn set_kinovi_web_client(mut self, client: RouterKinoviWebClient) -> Self {
+crates/api_clients/artcraft/artcraft_router/src/client/multi_router_client_builder.rs:63:  pub fn set_midjourney_client(mut self, client: RouterMidjourneyClient) -> Self {
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:1:use crate::client::router_midjourney_client::RouterMidjourneyClient;
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:7:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:14:  Midjourney(RouterMidjourneyClient),
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:18:  KinoviWeb(RouterKinoviWebClient),
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:23:  pub fn get_midjourney_client_ref(&self) -> Result<&RouterMidjourneyClient, ClientError> {
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:27:      _ => Err(ClientError::ClientNotConfigured(ClientType::Midjourney)),
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:63:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ClientError> {
+crates/api_clients/artcraft/artcraft_router/src/client/router_client.rs:67:      _ => Err(ClientError::ClientNotConfigured(ClientType::KinoviWeb)),
+crates/api_clients/artcraft/artcraft_router/src/errors/artcraft_router_error.rs:67:      ProviderError::MidjourneySubscriptionRequired(_) => true,
+crates/api_clients/artcraft/artcraft_router/src/errors/artcraft_router_error.rs:69:      ProviderError::KinoviWeb(KinoviWebError::ApiSpecific(KinoviWebSpecificApiError::BillingError { .. })) => true,
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:53:  KinoviWebOnlySupportsUrls,
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:67:  CharacterTokenToKinoviCharacterIdNotProvided,
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:70:  CharacterTokenNotFoundInMap { token: CharacterToken },
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:96:      Self::KinoviWebOnlySupportsUrls => {
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:108:      Self::CharacterTokenToKinoviCharacterIdNotProvided => {
+crates/api_clients/artcraft/artcraft_router/src/errors/client_error.rs:111:      Self::CharacterTokenNotFoundInMap { token } => {
+crates/api_clients/artcraft/artcraft_router/src/errors/download_error.rs:17:  WreqDownload {
+crates/api_clients/artcraft/artcraft_router/src/errors/download_error.rs:35:      Self::WreqDownload { url, error, maybe_status } => {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft.rs:29:      Self::KinoviSunoRemix(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft.rs:30:      Self::KinoviSunoSample(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft_context.rs:7:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_draft_context.rs:22:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs:51:      Self::KinoviSunoMusic(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs:52:      Self::KinoviSunoRemix(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs:53:      Self::KinoviSunoSounds(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/audio_generation_request.rs:54:      Self::KinoviSunoSample(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:119:      (RouterProvider::KinoviWeb, RouterAudioModel::SunoMusic) => build_kinovi_suno_music(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:120:      (RouterProvider::KinoviWeb, RouterAudioModel::SunoRemix) => build_kinovi_suno_remix(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:121:      (RouterProvider::KinoviWeb, RouterAudioModel::SunoSounds) => build_kinovi_suno_sounds(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:122:      (RouterProvider::KinoviWeb, RouterAudioModel::SunoSample) => build_kinovi_suno_sample(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:205:      let result = builder(RouterProvider::KinoviWeb, RouterAudioModel::SunoMusic).build2().expect("build");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:214:      let result = builder(RouterProvider::KinoviWeb, RouterAudioModel::SunoSounds).build2().expect("build");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:223:      let result = builder_with_audio_ref(RouterProvider::KinoviWeb, RouterAudioModel::SunoRemix).build2().expect("build");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:232:      let result = builder_with_audio_ref(RouterProvider::KinoviWeb, RouterAudioModel::SunoSample).build2().expect("build");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_request_builder.rs:245:      let result = builder(RouterProvider::KinoviWeb, RouterAudioModel::SeedAudio1p0).build2();
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_response.rs:13:pub struct KinoviWebAudioResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_response.rs:40:  KinoviWeb(KinoviWebAudioResponsePayload),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/generate_audio_response.rs:52:  pub fn get_kinovi_web_payload(&self) -> Option<KinoviWebAudioResponsePayload> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/build.rs:122:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/cost.rs:57:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:9:  GenerateAudioResponse, KinoviWebAudioResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:19:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateAudioResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:30:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:32:    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:46:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:81:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_music/request.rs:90:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/build.rs:171:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/cost.rs:66:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:9:  GenerateAudioResponse, KinoviWebAudioResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:20:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateAudioResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:31:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:33:    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:51:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:68:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_remix/request.rs:86:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/build.rs:165:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/cost.rs:66:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:9:  GenerateAudioResponse, KinoviWebAudioResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:20:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateAudioResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:31:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:33:    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:51:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:68:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sample/request.rs:87:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/build.rs:204:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/cost.rs:60:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:9:  GenerateAudioResponse, KinoviWebAudioResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:19:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateAudioResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:30:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:32:    Ok(GenerateAudioResponse::KinoviWeb(KinoviWebAudioResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:47:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:82:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_audio/providers/kinovi/suno_sounds/request.rs:91:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:117:      (RouterProvider::Midjourney, RouterImageModel::Midjourney7 | RouterImageModel::Midjourney7Niji | RouterImageModel::Midjourney8) => build_midjourney(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:160:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney7) => build_kinovi_midjourney_7(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:161:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney7Niji) => build_kinovi_midjourney_7_niji(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:162:      (RouterProvider::KinoviWeb, RouterImageModel::Midjourney8) => build_kinovi_midjourney_8(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:163:      (RouterProvider::KinoviWeb, RouterImageModel::Seedream5p0Pro) => build_kinovi_seedream_5p0_pro(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_request_builder.rs:164:      (RouterProvider::KinoviWeb, RouterImageModel::Seedream5p0ProUltra) => build_kinovi_seedream_5p0_pro(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs:29:/// image generation). Mirrors `KinoviWebVideoResponsePayload` on the
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs:32:pub struct KinoviWebImageResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs:44:  KinoviWeb(KinoviWebImageResponsePayload),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/generate_image_response.rs:62:  pub fn get_kinovi_web_payload(&self) -> Option<KinoviWebImageResponsePayload> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs:33:      Self::KinoviMidjourney7(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs:34:      Self::KinoviMidjourney7Niji(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs:35:      Self::KinoviMidjourney8(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft.rs:36:      Self::KinoviSeedream5p0Pro(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft_context.rs:7:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_draft_context.rs:32:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs:151:      Self::MidjourneyRequest(_) => RouterProvider::Midjourney,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs:193:      Self::KinoviMidjourney7(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs:194:      Self::KinoviMidjourney7Niji(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs:195:      Self::KinoviMidjourney8(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/image_generation_request.rs:196:      Self::KinoviSeedream5p0Pro(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/build.rs:185:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/cost.rs:174:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:9:  GenerateImageResponse, KinoviWebImageResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:21:    client: &RouterKinoviWebClient,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:31:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:33:    Ok(GenerateImageResponse::KinoviWeb(KinoviWebImageResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:55:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:67:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:87:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:103:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7/request.rs:138:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/build.rs:173:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:9:  GenerateImageResponse, KinoviWebImageResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:20:    client: &RouterKinoviWebClient,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:30:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:32:    Ok(GenerateImageResponse::KinoviWeb(KinoviWebImageResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:54:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:65:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:85:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:101:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_7_niji/request.rs:136:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/build.rs:171:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:9:  GenerateImageResponse, KinoviWebImageResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:20:    client: &RouterKinoviWebClient,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:30:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:32:    Ok(GenerateImageResponse::KinoviWeb(KinoviWebImageResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:54:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:65:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:85:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:101:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/midjourney_8/request.rs:136:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/build.rs:194:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:9:  GenerateImageResponse, KinoviWebImageResponsePayload,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:20:    client: &RouterKinoviWebClient,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:30:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:32:    Ok(GenerateImageResponse::KinoviWeb(KinoviWebImageResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:55:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:66:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:86:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:102:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/seedream_5p0_pro/request.rs:137:    let payload = response.get_kinovi_web_payload().expect("expected kinovi_web payload");
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/upload.rs:33:    .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/providers/kinovi/upload.rs:41:    .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/router_image_request_to_artcraft_prompt.rs:77:    RouterProvider::Midjourney => GenerationProvider::Midjourney,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_image/router_image_request_to_artcraft_prompt.rs:80:    RouterProvider::KinoviWeb => GenerationProvider::Artcraft ,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_mesh/generate_mesh_request_builder.rs:271:        RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_splat/generate_splat_request_builder.rs:255:        RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:251:      (RouterProvider::KinoviWeb, RouterVideoModel::HappyHorse1p0) => build_kinovi_happy_horse_1p0(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:252:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0) => build_kinovi_seedance_2p0(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:253:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0Fast) => build_kinovi_seedance_2p0_fast(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:254:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0Mini) => build_kinovi_seedance_2p0_mini(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:255:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0BytePlusMini) => build_kinovi_seedance_2p0_mini(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:256:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p0BytePlusUltraMini) => build_kinovi_seedance_2p0_mini(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:257:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p5Preview) => build_kinovi_seedance_2p5_preview(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_request_builder.rs:258:      (RouterProvider::KinoviWeb, RouterVideoModel::Seedance2p5) => build_kinovi_seedance_2p5(self),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_response.rs:13:pub struct KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_response.rs:61:  KinoviWeb(KinoviWebVideoResponsePayload),
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/generate_video_response.rs:73:  pub fn get_kinovi_web_payload(&self) -> Option<KinoviWebVideoResponsePayload> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/build.rs:447:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/cost.rs:313:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:16:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:27:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:29:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:50:  use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:185:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/happy_horse_1p0/request.rs:196:    RouterClient::KinoviWeb(RouterKinoviWebClient::new(session))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/resolve.rs:115:        ArtcraftRouterError::Client(ClientError::CharacterTokenNotFoundInMap {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/build.rs:626:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/cost.rs:613:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs:17:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs:28:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0/request.rs:30:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/build.rs:655:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/cost.rs:409:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs:17:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs:28:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_fast/request.rs:30:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/build.rs:497:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/cost.rs:339:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs:17:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs:28:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p0_mini/request.rs:30:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/build.rs:457:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs:17:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs:28:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5/request.rs:30:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/build.rs:485:      provider: RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs:5:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs:8:use crate::generate::generate_video::generate_video_response::{GenerateVideoResponse, KinoviWebVideoResponsePayload};
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs:17:  pub async fn send(&self, client: &RouterKinoviWebClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs:28:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/seedance_2p5_preview/request.rs:30:    Ok(GenerateVideoResponse::KinoviWeb(KinoviWebVideoResponsePayload {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/upload.rs:48:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/providers/kinovi/upload.rs:56:      .map_err(|err| ArtcraftRouterError::Provider(ProviderError::KinoviWeb(err)))?;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:36:      Self::KinoviHappyHorse1p0(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:37:      Self::KinoviSeedance2p0(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:38:      Self::KinoviSeedance2p0Fast(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:39:      Self::KinoviSeedance2p0Mini(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:40:      Self::KinoviSeedance2p5Preview(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft.rs:41:      Self::KinoviSeedance2p5(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft_context.rs:2:use crate::client::router_kinovi_web_client::RouterKinoviWebClient;
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft_context.rs:32:  pub fn get_kinovi_web_client_ref(&self) -> Result<&RouterKinoviWebClient, ArtcraftRouterError> {
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_draft_context.rs:45:      .ok_or_else(|| ArtcraftRouterError::Client(ClientError::CharacterTokenToKinoviCharacterIdNotProvided))
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:285:      Self::KinoviHappyHorse1p0(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:286:      Self::KinoviSeedance2p0(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:287:      Self::KinoviSeedance2p0Fast(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:288:      Self::KinoviSeedance2p0Mini(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:289:      Self::KinoviSeedance2p5Preview(_) => RouterProvider::KinoviWeb,
+crates/api_clients/artcraft/artcraft_router/src/generate/generate_video/video_generation_request.rs:290:      Self::KinoviSeedance2p5(_) => RouterProvider::KinoviWeb,
+crates/desktop/artcraft/src/core/commands/enqueue/generate_error.rs:236:          ProviderError::Midjourney(_) | ProviderError::MidjourneySubscriptionRequired(_) | ProviderError::MidjourneySubmitRejected(_) => BillingProvider::Midjourney,
+crates/desktop/artcraft/src/core/commands/enqueue/generate_error.rs:238:          ProviderError::KinoviWeb(_) => BillingProvider::Kinovi,
+crates/desktop/artcraft/src/core/commands/enqueue/generate_error.rs:246:      ArtcraftRouterError::Provider(ProviderError::Midjourney(e)) => Self::from(e),
+crates/desktop/artcraft/src/core/commands/enqueue/generate_error.rs:247:      ArtcraftRouterError::Provider(ProviderError::MidjourneySubscriptionRequired(message) | ProviderError::MidjourneySubmitRejected(message)) => Self::BadInput(BadInputReason::WrongImageArguments(message)),
+crates/desktop/artcraft/src/core/commands/enqueue/generate_error.rs:252:      ArtcraftRouterError::Provider(ProviderError::KinoviWeb(_)) => Self::ArtcraftRouterNotYetSupportedProvider("kinovi_web"),
+crates/desktop/artcraft/src/core/commands/generate/common/router_video_request_to_artcraft_prompt.rs:99:    RouterProvider::Midjourney => GenerationProvider::Midjourney,
+crates/desktop/artcraft/src/core/commands/generate/common/router_video_request_to_artcraft_prompt.rs:102:    RouterProvider::KinoviWeb => GenerationProvider::Artcraft ,
+crates/desktop/artcraft/src/core/commands/generate/generate_image/providers/midjourney/handle_midjourney.rs:18:use artcraft_router::client::router_midjourney_client::RouterMidjourneyClient;
+crates/desktop/artcraft/src/core/commands/generate/generate_image/providers/midjourney/handle_midjourney.rs:36:  let builder = GenerateImageRequestBuilder { model: tauri_image_model_to_router_model(model).unwrap_or(RouterImageModel::Midjourney8), provider: RouterProvider::Midjourney, prompt: request.prompt.clone(), image_inputs: None, resolution: None, aspect_ratio: request.aspect_ratio.map(convert_aspect_ratio), quality: None, image_batch_count: Some(4), horizontal_angle: None, vertical_angle: None, zoom: None, request_mismatch_mitigation_strategy: RequestMismatchMitigationStrategy::PayMoreUpgrade, generation_mode_mismatch_strategy: Some(GenerationModeMismatchStrategy::AbortGeneration), idempotency_token: None };
+crates/desktop/artcraft/src/core/commands/generate/generate_image/providers/midjourney/handle_midjourney.rs:46:  let client = RouterClient::Midjourney(RouterMidjourneyClient::new(session.cookie_header, session.user_id, session.browser));

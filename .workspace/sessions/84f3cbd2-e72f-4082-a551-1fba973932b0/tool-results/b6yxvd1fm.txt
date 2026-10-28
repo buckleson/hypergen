@@ -1,0 +1,1158 @@
+---
+name: developer
+description: H0x developer (run as dev-1/dev-2/dev-3). Implements exactly one subtask, YAGNI-style, touching only its listed files.
+---
+You implement ONE subtask in `E:/research-clones/h0x-video-studio/app`. Follow the ADR Deterministic rules and TOOLS.md.
+
+- Touch only the files listed in the subtask. If another file must change, stop and report it; another developer may hold it.
+- Locate code with `graphify query` or graft, not by reading whole files. Find literals with Grep.
+- Write the smallest change that meets the acceptance criteria. Match surrounding style, delete dead code you make obsolete, and add no new abstractions, flags or obvious comments.
+- Repo coding rules (inherited from upstream):
+  - 2-space indent in Rust and TypeScript.
+  - `log` macros, not `println!`.
+  - `anyhow::Result` in app code; `maybe_` prefix for optional fields.
+  - One Tauri command per file.
+  - Never touch `external/` or `secrets/`.
+- Branding rule: no user-visible "ArtCraft", "getartcraft", "Storyteller" or "FakeYou" outside the ADR allow-list.
+- Before you finish, run the fastest relevant check:
+  - TS: `npx vitest run <file>` inside `frontend/`, or `npx tsc -p <lib tsconfig> --noEmit`.
+  - Rust: `SQLX_OFFLINE=true cargo check -p <crate>`. It is heavy; run it once at the end.
+- When fixing a failure report, fix the root cause. Never weaken or skip the test unless the report says the test itself is wrong.
+- Don't commit. The main session commits.
+
+Return: the files changed, one line on what changed, and the check you ran with its result.
+crates/api_clients/grok_consumer_client/src/error/grok_client_error.rs:9:  WreqClientError(wreq::Error),
+crates/api_clients/grok_consumer_client/src/error/grok_client_error.rs:116:      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+crates/api_clients/grok_consumer_client/src/error/grok_generic_api_error.rs:59:  WreqError(wreq::Error),
+crates/api_clients/grok_consumer_client/src/error/grok_generic_api_error.rs:79:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+crates/api_clients/grok_consumer_client/src/recipes/prompt_websocket_image_with_retry.rs:41:      Err(GrokError::Client(GrokClientError::WreqClientError(err))) => {
+crates/api_clients/grok_consumer_client/src/recipes/prompt_websocket_image_with_retry.rs:42:        error!("Error sending message to websocket (WreqClientError): {}", err);
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/download_video_file.rs:30:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/download_video_file.rs:59:      .map_err(|err| GrokGenericApiError::WreqError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/download_video_file.rs:69:        GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/grok_download_video.rs:57:        .map_err(|err| GrokGenericApiError::WreqError(err))?
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/grok_download_video.rs:76:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/grok_download_video.rs:88:        .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/download_video_file/grok_download_video.rs:116:        .map_err(|err| GrokGenericApiError::WreqError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:16:      .map_err(|err| GrokClientError::WreqClientError(err))?)
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:25:      .map_err(|err| GrokClientError::WreqClientError(err))?)
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:34:      .map_err(|err| GrokClientError::WreqClientError(err))?)
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:39:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:48:      .map_err(|err| GrokClientError::WreqClientError(err))?)
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:57:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/_metadata/tls_fingerprint_checking.rs:62:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/create_listen_websocket.rs:28:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/create_listen_websocket.rs:49:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/grok_websocket.rs:29:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/image_websocket/grok_wrapped_websocket.rs:33:              GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/index_page/get_index_page.rs:28:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/get_index_page.rs:53:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/get_index_page.rs:60:  //    .map_err(|err| GrokGenericApiError::WreqError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/get_index_page.rs:73:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/requests/get_index_page_script_with_client.rs:41:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/requests/get_index_page_script_with_client.rs:48:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/requests/get_index_page_with_client.rs:45:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/index_page/requests/get_index_page_with_client.rs:51:      .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/create_media_post/grok_create_media_post.rs:49:        .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/create_media_post/grok_create_media_post.rs:79:    //    .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/create_media_post/grok_create_media_post.rs:100:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/create_media_post/grok_create_media_post.rs:107:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/create_media_post/grok_create_media_post.rs:116:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/like_media_post/grok_like_media.rs:51:        .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/like_media_post/grok_like_media.rs:96:    //    .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/like_media_post/grok_like_media.rs:110:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/like_media_post/grok_like_media.rs:117:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/like_media_post/grok_like_media.rs:128:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/list_media_posts/grok_list_media_posts.rs:63:        .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/media_posts/list_media_posts/grok_list_media_posts.rs:108:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/list_media_posts/grok_list_media_posts.rs:115:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/media_posts/list_media_posts/grok_list_media_posts.rs:124:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/upload_file/grok_upload_file.rs:107:        .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/upload_file/grok_upload_file.rs:139:    //    .map_err(|err| GrokClientError::WreqClientError(err))?;
+crates/api_clients/grok_consumer_client/src/requests/upload_file/grok_upload_file.rs:156:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/upload_file/grok_upload_file.rs:163:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/upload_file/grok_upload_file.rs:172:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/video_chat/grok_video_gen_chat_conversation.rs:151:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/requests/video_chat/grok_video_gen_chat_conversation.rs:178:        .map_err(|err| GrokClientError::WreqClientError(err))?)
+crates/api_clients/grok_consumer_client/src/requests/video_chat/grok_video_gen_chat_conversation.rs:288:          GrokClientError::WreqClientError(err)
+crates/api_clients/grok_consumer_client/src/requests/video_chat/grok_video_gen_chat_conversation.rs:299:          GrokGenericApiError::WreqError(err)
+crates/api_clients/grok_consumer_client/src/utils/create_firefox_client.rs:9:      .map_err(|err| GrokClientError::WreqClientError(err))
+crates/api_clients/kinovi_web_client/src/billing/get_billing_payments_history.rs:131:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_billing_payments_history.rs:153:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_billing_payments_history.rs:157:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_billing_payments_history.rs:162:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_credits_history.rs:123:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_credits_history.rs:145:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_credits_history.rs:149:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/billing/get_credits_history.rs:154:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/error/kinovi_web_client_error.rs:13:  WreqClientError(wreq::Error),
+crates/api_clients/kinovi_web_client/src/error/kinovi_web_client_error.rs:27:      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+crates/api_clients/kinovi_web_client/src/error/kinovi_web_generic_api_error.rs:33:  WreqError(wreq::Error),
+crates/api_clients/kinovi_web_client/src/error/kinovi_web_generic_api_error.rs:46:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+crates/api_clients/kinovi_web_client/src/requests/create_material/create_material.rs:221:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/create_material/create_material.rs:241:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/create_material/create_material.rs:246:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_character/generate_character.rs:81:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_character/generate_character.rs:102:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_character/generate_character.rs:107:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_image/generate_image.rs:259:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_image/generate_image.rs:282:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_image/generate_image.rs:287:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_video/generate_video.rs:370:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_video/generate_video.rs:393:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/generate_video/generate_video.rs:398:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/get_user_auth_details/get_user_auth_details.rs:48:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/get_user_auth_details/get_user_auth_details.rs:70:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/get_user_auth_details/get_user_auth_details.rs:74:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/get_user_auth_details/get_user_auth_details.rs:79:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_characters/poll_characters.rs:145:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_characters/poll_characters.rs:164:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_characters/poll_characters.rs:169:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_orders/poll_orders.rs:161:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_orders/poll_orders.rs:183:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_orders/poll_orders.rs:187:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/poll_orders/poll_orders.rs:192:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/prepare_file_upload/prepare_file_upload.rs:57:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/prepare_file_upload/prepare_file_upload.rs:89:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/prepare_file_upload/prepare_file_upload.rs:94:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/update_character/update_character.rs:64:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/update_character/update_character.rs:85:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/update_character/update_character.rs:90:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/upload_file/upload_file.rs:49:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/upload_file/upload_file.rs:68:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/upload_file/upload_file.rs:77:      .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/workflow_run_task/workflow_run_task.rs:386:    .map_err(|err| KinoviWebClientError::WreqClientError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/workflow_run_task/workflow_run_task.rs:409:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/kinovi_web_client/src/requests/workflow_run_task/workflow_run_task.rs:414:    .map_err(|err| KinoviWebGenericApiError::WreqError(err))?;
+crates/api_clients/midjourney_client/src/client/websocket/open_midjourney_websocket.rs:46:  let client = req.browser.clone().unwrap_or_default().build_client().map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/get_index_page_html.rs:27:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/get_index_page_html.rs:52:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/imagine.rs:104:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/imagine.rs:123:      .map_err(|err| MidjourneyClientError::WreqError(err))?;
+crates/api_clients/midjourney_client/src/endpoints/prompt_session_log.rs:58:  let client = args.browser.clone().unwrap_or_default().build_client().map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/prompt_session_log.rs:85:  let http_request = client.post(url).header("cookie", cookie_header).header("Referer", &referer).header("Referrer-Policy", "origin-when-cross-origin").header("accept", "*/*").header("accept-language", "en-US,en;q=0.8").header("content-type", "application/json").header("priority", "u=1, i").header("sec-fetch-dest", "empty").header("sec-fetch-mode", "cors").header("sec-fetch-site", "same-origin").header("x-csrf-protection", "1").json(&body).build().map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/refresh_token.rs:57:  let client = args.browser.clone().unwrap_or_default().build_client().map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/refresh_token.rs:63:  let http_request = client.post(url).header("Origin", "https://www.midjourney.com").header("Referer", "https://www.midjourney.com/").header("accept", "*/*").header("accept-language", "en-US,en;q=0.8").header("content-type", "application/x-www-form-urlencoded").form(&form).build().map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/storage_list.rs:38:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/storage_list.rs:64:      .map_err(|err| MidjourneyClientError::WreqError(err))?;
+crates/api_clients/midjourney_client/src/endpoints/submit_job.rs:85:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/submit_job.rs:164:      .map_err(|err| MidjourneyClientError::WreqError(err))?;
+crates/api_clients/midjourney_client/src/endpoints/user_connections.rs:45:      .map_err(MidjourneyClientError::WreqError)?;
+crates/api_clients/midjourney_client/src/endpoints/user_connections.rs:71:      .map_err(|err| MidjourneyClientError::WreqError(err))?;
+crates/api_clients/midjourney_client/src/error/midjourney_client_error.rs:26:  WreqError(wreq::Error),
+crates/api_clients/midjourney_client/src/error/midjourney_client_error.rs:53:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+crates/api_clients/midjourney_client/src/error/midjourney_client_error.rs:82:    Self::WreqError(error)
+crates/api_clients/midjourney_client/src/utils/image_downloader_client.rs:20:          .map_err(MidjourneyClientError::WreqError)?,
+crates/api_clients/midjourney_client/src/utils/image_downloader_client.rs:42:        .map_err(|err| MidjourneyClientError::WreqError(err))?;
+crates/api_clients/openai_sora_client/src/error/sora_client_error.rs:34:  WreqClientError(wreq::Error),
+crates/api_clients/openai_sora_client/src/error/sora_client_error.rs:62:      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+crates/api_clients/openai_sora_client/src/error/sora_generic_api_error.rs:37:  WreqError(wreq::Error),
+crates/api_clients/openai_sora_client/src/error/sora_generic_api_error.rs:51:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+crates/api_clients/openai_sora_client/src/requests/auth_bearer/generate_bearer_jwt_with_cookie.rs:42:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_bearer/generate_bearer_jwt_with_cookie.rs:57:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_bearer/generate_bearer_jwt_with_cookie.rs:65:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_sentinel/generate_sentinel_token.rs:62:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_sentinel/generate_sentinel_token.rs:74:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_sentinel_2/generate_sentinel_token_2.rs:53:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/auth_sentinel_2/generate_sentinel_token_2.rs:65:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/job_status/sora_job_status.rs:233:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/job_status/sora_job_status.rs:240:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/job_status/sora_job_status.rs:249:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/job_status/unimplemented_sora_job_status.rs:35:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/job_status/unimplemented_sora_job_status.rs:41:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/list_media/list_media.rs:53:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/list_media/list_media.rs:67:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/deprecated/list_media/list_media.rs:81:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/generate_sora2_video/generate_sora2_video.rs:123:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/generate_sora2_video/generate_sora2_video.rs:130:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/generate_sora2_video/generate_sora2_video.rs:138:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/image_gen/image_gen_http_request.rs:172:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/image_gen/image_gen_http_request.rs:179:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/image_gen/image_gen_http_request.rs:187:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/list_classic_tasks/list_classic_tasks.rs:112:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/list_classic_tasks/list_classic_tasks.rs:119:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/list_classic_tasks/list_classic_tasks.rs:128:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/list_sora2_drafts/list_sora2_drafts.rs:81:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/list_sora2_drafts/list_sora2_drafts.rs:88:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/list_sora2_drafts/list_sora2_drafts.rs:96:        SoraClientError::WreqClientError(err)
+crates/api_clients/openai_sora_client/src/requests/upload/upload_media_http_request.rs:71:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/upload/upload_media_http_request.rs:84:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/upload_sora2/upload_media_sora2_http_request.rs:65:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/requests/upload_sora2/upload_media_sora2_http_request.rs:78:        SoraGenericApiError::WreqError(err)
+crates/api_clients/openai_sora_client/src/utils_internal/classify_general_http_error.rs:11:    Err(err) => return SoraGenericApiError::WreqError(err).into(),
+crates/api_clients/worldlabs_api_client/src/api/requests/delete_world/delete_world.rs:45:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/delete_world/delete_world.rs:54:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/generate_world/generate_world.rs:65:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/generate_world/generate_world.rs:74:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_media_asset/get_media_asset.rs:48:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_media_asset/get_media_asset.rs:57:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_operation/get_operation.rs:97:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_operation/get_operation.rs:106:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_world/get_world.rs:64:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/get_world/get_world.rs:73:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/list_worlds/list_worlds.rs:84:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/list_worlds/list_worlds.rs:93:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/prepare_upload/prepare_upload.rs:83:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/prepare_upload/prepare_upload.rs:92:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/api/requests/upload_to_signed_url/upload_to_signed_url.rs:41:      WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_api_client/src/error/world_labs_client_error.rs:8:  WreqClientError(wreq::Error),
+crates/api_clients/worldlabs_api_client/src/error/world_labs_client_error.rs:19:      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+crates/api_clients/worldlabs_api_client/src/error/world_labs_generic_api_error.rs:24:  WreqError(wreq::Error),
+crates/api_clients/worldlabs_api_client/src/error/world_labs_generic_api_error.rs:47:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_refresh_token/google_refresh_token.rs:47:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_refresh_token/google_refresh_token.rs:77:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_refresh_token/google_refresh_token.rs:84:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_refresh_token/google_refresh_token.rs:93:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_upload/google_upload_image.rs:38:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_upload/google_upload_image.rs:57:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_upload/google_upload_image.rs:64:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/google_upload/google_upload_image.rs:73:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/begin_object_image_upload.rs:56:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/begin_object_image_upload.rs:89:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/begin_object_image_upload.rs:96:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/begin_object_image_upload.rs:105:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_run_object.rs:50:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_run_object.rs:82:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_run_object.rs:89:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_run_object.rs:98:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_upload_object.rs:51:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_upload_object.rs:83:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_upload_object.rs:90:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/create_upload_object.rs:99:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/finalize_object_image_upload.rs:56:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/finalize_object_image_upload.rs:88:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/finalize_object_image_upload.rs:95:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/finalize_object_image_upload.rs:104:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_upload.rs:78:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_upload.rs:113:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_upload.rs:120:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_upload.rs:129:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_world.rs:84:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_world.rs:118:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_world.rs:125:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/objects/update_run_object_with_world.rs:134:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/recaption/recaption_image.rs:54:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/recaption/recaption_image.rs:86:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/recaption/recaption_image.rs:93:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/recaption/recaption_image.rs:102:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/create_world.rs:57:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/create_world.rs:91:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/create_world.rs:98:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/create_world.rs:107:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/poll_world_status.rs:57:      .map_err(|err| WorldLabsClientError::WreqClientError(err))?;
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/poll_world_status.rs:89:        WorldLabsClientError::WreqClientError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/poll_world_status.rs:96:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/api/requests/worlds/poll_world_status.rs:105:        WorldLabsGenericApiError::WreqError(err)
+crates/api_clients/worldlabs_consumer_client/src/error/world_labs_client_error.rs:9:  WreqClientError(wreq::Error),
+crates/api_clients/worldlabs_consumer_client/src/error/world_labs_client_error.rs:119:      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+crates/api_clients/worldlabs_consumer_client/src/error/world_labs_generic_api_error.rs:65:  WreqError(wreq::Error),
+crates/api_clients/worldlabs_consumer_client/src/error/world_labs_generic_api_error.rs:86:      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+[package]
+name = "worldlabs_api_client"
+edition = "2024"
+version = "0.0.1"
+publish = false
+
+[lib]
+name = "worldlabs_api_client"
+path = "src/lib.rs"
+
+[dependencies]
+
+# Internal
+errors.workspace = true
+filesys.workspace = true
+
+# External
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { version = "1", features = ["full"] }
+uuid.workspace = true
+wreq.workspace = true
+
+[dev-dependencies]
+filesys.workspace = true
+env_logger.workspace = true
+env.workspace = true
+chrono.workspace = true
+strum.workspace = true
+test_data.workspace = true
+use crate::error::world_labs_error::WorldLabsError;
+use crate::error::world_labs_generic_api_error::WorldLabsGenericApiError;
+use crate::error::world_labs_specific_api_error::WorldLabsSpecificApiError;
+use wreq::StatusCode;
+
+/// Detect error HTTP responses and coerce the response as a Rust Error.
+pub fn filter_world_labs_http_error(status_code: StatusCode, maybe_body: Option<&str>) -> Result<(), WorldLabsError> {
+  if status_code.is_success() {
+    return Ok(());
+  }
+
+  match status_code {
+    StatusCode::PAYMENT_REQUIRED => {
+      return Err(WorldLabsSpecificApiError::InsufficientCredits.into());
+    },
+    _ => {},
+  }
+
+  // Check for NSFW content policy rejection (403 with nsfw/sexuality keywords).
+  if let Some(nsfw_error) = check_nsfw_content_rejection(status_code, maybe_body) {
+    return Err(nsfw_error.into());
+  }
+
+  if let Some(body) = maybe_body {
+    return Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody {
+      status_code,
+      body: body.to_string(),
+    }.into());
+  }
+
+  Err(WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody {
+    status_code,
+    body: String::new(),
+  }.into())
+}
+
+/// Check if a 403 response is an NSFW content policy rejection.
+/// Returns `Some(WorldLabsSpecificApiError)` if it matches, `None` otherwise.
+fn check_nsfw_content_rejection(
+  status_code: StatusCode,
+  maybe_body: Option<&str>,
+) -> Option<WorldLabsSpecificApiError> {
+  if status_code != StatusCode::FORBIDDEN {
+    return None;
+  }
+
+  let body = maybe_body?;
+  let body_lower = body.to_lowercase();
+
+  if body_lower.contains("nsfw") || body_lower.contains("sexuality") {
+    Some(WorldLabsSpecificApiError::NsfwContentPolicyRejected {
+      message: Some(body.to_string()),
+    })
+  } else {
+    None
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn success_200_returns_ok() {
+    let result = filter_world_labs_http_error(StatusCode::OK, None);
+    assert!(result.is_ok());
+  }
+
+  #[test]
+  fn success_200_with_body_returns_ok() {
+    let result = filter_world_labs_http_error(StatusCode::OK, Some("{}"));
+    assert!(result.is_ok());
+  }
+
+  // --- NSFW 403 ---
+
+  #[test]
+  fn nsfw_403_real_response() {
+    let body = r#"{"detail":"NSFW Content is not permitted by policy.  Sexuality"}"#;
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
+    let err = result.unwrap_err();
+
+    assert!(err.is_403_forbidden());
+    assert!(matches!(err, WorldLabsError::ApiSpecific(
+      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
+    )));
+  }
+
+  #[test]
+  fn nsfw_403_preserves_message() {
+    let body = r#"{"detail":"NSFW Content is not permitted by policy.  Sexuality"}"#;
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
+    let err = result.unwrap_err();
+
+    if let WorldLabsError::ApiSpecific(WorldLabsSpecificApiError::NsfwContentPolicyRejected { message }) = err {
+      assert_eq!(message.as_deref(), Some(body));
+    } else {
+      panic!("expected NsfwContentPolicyRejected, got: {:?}", err);
+    }
+  }
+
+  #[test]
+  fn nsfw_403_case_insensitive_nsfw() {
+    let body = r#"{"detail":"nsfw content detected"}"#;
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(
+      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
+    )));
+  }
+
+  #[test]
+  fn nsfw_403_case_insensitive_sexuality() {
+    let body = r#"{"detail":"Rejected due to Sexuality content"}"#;
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiSpecific(
+      WorldLabsSpecificApiError::NsfwContentPolicyRejected { .. }
+    )));
+  }
+
+  // --- Non-NSFW 403 ---
+
+  #[test]
+  fn non_nsfw_403_is_generic_error() {
+    let body = r#"{"detail":"Forbidden: invalid API key"}"#;
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, Some(body));
+    let err = result.unwrap_err();
+
+    assert!(err.is_403_forbidden());
+    assert!(matches!(err, WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
+    )));
+  }
+
+  #[test]
+  fn non_nsfw_403_no_body_is_generic_error() {
+    let result = filter_world_labs_http_error(StatusCode::FORBIDDEN, None);
+    let err = result.unwrap_err();
+    assert!(err.is_403_forbidden());
+    assert!(matches!(err, WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
+    )));
+  }
+
+  // --- 402 Payment Required ---
+
+  #[test]
+  fn payment_required_402() {
+    let result = filter_world_labs_http_error(StatusCode::PAYMENT_REQUIRED, Some("{}"));
+    let err = result.unwrap_err();
+    assert!(matches!(err, WorldLabsError::ApiSpecific(
+      WorldLabsSpecificApiError::InsufficientCredits
+    )));
+    assert!(!err.is_403_forbidden());
+  }
+
+  // --- Other errors ---
+
+  #[test]
+  fn server_error_500_is_generic() {
+    let body = r#"{"detail":"Internal server error"}"#;
+    let result = filter_world_labs_http_error(StatusCode::INTERNAL_SERVER_ERROR, Some(body));
+    let err = result.unwrap_err();
+    assert!(!err.is_403_forbidden());
+    assert!(matches!(err, WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
+    )));
+  }
+
+  #[test]
+  fn bad_request_400_is_generic() {
+    let body = r#"{"detail":"Bad request"}"#;
+    let result = filter_world_labs_http_error(StatusCode::BAD_REQUEST, Some(body));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
+    )));
+  }
+
+  #[test]
+  fn nsfw_keyword_in_non_403_is_not_nsfw_error() {
+    // Even if the body mentions "nsfw", a 400 should NOT be classified as NSFW rejection.
+    let body = r#"{"detail":"nsfw check failed"}"#;
+    let result = filter_world_labs_http_error(StatusCode::BAD_REQUEST, Some(body));
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { .. }
+    )));
+  }
+
+  #[test]
+  fn error_500_no_body() {
+    let result = filter_world_labs_http_error(StatusCode::INTERNAL_SERVER_ERROR, None);
+    assert!(matches!(result.unwrap_err(), WorldLabsError::ApiGeneric(
+      WorldLabsGenericApiError::UncategorizedBadResponseWithStatusAndBody { body, .. }
+    ) if body.is_empty()));
+  }
+}
+pub mod world_labs_client_error;
+pub mod world_labs_error;
+pub mod world_labs_generic_api_error;
+pub mod world_labs_specific_api_error;
+pub (crate) mod filter_world_labs_http_error;use std::error::Error;
+use std::fmt::{Display, Formatter};
+
+#[derive(Debug)]
+pub enum WorldLabsClientError {
+
+  /// An error was encountered in building the Wreq client
+  WreqClientError(wreq::Error),
+
+  /// Can't read a local file for uploading.
+  CannotReadLocalFileForUpload(std::io::Error),
+}
+
+impl Error for WorldLabsClientError {}
+
+impl Display for WorldLabsClientError {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Self::WreqClientError(err) => write!(f, "Wreq client error (during client creation): {}", err),
+      Self::CannotReadLocalFileForUpload(err) => write!(f, "Cannot read local file for upload: {}", err),
+    }
+  }
+}
+use crate::error::world_labs_client_error::WorldLabsClientError;
+use crate::error::world_labs_generic_api_error::WorldLabsGenericApiError;
+use crate::error::world_labs_specific_api_error::WorldLabsSpecificApiError;
+use std::error::Error;
+
+#[derive(Debug)]
+pub enum WorldLabsError {
+  Client(WorldLabsClientError),
+  ApiSpecific(WorldLabsSpecificApiError),
+  ApiGeneric(WorldLabsGenericApiError),
+}
+
+impl WorldLabsError {
+  pub fn is_403_forbidden(&self) -> bool {
+    match self {
+      Self::ApiSpecific(e) => e.is_403_forbidden(),
+      Self::ApiGeneric(e) => e.is_403_forbidden(),
+      Self::Client(_) => false,
+    }
+  }
+}
+
+impl Error for WorldLabsError {}
+
+impl std::fmt::Display for WorldLabsError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Self::Client(e) => write!(f, "WorldLabsClientError: {:?}", e),
+      Self::ApiSpecific(e) => write!(f, "WorldLabsSpecificApiError: {:?}", e),
+      Self::ApiGeneric(e) => write!(f, "WorldLabsGenericApiError: {:?}", e),
+    }
+  }
+}
+
+impl From<WorldLabsClientError> for WorldLabsError {
+  fn from(error: WorldLabsClientError) -> Self {
+    Self::Client(error)
+  }
+}
+
+impl From<WorldLabsSpecificApiError> for WorldLabsError {
+  fn from(error: WorldLabsSpecificApiError) -> Self {
+    Self::ApiSpecific(error)
+  }
+}
+
+impl From<WorldLabsGenericApiError> for WorldLabsError {
+  fn from(error: WorldLabsGenericApiError) -> Self {
+    Self::ApiGeneric(error)
+  }
+}
+use std::error::Error;
+use std::fmt::{Display, Formatter};
+use wreq::StatusCode;
+
+#[derive(Debug)]
+pub enum WorldLabsGenericApiError {
+  /// Unknown error occurred when uploading to signed URL
+  GoogleUploadFailed {
+    status_code: StatusCode,
+    body: String,
+  },
+
+  /// serde_json::Error, likely from JSON deserialization schema mismatch.
+  /// Includes the original body.
+  SerdeResponseParseErrorWithBody(serde_json::Error, String),
+
+  /// An uncategorized bad HTTP response.
+  UncategorizedBadResponseWithStatusAndBody {
+    status_code: StatusCode,
+    body: String,
+  },
+
+  /// An uncaught error from the API client.
+  WreqError(wreq::Error),
+}
+
+impl WorldLabsGenericApiError {
+  pub fn is_403_forbidden(&self) -> bool {
+    match self {
+      Self::UncategorizedBadResponseWithStatusAndBody { status_code, .. }
+      | Self::GoogleUploadFailed { status_code, .. } => {
+        *status_code == StatusCode::FORBIDDEN
+      }
+      _ => false,
+    }
+  }
+}
+
+impl Error for WorldLabsGenericApiError {}
+
+impl Display for WorldLabsGenericApiError {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Self::GoogleUploadFailed { status_code, body } => write!(f, "Signed URL upload failed with HTTP {}: {:?}", status_code, body),
+      Self::SerdeResponseParseErrorWithBody(err, body) => write!(f, "Failed to parse response body: {:?}. Body: {}", err, body),
+      Self::UncategorizedBadResponseWithStatusAndBody { status_code, body } => write!(f, "Uncategorized bad response: status code {}, body: {}", status_code, body),
+      Self::WreqError(err) => write!(f, "Wreq client error: {}", err),
+    }
+  }
+}
+use std::error::Error;
+use std::fmt::{Display, Formatter};
+
+#[derive(Debug)]
+pub enum WorldLabsSpecificApiError {
+  /// There aren't sufficient funds for generation.
+  InsufficientCredits,
+
+  /// The content was rejected by WorldLabs' NSFW / content policy filter.
+  NsfwContentPolicyRejected {
+    message: Option<String>,
+  },
+}
+
+impl WorldLabsSpecificApiError {
+  pub fn is_403_forbidden(&self) -> bool {
+    match self {
+      Self::NsfwContentPolicyRejected { .. } => true,
+      _ => false,
+    }
+  }
+}
+
+impl Error for WorldLabsSpecificApiError {}
+
+impl Display for WorldLabsSpecificApiError {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Self::InsufficientCredits => write!(f, "Insufficient credits"),
+      Self::NsfwContentPolicyRejected { message } => {
+        write!(f, "NSFW content policy rejection")?;
+        if let Some(msg) = message {
+          write!(f, ": {}", msg)?;
+        }
+        Ok(())
+      }
+    }
+  }
+}
+use crate::error::world_labs_error::WorldLabsError;
+use crate::error::world_labs_generic_api_error::WorldLabsGenericApiError;
+use log::{debug, error};
+use std::collections::HashMap;
+use std::time::Duration;
+use wreq::Client;
+
+pub struct UploadToSignedUrlArgs<'a> {
+  pub upload_url: &'a str,
+  pub file_bytes: Vec<u8>,
+  pub required_headers: &'a HashMap<String, String>,
+  pub content_type: &'a str,
+  pub request_timeout: Option<Duration>,
+}
+
+/// PUT {upload_url}
+///
+/// Upload raw file bytes to the signed URL returned by prepare_upload.
+/// Include any required_headers from the prepare_upload response.
+pub async fn upload_to_signed_url(args: UploadToSignedUrlArgs<'_>) -> Result<(), WorldLabsError> {
+  let client = Client::new();
+
+  debug!("Uploading to signed URL: {}", args.upload_url);
+
+  let mut request_builder = client.put(args.upload_url)
+    .header("Content-Type", args.content_type)
+    .body(args.file_bytes);
+
+  for (key, value) in args.required_headers {
+    request_builder = request_builder.header(key.as_str(), value.as_str());
+  }
+
+  if let Some(timeout) = args.request_timeout {
+    request_builder = request_builder.timeout(timeout);
+  }
+
+  let response = request_builder.send()
+    .await
+    .map_err(|err| {
+      error!("Error during signed URL upload: {:?}", err);
+      WorldLabsGenericApiError::WreqError(err)
+    })?;
+
+  let status = response.status();
+
+  if !status.is_success() {
+    let body = response.text()
+      .await
+      .unwrap_or_default();
+    error!("Signed URL upload failed (code {}): {:?}", status.as_u16(), body);
+    return Err(WorldLabsGenericApiError::GoogleUploadFailed {
+      status_code: status,
+      body,
+    }.into());
+  }
+
+  debug!("Upload to signed URL succeeded");
+
+  Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  // Upload tests are covered by the end-to-end recipe test,
+  // since this endpoint requires a fresh signed URL from prepare_upload.
+}
+use crate::api::api_types::operation_id::OperationId;
+use crate::api::api_types::world_labs_model::WorldLabsModel;
+use crate::api::requests::generate_world::http_request::{RawRequest, RawResponse, WorldPrompt, Permission};
+use crate::credentials::world_labs_api_creds::WorldLabsApiCreds;
+use crate::error::filter_world_labs_http_error::filter_world_labs_http_error;
+use crate::error::world_labs_error::WorldLabsError;
+use crate::error::world_labs_generic_api_error::WorldLabsGenericApiError;
+use log::{debug, error};
+use std::time::Duration;
+use wreq::Client;
+
+const URL: &str = "https://api.worldlabs.ai/marble/v1/worlds:generate";
+
+pub struct GenerateWorldArgs<'a> {
+  pub creds: &'a WorldLabsApiCreds,
+  pub world_prompt: WorldPrompt,
+  pub display_name: Option<String>,
+  pub model: WorldLabsModel,
+  pub seed: Option<u32>,
+  pub tags: Option<Vec<String>>,
+  pub permission: Option<Permission>,
+  pub request_timeout: Option<Duration>,
+}
+
+pub struct GenerateWorldResponse {
+  pub operation_id: OperationId,
+  pub done: bool,
+}
+
+/// POST /marble/v1/worlds:generate
+///
+/// Start world generation. Returns an operation_id to poll with get_operation.
+pub async fn generate_world(args: GenerateWorldArgs<'_>) -> Result<GenerateWorldResponse, WorldLabsError> {
+  let client = Client::new();
+
+  let model_name = args.model
+      .to_new_value()
+      .get_model_api_name_str()
+      .to_string();
+
+  let payload = RawRequest {
+    world_prompt: args.world_prompt,
+    display_name: args.display_name,
+    model: Some(model_name),
+    seed: args.seed,
+    tags: args.tags,
+    permission: args.permission,
+  };
+
+  debug!("Requesting URL: {}", URL);
+
+  let mut request_builder = client.post(URL)
+    .header("WLT-Api-Key", args.creds.api_key())
+    .header("Content-Type", "application/json")
+    .json(&payload);
+
+  if let Some(timeout) = args.request_timeout {
+    request_builder = request_builder.timeout(timeout);
+  }
+
+  let response = request_builder.send()
+    .await
+    .map_err(|err| {
+      error!("Error during generate_world request: {:?}", err);
+      WorldLabsGenericApiError::WreqError(err)
+    })?;
+
+  let status = response.status();
+
+  let response_body = response.text()
+    .await
+    .map_err(|err| {
+      error!("Error reading response body: {:?}", err);
+      WorldLabsGenericApiError::WreqError(err)
+    })?;
+
+  if !status.is_success() {
+    error!("generate_world returned error (code {}): {:?}", status.as_u16(), response_body);
+  }
+
+  filter_world_labs_http_error(status, Some(&response_body))?;
+
+  debug!("Response body (200): {}", response_body);
+
+  let raw: RawResponse = serde_json::from_str(&response_body)
+    .map_err(|err| WorldLabsGenericApiError::SerdeResponseParseErrorWithBody(err, response_body.to_string()))?;
+
+  Ok(GenerateWorldResponse {
+    operation_id: OperationId(raw.operation_id),
+    done: raw.done.unwrap_or(false),
+  })
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::api::requests::generate_world::http_request::{ContentReference, WorldPrompt};
+  use crate::api::requests::prepare_upload::prepare_upload::{prepare_upload, PrepareUploadArgs, MediaAssetKind};
+  use crate::api::requests::upload_to_signed_url::upload_to_signed_url::{upload_to_signed_url, UploadToSignedUrlArgs};
+  use crate::test_utils::get_test_api_key::get_test_api_key;
+  use crate::test_utils::setup_test_logging::setup_test_logging;
+  use filesys::file_read_bytes::file_read_bytes;
+  use log::LevelFilter;
+
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_text_prompt() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    let response = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Text {
+        text_prompt: Some("A cozy cabin in the snowy mountains".to_string()),
+        disable_recaption: None,
+      },
+      display_name: Some("Test World".to_string()),
+      model: WorldLabsModel::Marble0p1Mini,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await.unwrap();
+
+    println!("Operation ID: {}", response.operation_id.as_str());
+    println!("Done: {}", response.done);
+
+    assert_eq!(1, 2);
+  }
+
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_image_uri() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    let response = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Image {
+        image_prompt: ContentReference::Uri {
+          uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png".to_string(),
+        },
+        text_prompt: None,
+        is_pano: None,
+        disable_recaption: None,
+      },
+      display_name: None,
+      model: WorldLabsModel::Marble0p1Mini,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await.unwrap();
+
+    println!("Operation ID: {}", response.operation_id.as_str());
+    println!("Done: {}", response.done);
+
+    assert_eq!(1, 2);
+  }
+
+  /// End-to-end: upload a safe image step by step (prepare → upload →
+  /// generate_world), printing each step's result for debugging.
+  ///
+  /// Uses a synthetic gradient PNG from test_data/.
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_for_safe_image() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    // --- Read file ---
+    let file_bytes = file_read_bytes("/Users/bt/dev/storyteller/artcraft/test_data/image/mochi.jpg")
+        .expect("failed to read safe test image");
+    println!("Read {} bytes from safe test image", file_bytes.len());
+
+    // --- Step 1: prepare_upload ---
+    println!("\n=== Step 1: prepare_upload ===");
+    let prepare_result = prepare_upload(PrepareUploadArgs {
+      creds: &creds,
+      file_name: "mochi.jpg",
+      kind: MediaAssetKind::Image,
+      request_timeout: None,
+    }).await;
+
+    println!("prepare_upload result: {:?}", prepare_result.as_ref().map(|r| &r.media_asset_id));
+
+    let prepare_response = match prepare_result {
+      Ok(r) => {
+        println!("  Media Asset ID: {}", r.media_asset_id.as_str());
+        println!("  Upload URL: {}", r.upload_url);
+        println!("  Required headers: {:?}", r.required_headers);
+        r
+      }
+      Err(err) => {
+        println!("  ERROR at prepare_upload: {:?}", err);
+        panic!("prepare_upload failed: {:?}", err);
+      }
+    };
+
+    // --- Step 2: upload_to_signed_url ---
+    println!("\n=== Step 2: upload_to_signed_url ===");
+    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs {
+      upload_url: &prepare_response.upload_url,
+      file_bytes,
+      required_headers: &prepare_response.required_headers,
+      content_type: "image/jpeg",
+      request_timeout: None,
+    }).await;
+
+    match &upload_result {
+      Ok(()) => println!("  Upload succeeded."),
+      Err(err) => {
+        println!("  ERROR at upload_to_signed_url: {:?}", err);
+        panic!("upload_to_signed_url failed: {:?}", err);
+      }
+    }
+
+    // --- Step 3: generate_world ---
+    println!("\n=== Step 3: generate_world ===");
+    let generate_result = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Image {
+        image_prompt: ContentReference::MediaAsset {
+          media_asset_id: prepare_response.media_asset_id.as_str().to_string(),
+        },
+        text_prompt: Some("A colorful gradient landscape".to_string()),
+        is_pano: None,
+        disable_recaption: None,
+      },
+      display_name: None,
+      model: WorldLabsModel::Marble0p1Mini,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await;
+
+    match &generate_result {
+      Ok(r) => {
+        println!("  SUCCESS — safe image");
+        println!("  Operation ID: {}", r.operation_id.as_str());
+        println!("  Done: {}", r.done);
+      }
+      Err(err) => {
+        println!("  ERROR at generate_world: {:?}", err);
+      }
+    }
+
+    assert_eq!(1, 2, "Inspect output above");
+  }
+
+  /// End-to-end: upload an NSFW image step by step (prepare → upload →
+  /// generate_world), printing each step's result for debugging.
+  ///
+  /// We expect the NSFW rejection to happen at one of these steps.
+  /// This test helps us identify *which* step returns the moderation error
+  /// and what the error response body looks like.
+  ///
+  /// NB: Place the NSFW test image at `test_data/images/nsfw_test_image.png`.
+  /// This file is NOT checked into git.
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_for_nsfw_image() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    // --- Read file ---
+    let file_bytes = file_read_bytes("/Users/bt/Pictures/nsfw_test/nsfw_test_1.jpg")
+        .expect("failed to read NSFW test image");
+    println!("Read {} bytes from NSFW test image", file_bytes.len());
+
+    // --- Step 1: prepare_upload ---
+    println!("\n=== Step 1: prepare_upload ===");
+    let prepare_result = prepare_upload(PrepareUploadArgs {
+      creds: &creds,
+      file_name: "nsfw_test_1.jpg",
+      kind: MediaAssetKind::Image,
+      request_timeout: None,
+    }).await;
+
+    let prepare_response = match prepare_result {
+      Ok(r) => {
+        println!("  OK — Media Asset ID: {}", r.media_asset_id.as_str());
+        println!("  Upload URL: {}", r.upload_url);
+        r
+      }
+      Err(err) => {
+        println!("  NSFW CAUGHT AT STEP 1 (prepare_upload)!");
+        println!("  Error (Debug): {:?}", err);
+        println!("  Error (Display): {}", err);
+        assert_eq!(1, 2, "NSFW caught at prepare_upload — inspect output above");
+        unreachable!();
+      }
+    };
+
+    // --- Step 2: upload_to_signed_url ---
+    println!("\n=== Step 2: upload_to_signed_url ===");
+    let upload_result = upload_to_signed_url(UploadToSignedUrlArgs {
+      upload_url: &prepare_response.upload_url,
+      file_bytes,
+      required_headers: &prepare_response.required_headers,
+      content_type: "image/jpeg",
+      request_timeout: None,
+    }).await;
+
+    match &upload_result {
+      Ok(()) => println!("  OK — upload succeeded."),
+      Err(err) => {
+        println!("  NSFW CAUGHT AT STEP 2 (upload_to_signed_url)!");
+        println!("  Error (Debug): {:?}", err);
+        println!("  Error (Display): {}", err);
+        assert_eq!(1, 2, "NSFW caught at upload — inspect output above");
+      }
+    }
+
+    // --- Step 3: generate_world ---
+    println!("\n=== Step 3: generate_world ===");
+    let generate_result = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Image {
+        image_prompt: ContentReference::MediaAsset {
+          media_asset_id: prepare_response.media_asset_id.as_str().to_string(),
+        },
+        text_prompt: None,
+        is_pano: None,
+        disable_recaption: None,
+      },
+      display_name: None,
+      model: WorldLabsModel::Marble0p1Mini,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await;
+
+    match &generate_result {
+      Ok(r) => {
+        println!("  UNEXPECTED SUCCESS — NSFW image was NOT rejected at generate_world!");
+        println!("  Operation ID: {}", r.operation_id.as_str());
+        println!("  Done: {}", r.done);
+      }
+      Err(err) => {
+        println!("  NSFW CAUGHT AT STEP 3 (generate_world)!");
+        println!("  Error (Debug): {:?}", err);
+        println!("  Error (Display): {}", err);
+      }
+    }
+
+    assert_eq!(1, 2, "Inspect output above");
+  }
+
+  /// Marble 1.1: generate world from a mountain/tree image via URI.
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_marble_1p1_image_uri() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    let image_url = test_data::web::image_urls::MOUNTAIN_TREE_IMAGE_URL;
+
+    println!("=== generate_world with Marble 1.1 ===");
+    println!("Image URL: {}", image_url);
+
+    let result = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Image {
+        image_prompt: ContentReference::Uri {
+          uri: image_url.to_string(),
+        },
+        text_prompt: Some("Mountain landscape with a tree".to_string()),
+        is_pano: None,
+        disable_recaption: None,
+      },
+      display_name: None,
+      model: WorldLabsModel::Marble1p1,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await;
+
+    match &result {
+      Ok(r) => {
+        println!("SUCCESS — Marble 1.1");
+        println!("  Operation ID: {}", r.operation_id.as_str());
+        println!("  Done: {}", r.done);
+      }
+      Err(err) => {
+        println!("ERROR — Marble 1.1");
+        println!("  Error (Debug): {:?}", err);
+        println!("  Error (Display): {}", err);
+      }
+    }
+
+    assert_eq!(1, 2, "Inspect output above");
+  }
+
+  /// Marble 1.1-plus: generate world from a wide fall mountains image via URI.
+  #[tokio::test]
+  #[ignore]
+  async fn test_generate_world_marble_1p1_plus_image_uri() {
+    setup_test_logging(LevelFilter::Debug);
+
+    let creds = get_test_api_key().unwrap();
+
+    let image_url = test_data::web::image_urls::SUPER_WIDE_FALL_MOUNTAINS_IMAGE_URL;
+
+    println!("=== generate_world with Marble 1.1-plus ===");
+    println!("Image URL: {}", image_url);
+
+    let result = generate_world(GenerateWorldArgs {
+      creds: &creds,
+      world_prompt: WorldPrompt::Image {
+        image_prompt: ContentReference::Uri {
+          uri: image_url.to_string(),
+        },
+        text_prompt: Some("Autumn mountain panorama".to_string()),
+        is_pano: None,
+        disable_recaption: None,
+      },
+      display_name: None,
+      model: WorldLabsModel::Marble1p1Plus,
+      seed: None,
+      tags: None,
+      permission: None,
+      request_timeout: None,
+    }).await;
+
+    match &result {
+      Ok(r) => {
+        println!("SUCCESS — Marble 1.1-plus");
+        println!("  Operation ID: {}", r.operation_id.as_str());
+        println!("  Done: {}", r.done);
+      }
+      Err(err) => {
+        println!("ERROR — Marble 1.1-plus");
+        println!("  Error (Debug): {:?}", err);
+        println!("  Error (Display): {}", err);
+      }
+    }
+
+    assert_eq!(1, 2, "Inspect output above");
+  }
+}
