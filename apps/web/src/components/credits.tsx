@@ -4,11 +4,15 @@
 
 import { For, Show } from "solid-js";
 
+import buckleson from "@/assets/images/credits/buckleson.png";
+import hyperox from "@/assets/images/credits/hyperox.png";
+import pavi from "@/assets/images/credits/pavi.png";
+
 /** Who stands behind Hypergen, shown in Help > About. */
 export const CREDITS = [
-  { role: "Secured by", name: "HyperOx", logo: "/credits/hyperox.png" },
-  { role: "Powered by", name: "Buckleson", logo: "/credits/buckleson.png", href: "https://buckleson.com" },
-  { role: "Managed by", name: "Pavi", logo: "/credits/pavi.png", href: "https://pavi.tech" },
+  { role: "Secured by", name: "HyperOx", logo: hyperox },
+  { role: "Powered by", name: "Buckleson", logo: buckleson, href: "https://buckleson.com" },
+  { role: "Managed by", name: "Pavi", logo: pavi, href: "https://pavi.tech" },
 ] as const;
 
 export function HypergenCredits() {

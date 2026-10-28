@@ -204,7 +204,7 @@ def main():
 
     # --- credit logos (Help > About) -------------------------------------------
     logos = os.path.join(os.path.dirname(__file__), 'credits')
-    credits = os.path.join(PUBLIC, 'credits')
+    credits = os.path.join(IMAGES, 'credits')
     os.makedirs(credits, exist_ok=True)
     tile(64).save(os.path.join(credits, 'hyperox.png'))
     for src, name in (('Bson_logo.jpg', 'buckleson.png'), ('Pavii-logo.png', 'pavi.png')):
