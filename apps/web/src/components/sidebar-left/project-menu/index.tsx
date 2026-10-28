@@ -26,7 +26,6 @@ import { FileMenu, useFileCommands } from "./file-menu";
 import { EditMenu } from "./edit-menu";
 import { ViewMenu } from "./view-menu";
 import { ToolMenu } from "./tool-menu";
-import { AiCreditsMenu } from "./ai-credits-menu";
 import { HelpMenu } from "./help-menu";
 
 export function ProjectMenu() {
@@ -40,9 +39,9 @@ export function ProjectMenu() {
     navigate(location.state?.returnTo ?? "/");
   };
 
-  const handleOpenAccount = () => {
+  const handleOpenSettings = () => {
     (document.activeElement as HTMLElement)?.blur?.();
-    navigate("/?dashboard=account");
+    navigate("/?dashboard=settings");
   };
 
   /**
@@ -141,15 +140,6 @@ export function ProjectMenu() {
 
             <DropdownMenuGroup>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>AI credits</DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent class="w-[188px]">
-                    <AiCreditsMenu />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-
-              <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Help</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent class="w-[188px]">
@@ -158,7 +148,7 @@ export function ProjectMenu() {
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
-              <DropdownMenuItem onSelect={handleOpenAccount}>Account</DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleOpenSettings}>Settings</DropdownMenuItem>
             </DropdownMenuGroup>
 
             <Show when={!isDesktop}>

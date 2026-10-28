@@ -4,59 +4,40 @@
 
 
 import { getAssetFile, getLibrary } from "@hypergen/runtime";
-import { DapiError, generatedPath, isLocalJobId, isLocalModel } from "@hypergen/dapi";
+import { DapiError, HYPERGEN_MODELS, generatedPath, isLocalJobId, isLocalModel } from "@hypergen/dapi";
 
-import { api } from "@/lib/api";
+import { cancelJob, getJob, runJob } from "@/lib/jobs";
 import { uploadFile } from "@/lib/uploads";
 import { encodeSceneAudio, hasAudio } from "@/engine/scene-audio";
 import { resolveAsset } from "../lib/assets";
 import { audioFile } from "../lib/audio";
 import { destination, storeAt } from "../lib/outputs";
-import { apiError, requireSignIn } from "../lib/remote";
 import { requireScene } from "../lib/scene";
 import { localJob, startLocalJob } from "../local/jobs";
 
 import type { Asset, AssetLibrary } from "@hypergen/assets";
-import type { AssetRef, GenerateRequestInput, Job } from "@diffusionstudio/api-contract";
-import type { GenerationResult } from "@hypergen/dapi";
+import type { GenerationResult, Job, ModelId, ModelRequest } from "@hypergen/dapi";
 import type { ToolContext, ToolHandler } from "../handler";
 import type { Destination } from "../lib/outputs";
 
 /**
- * Starts a job: on the API, or, for a model that runs on this machine, in the
- * app (see ../local). Both answer with the API's `Job`, and `job` polls both.
+ * Starts a job: on fal.ai, or, for a model that runs on this machine, in the
+ * app (see ../local). Both answer with a `Job`, and `job` polls both.
  */
 export const generate: ToolHandler<"generate"> = async (args, ctx) => {
   if (isLocalModel(args.model)) {
     return startLocalJob(args, destination(args.output, ctx.session()), ctx);
   }
 
-  const { output, maxCredits, estimate, ...request } = args;
-  await requireSignIn();
-
+  const { output, estimate, ...request } = args;
   if (estimate) {
-    try {
-      const { credits, etaSeconds } = await api.estimate.query((await withUploads(request, ctx)) as GenerateRequestInput);
-      return { credits, etaSeconds };
-    } catch (error) {
-      throw apiError(error);
-    }
+    return { etaSeconds: HYPERGEN_MODELS[request.model as ModelId].etaSeconds };
   }
 
   const target = destination(output, ctx.session());
-
-  try {
-    const job = await api.generate.mutate({
-      request: (await withUploads(request, ctx)) as GenerateRequestInput,
-      idempotencyKey: crypto.randomUUID(),
-      maxCredits,
-    });
-
-    destinations.set(job.id, target);
-    return present(job, ctx);
-  } catch (error) {
-    throw apiError(error);
-  }
+  const job = await start((await withUploads(request, ctx)) as ModelRequest);
+  destinations.set(job.id, target);
+  return present(job, ctx);
 };
 
 export const job: ToolHandler<"job"> = async ({ id, cancel }, ctx) => {
@@ -64,21 +45,19 @@ export const job: ToolHandler<"job"> = async ({ id, cancel }, ctx) => {
     return localJob(id, cancel ?? false);
   }
 
-  await requireSignIn();
-
-  try {
-    let job: Job;
-    if (cancel) {
-      job = await api.jobs.cancel.mutate({ id });
-    } else {
-      job = await api.jobs.get.query({ id });
-    }
-
-    return present(job, ctx);
-  } catch (error) {
-    throw apiError(error);
+  const job = cancel ? await cancelJob(id) : getJob(id);
+  if (!job) {
+    throw new DapiError("not-found", `No job ${id}: jobs live in the app for the session, and are gone once it restarts or reloads.`);
   }
+  return present(job, ctx);
 };
+
+/** Starts a job and answers with its first state; it is followed on in the background. */
+function start(request: ModelRequest): Promise<Job> {
+  return new Promise((resolve, reject) => {
+    runJob(request, resolve).catch(reject);
+  });
+}
 
 // ── Requests ─────────────────────────────────────────────────
 
@@ -89,7 +68,7 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** `{ path }` and nothing else: a file the caller means, as opposed to a field of the API's. */
+/** `{ path }` and nothing else: a file the caller means, as opposed to a field of the model's. */
 const isFileRef = (value: unknown): value is FileRef => {
   return isPlainObject(value) && typeof value.path === "string" && Object.keys(value).length === 1;
 }
@@ -101,7 +80,7 @@ const isSceneRef = (value: unknown): value is SceneRef => {
 
 /**
  * The request with every `{ path }` and `{ scene }` uploaded and replaced by
- * the ref the API names it by; the rest untouched. `field` is the key the
+ * a data: URI of the file; the rest untouched. `field` is the key the
  * value sits under (an array's items sit under the array's).
  */
 async function withUploads(value: unknown, ctx: ToolContext, field?: string): Promise<unknown> {
@@ -114,7 +93,7 @@ async function withUploads(value: unknown, ctx: ToolContext, field?: string): Pr
 }
 
 /** A file uploaded; in an `audio` field only its sound, so a video's picture is not sent to be ignored. */
-async function upload(path: string, field: string | undefined, ctx: ToolContext): Promise<AssetRef> {
+async function upload(path: string, field: string | undefined, ctx: ToolContext): Promise<string> {
   const asset = await resolveAsset(ctx, path);
   return uploadFile(field === "audio" ? await audioFile(asset) : await getAssetFile(asset));
 }
@@ -125,9 +104,9 @@ async function upload(path: string, field: string | undefined, ctx: ToolContext)
  * only: what a scene would be as a picture or a video is a frame to pick or a
  * full export to run, which `capture` and `export` are for. Checked before
  * anything renders, and the render runs before the job starts, so a scene
- * with nothing to hear never costs credits.
+ * with nothing to hear never starts a job.
  */
-async function uploadScene(id: string, field: string | undefined, ctx: ToolContext): Promise<AssetRef> {
+async function uploadScene(id: string, field: string | undefined, ctx: ToolContext): Promise<string> {
   if (field !== "audio") {
     throw new DapiError(
       "invalid-input",
@@ -161,7 +140,7 @@ async function present(job: Job, ctx: ToolContext): Promise<GenerationResult> {
   let target = destinations.get(job.id) ?? destination(undefined, session);
   if (target.kind === "library" && !session) target = { kind: "disk", path: null };
   if (job.status !== "succeeded" || target.kind === "disk") {
-    return { job, saveTo: target.kind === "disk" ? target.path : null };
+    return { job: { ...job, assets: job.assets.map((file) => ({ ...file })) }, saveTo: target.kind === "disk" ? target.path : null };
   }
 
   const library = getLibrary(session!.world);

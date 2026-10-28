@@ -153,7 +153,7 @@ export function EditorPage() {
 
     load();
   
-    // A burst arrives as the whole set of files it touched, so a checkout that
+    // A burst arrives as the whole set of files it touched, so a git branch switch that
     // rewrites the library and the sources at once reloads both — reading only
     // the last path of a burst would answer for one of them and drop the rest.
     const unwatch = watchProject(dir, (paths) => {

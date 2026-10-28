@@ -20,8 +20,8 @@ export type DapiErrorCode =
   | "invalid-input"
   /** A single-slot resource (the export renderer) is in use. */
   | "busy"
-  /** The tool needs a signed-in account. */
-  | "sign-in-required"
+  /** The model's provider needs an API key and none is saved. */
+  | "MISSING_KEY"
   /** The platform or an external binary (gh, osascript) cannot do it. */
   | "unsupported"
   /** The caller or the app canceled the operation. */
@@ -39,4 +39,23 @@ export class DapiError extends Error {
 
 export function isDapiError(value: unknown): value is DapiError {
   return value instanceof DapiError;
+}
+
+const PROVIDER_NAMES = { gemini: "Gemini", fal: "fal.ai" } as const;
+
+/** The error a call fails with when `provider`'s API key is not saved. */
+export function missingKey(provider: keyof typeof PROVIDER_NAMES): DapiError {
+  return new DapiError("MISSING_KEY", `Add your ${PROVIDER_NAMES[provider]} API key in Hypergen > Settings > AI providers.`);
+}
+
+const MISSING_KEY_PREFIX = "MISSING_KEY: ";
+
+/**
+ * An error the main process sent as a string, as an error again: one that
+ * starts `MISSING_KEY: ` is the `DapiError` it was, any other a plain `Error`.
+ */
+export function fromWireError(message: string): Error {
+  return message.startsWith(MISSING_KEY_PREFIX)
+    ? new DapiError("MISSING_KEY", message.slice(MISSING_KEY_PREFIX.length))
+    : new Error(message);
 }

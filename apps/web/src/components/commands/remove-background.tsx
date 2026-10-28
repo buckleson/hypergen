@@ -7,7 +7,7 @@ import { useTransforms } from "@/components/genai/use-transforms";
 import { TransformBar } from "./transform-bar";
 
 export function RemoveBackgroundCommand() {
-  const { targets, run, price } = useTransforms();
+  const { targets, run } = useTransforms();
 
   useCommand({
     id: "remove-background",
@@ -17,7 +17,6 @@ export function RemoveBackgroundCommand() {
     keywords: ["cutout", "matte", "transparent"],
     ready: () => targets("removeBackground").length > 0,
     run: () => run("removeBackground"),
-    credits: () => price("removeBackground"),
     bar: () => (
       <TransformBar type="removeBackground" verb="Remove the background of" empty="Select an image to cut out" />
     ),

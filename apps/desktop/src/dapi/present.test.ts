@@ -6,7 +6,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { present, toCallToolResult } from "./present";
+import { DapiError, missingKey } from "@hypergen/dapi";
+import { present, toCallToolResult, toErrorResult } from "./present";
 
 const dir = mkdtempSync(join(tmpdir(), "hypergen-present-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -90,9 +91,20 @@ describe("toCallToolResult", () => {
   });
 });
 
+describe("toErrorResult", () => {
+  it("prefixes a missing key with its code so agents can branch on it", () => {
+    const error = missingKey("fal");
+    expect(toErrorResult(error)).toEqual({ isError: true, content: [{ type: "text", text: `MISSING_KEY: ${error.message}` }] });
+  });
+
+  it("passes any other error's message as is", () => {
+    expect(toErrorResult(new DapiError("not-found", "No such node"))).toEqual({ isError: true, content: [{ type: "text", text: "No such node" }] });
+  });
+});
+
 describe("present a generation job", () => {
   const job = (id: string, status: string, assets: Array<Record<string, unknown>>) => ({
-    job: { id, status, credits: 4, etaSeconds: 10, etaRemainingSeconds: null, error: null, assets },
+    job: { id, status, etaSeconds: 10, etaRemainingSeconds: null, error: null, assets },
     saveTo: null as string | null,
   });
   const file = (filename: string) => ({ url: `https://files.test/${filename}`, filename, mimeType: "image/png", size: 8 });

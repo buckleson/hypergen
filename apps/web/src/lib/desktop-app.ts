@@ -4,7 +4,6 @@
 
 import { toast } from "somoto";
 
-import { track } from "@/lib/analytics";
 
 /**
  * The asset names are version-independent (see the makers in
@@ -53,9 +52,8 @@ export function desktopAppDownloadLabel(): string {
  * macOS and Windows builds to hand out — everywhere else this explains that
  * instead.
  */
-export function downloadDesktopApp(source: DesktopAppDownloadSource) {
+export function downloadDesktopApp(_source: DesktopAppDownloadSource) {
   const platform = desktopAppPlatform();
-  track("desktop_app_download", { source, supported: platform !== null, platform: platform ?? "other" });
 
   if (!platform) {
     toast("Available for macOS and Windows", {

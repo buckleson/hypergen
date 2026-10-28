@@ -1,6 +1,6 @@
 # listen
 
-Prompt a multimodal model for a semantic analysis of an audio track and return its answer. Shines on audio semantics (the name of the music playing, who is speaking, the spoken content with second-granularity timestamps). Accepts an audio file or a video; of a video only the audio track is analyzed.
+Prompt Gemini, with the user's own Gemini API key, for a semantic analysis of an audio track and return its answer. Shines on audio semantics (the name of the music playing, who is speaking, the spoken content with second-granularity timestamps). Accepts an audio file or a video; of a video only the audio track is analyzed.
 
 | | |
 | --- | --- |
@@ -16,7 +16,7 @@ Prompt a multimodal model for a semantic analysis of an audio track and return i
 | `start` | `Time` | `-s, --start <time>` | start of the segment to analyze (default: 0); timestamps in the analysis are relative to this point |
 | `end` | `Time` | `-e, --end <time>` | end of the segment to analyze (default: media duration) |
 
-With no `prompt` it returns a general description of what is heard; with one it answers that question about the audio (e.g. "who is speaking?", "what music is playing?", "summarize what is said"). See [the prompt guide](../../guides/prompts/media-listen.md) for prompts that work.
+The audio (the window's, when `start`/`end` are given) is sent to Gemini inline, at most 20 MB of it per call; for a longer recording, analyze it a window at a time. With no `prompt` it returns a general description of what is heard; with one it answers that question about the audio (e.g. "who is speaking?", "what music is playing?", "summarize what is said"). See [the prompt guide](../../guides/prompts/media-listen.md) for prompts that work.
 
 ## Output
 
@@ -28,4 +28,4 @@ One JSON object, the model's answer. `start`/`end` echo the analyzed window (in 
 
 ## Errors
 
-Fails when the path can't be resolved, the asset isn't a video or audio asset, or `start`/`end` cross (`start` >= `end`).
+Fails when the path can't be resolved, the asset isn't a video or audio asset, or `start`/`end` cross (`start` >= `end`) (`invalid-input`); when the audio is over 20 MB (`invalid-input`: pass a shorter `start`/`end` window); and with `MISSING_KEY` when no Gemini API key is saved. The message: `Add your Gemini API key in Hypergen > Settings > AI providers.`

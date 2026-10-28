@@ -18,7 +18,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { TextField, TextFieldInput } from "@/components/ui/text-field";
-import { track } from "@/lib/analytics";
 import { listEditors, openInEditor, revealPath, type EditorInfo } from "@/lib/shell";
 import {
   duplicateProject,
@@ -103,7 +102,6 @@ export function DashboardProjectCard(props: DashboardProjectCardProps) {
     try {
       for (const project of props.targets) {
         await duplicateProject(project.dir);
-        track("project_duplicated");
       }
     } catch (e) {
       toast.error("Failed to duplicate project", { description: (e as Error).message });

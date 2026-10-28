@@ -10,11 +10,9 @@ import { useWorld } from "@hypergen/koota-solid";
 import { Generating, PaintType } from "@hypergen/runtime";
 import { transform } from "@/engine/generate";
 import { useMediaSelection } from "./selection";
-import { chargeOf } from "./use-estimate";
 
-import type { AssetRef, GenerateRequestInput } from "@diffusionstudio/api-contract";
+import type { ModelRequest } from "@hypergen/dapi";
 import type { NodeMedia } from "@/engine/generate";
-import type { SelectedMedia } from "./selection";
 import type { TransformType } from "./types";
 
 interface Tool {
@@ -23,9 +21,7 @@ interface Tool {
   /** Whether the tool can be run over media of `type`. */
   takes(type: NodeMedia["type"]): boolean;
   /** The request over `input`, an upload of media of `type`. */
-  request(type: NodeMedia["type"], input: AssetRef): GenerateRequestInput;
-  /** What running it over `media` costs, in credits; undefined while that isn't known. */
-  price(media: SelectedMedia): number | undefined;
+  request(type: NodeMedia["type"], input: string): ModelRequest;
 }
 
 const TOOLS: Record<TransformType, Tool> = {
@@ -33,17 +29,14 @@ const TOOLS: Record<TransformType, Tool> = {
     title: "Upscale failed",
     takes: () => true,
     request: (type, input) =>
-      type === PaintType.VIDEO ? { model: "bytedance-upscaler", video: input } : { model: "seedvr-2", image: input },
-    price: ({ type, asset }) =>
       type === PaintType.VIDEO
-        ? asset?.type === "VIDEO" ? chargeOf("bytedance-upscaler", asset.duration) : undefined
-        : chargeOf("seedvr-2"),
+        ? { model: "seedvr-video-upscale", video: input }
+        : { model: "seedvr-image-upscale", image: input },
   },
   removeBackground: {
     title: "Background removal failed",
     takes: (type) => type === PaintType.IMAGE,
-    request: (_type, image) => ({ model: "bria-rmbg-2.0", image }),
-    price: () => chargeOf("bria-rmbg-2.0"),
+    request: (_type, image) => ({ model: "bria-background-removal", image }),
   },
 };
 
@@ -63,12 +56,5 @@ export function useTransforms() {
     }
   };
 
-  /** What `run(type)` costs, in credits, a job per node; undefined while any of it isn't known. */
-  const price = (type: TransformType): number | undefined => {
-    const prices = targets(type).map((entry) => TOOLS[type].price(entry));
-    if (!prices.length || prices.some((credits) => credits === undefined)) return undefined;
-    return prices.reduce<number>((sum, credits) => sum + credits!, 0);
-  };
-
-  return { targets, run, price };
+  return { targets, run };
 }

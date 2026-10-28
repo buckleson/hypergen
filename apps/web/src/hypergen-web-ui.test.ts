@@ -18,7 +18,6 @@ import mcpViewSrc from './components/dashboard/mcp-view.tsx?raw';
 import helpViewSrc from './components/dashboard/help-view.tsx?raw';
 import helpMenuSrc from './components/sidebar-left/project-menu/help-menu.tsx?raw';
 import iconsReadme from './assets/icons/README.md?raw';
-import loginSrc from './pages/login.tsx?raw';
 
 // Lazy glob: only the keys are used, so no SVG is loaded.
 const ICON_FILES = Object.keys(import.meta.glob('./assets/icons/*.svg', { query: '?raw', import: 'default' }));
@@ -169,12 +168,6 @@ describe('T21 sidebars use the Hypergen logo; old logos deleted', () => {
     expect(ICON_NAMES.has('diffusion-logo-large')).toBe(false);
   });
 
-  it('login.tsx is left alone (P3): it still names its original logo icon', () => {
-    // Guards against login.tsx being edited in this subtask. Its icon no longer
-    // resolves after the deletion above; that is the known P3 follow-up.
-    expect(iconNames(loginSrc)).toContain('diffusion-logo');
-  });
-
   it('grep -i diffusion on the three sidebar files finds nothing', () => {
     for (const src of [dashboardSidebarSrc, sidebarLeftSrc, projectMenuSrc]) {
       expect(linesMatching(src, /diffusion/i)).toEqual([]);
@@ -269,15 +262,13 @@ describe('T23 help links: issues + website only', () => {
     for (const a of menuLinks) expect(a).toContain('target="_blank"');
   });
 
-  it.each(Object.keys(HELP))('%s keeps the copy-user-id flow unchanged', (name) => {
+  it.each(Object.keys(HELP))('%s has no copy-user-id flow (sign-in is gone)', (name) => {
     const src = HELP[name as keyof typeof HELP];
-    expect(src).toContain('navigator.clipboard.writeText(id)');
-    expect(src).toContain('toast("Copied!", { description: "The user id has been copied to your clipboard." })');
-    expect(src).toContain('if (!id) return;');
+    expect(src).not.toMatch(/clipboard|Copy user id/);
   });
 
-  it('help-menu still lists Copy user id between the two links', () => {
-    const order = ['Report an issue', 'Copy user id', 'Website'].map((s) => helpMenuSrc.indexOf(s));
+  it('help-menu lists Report an issue before Website', () => {
+    const order = ['Report an issue', 'Website'].map((s) => helpMenuSrc.indexOf(s));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });

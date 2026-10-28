@@ -84,7 +84,6 @@ describe("source branding", () => {
   it("keeps the DAPI_WIRE name in main-channels while its comments say hypergen", () => {
     const channels = read("main-channels.ts");
     expect(channels).toContain("DAPI_WIRE");
-    expect(channels).toContain("`hypergen://`");
     expect(channels).toContain("`hypergen` field of its package.json");
   });
 

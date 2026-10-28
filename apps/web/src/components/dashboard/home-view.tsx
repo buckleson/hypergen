@@ -42,7 +42,6 @@ import {
   type Attachment,
 } from "@/agent-chat";
 import { projectRoute, useReturnHere } from "@/hooks/use-project-route";
-import { track } from "@/lib/analytics";
 import {
   createProject,
   isDesktop,
@@ -248,7 +247,6 @@ export function DashboardHomeView() {
   const openProject = async (project: ProjectInfo) => {
     const found = await openProjectFromList(project);
     if (!found) return;
-    track("project_opened");
     navigate(projectRoute(projectKey(found)), { state: returnHere() });
   };
 

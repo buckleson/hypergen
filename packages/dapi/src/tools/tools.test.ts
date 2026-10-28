@@ -12,7 +12,7 @@ import { grab } from "./grab";
 import { listen } from "./listen";
 import { transcribe } from "./transcribe";
 import { generate, generatedPath, job } from "./generate";
-import { MODEL_IDS } from "@diffusionstudio/api-contract";
+import { MODEL_IDS } from "../models";
 import { LOCAL_MODEL_IDS, isLocalJobId, isLocalModel, samRequest } from "../local";
 import { toolJsonSchemas } from "../json-schema";
 
@@ -165,7 +165,7 @@ describe("sam-2.1", () => {
 
   it("tracks a span that holds the prompted frame", () => {
     const track = { ...at, points: [{ x: 0.5, y: 0.5 }] };
-    expect(samRequest.safeParse({ ...track, start: 1, end: "0:03", output: "masks/a.mask", maxCredits: 5 }).success).toBe(true);
+    expect(samRequest.safeParse({ ...track, start: 1, end: "0:03", output: "masks/a.mask", estimate: true }).success).toBe(true);
     expect(issues(samRequest.safeParse({ ...track, start: 2 }))).toHaveProperty("time");
     expect(issues(samRequest.safeParse({ ...track, end: 1.5 }))).toHaveProperty("time");
     expect(issues(samRequest.safeParse({ ...track, start: 3, end: 2 }))).toHaveProperty("end");
@@ -181,8 +181,8 @@ describe("sam-2.1", () => {
 });
 
 describe("local models", () => {
-  it("share no id with the API's", () => {
-    expect(LOCAL_MODEL_IDS.filter((id) => (MODEL_IDS as string[]).includes(id))).toEqual([]);
+  it("share no id with the fal.ai models", () => {
+    expect(LOCAL_MODEL_IDS.filter((id) => (MODEL_IDS as readonly string[]).includes(id))).toEqual([]);
     expect(isLocalModel("sam-2.1")).toBe(true);
     expect(isLocalModel("flux-2-klein")).toBe(false);
     expect(isLocalModel("toString")).toBe(false);
@@ -201,14 +201,14 @@ describe("local models", () => {
 describe("generate", () => {
   const input = generate.input;
 
-  it("passes the model's fields through unchecked, for the API to validate", () => {
+  it("passes the model's fields through unchecked, for the model to validate", () => {
     const fields = { prompt: "a fox", images: [{ path: "./ref.png" }, { kind: "url", url: "https://x.test/a.png" }], duration: 99, anything: { at: "all" } };
     expect(input.parse({ model: "nano-banana-pro", ...fields })).toEqual({ model: "nano-banana-pro", ...fields });
   });
 
   it("declares every model's fields by name, for clients that send only declared properties", () => {
     const { properties } = toolJsonSchemas(generate).inputSchema as { properties: Record<string, object> };
-    for (const field of ["prompt", "images", "aspectRatio", "resolution", "count", "duration", "startFrame", "voice", "image", "audio", "languageCode", "time", "points"]) {
+    for (const field of ["prompt", "images", "aspectRatio", "resolution", "count", "duration", "startFrame", "voice", "endFrame", "image", "video", "time", "points"]) {
       expect(properties[field]).toEqual({});
     }
     expect(input.parse({ model: "flux-2-klein", prompt: "a fox" })).toEqual({ model: "flux-2-klein", prompt: "a fox" });
@@ -218,15 +218,16 @@ describe("generate", () => {
     expect(issues(input.safeParse({ model: "dall-e-1", prompt: "a fox" }))).toHaveProperty("model");
   });
 
-  it("answers an estimate with the job's price alone, as an object schema", () => {
-    expect(input.parse({ model: "veo-3.1-fast", prompt: "a fox", estimate: true })).toEqual({ model: "veo-3.1-fast", prompt: "a fox", estimate: true });
-    expect(generate.output.parse({ credits: 38, etaSeconds: 90 })).toEqual({ credits: 38, etaSeconds: 90 });
+  it("answers an estimate with the job's run time alone, as an object schema", () => {
+    expect(input.parse({ model: "kling-v3-pro", prompt: "a fox", estimate: true })).toEqual({ model: "kling-v3-pro", prompt: "a fox", estimate: true });
+    expect(generate.output.parse({ etaSeconds: 90 })).toEqual({ etaSeconds: 90 });
+    expect(generate.result!.safeParse({ etaSeconds: 90 }).success).toBe(true);
     expect(toolJsonSchemas(generate).outputSchema).toHaveProperty("type", "object");
-    expect(job.output.safeParse({ credits: 38, etaSeconds: 90 }).success).toBe(false);
+    expect(job.output.safeParse({ etaSeconds: 90 }).success).toBe(false);
   });
 
   it("lets a job's fields beyond the documented ones through to the caller", () => {
-    const job = { id: "j", model: "flux-2-klein", status: "succeeded", etaSeconds: 9, etaRemainingSeconds: null, credits: 2, error: null, createdAt: "2026-10-06T00:00:00Z", assets: [{ path: "/a.png", filename: "a.png", width: 1024 }] };
+    const job = { id: "j", model: "flux-2-klein", status: "succeeded", etaSeconds: 9, etaRemainingSeconds: null, phase: null, progress: null, error: null, createdAt: "2026-10-06T00:00:00Z", assets: [{ path: "/a.png", filename: "a.png", width: 1024 }] };
     expect(generate.output.parse(job)).toEqual(job);
   });
 });

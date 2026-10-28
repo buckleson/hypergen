@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { toast } from "somoto";
-import { api } from "@/lib/api";
+import { getJob } from "@/lib/jobs";
 import { useCommand } from "@/context/commands";
 import { usePromptInput } from "@/context/prompt-input";
 import { useMediaSelection } from "@/components/genai/selection";
@@ -11,8 +11,8 @@ import { toConfig } from "@/components/genai/requests";
 
 /**
  * Opens the prompt box with the settings the first selected generated image
- * was made with. The job is fetched on pick rather than kept up with the
- * selection, which this command is mounted for the whole time.
+ * was made with. Jobs are known for this session only, so an image made
+ * before it has no settings to reuse.
  */
 export function ReuseSettingsCommand() {
   const { openPromptInput } = usePromptInput();
@@ -20,20 +20,15 @@ export function ReuseSettingsCommand() {
 
   const jobId = () => imageMedia().find((entry) => entry.asset?.job !== undefined)?.asset?.job;
 
-  const reuse = async () => {
+  const reuse = () => {
     const id = jobId();
-    if (!id) return;
-
-    try {
-      const config = toConfig((await api.jobs.get.query({ id })).request);
-      if (!config) {
-        toast("No generation config found", { description: "This asset wasn't generated with a prompt." });
-        return;
-      }
-      openPromptInput(config);
-    } catch (error) {
-      toast("Failed to load the generation", { description: error instanceof Error ? error.message : "Unknown error" });
+    const job = id ? getJob(id) : undefined;
+    const config = job && toConfig(job.request);
+    if (!config) {
+      toast("No generation settings found", { description: "Settings are kept for prompt generations made since the app started." });
+      return;
     }
+    openPromptInput(config);
   };
 
   useCommand({
@@ -43,7 +38,7 @@ export function ReuseSettingsCommand() {
     icon: "reuse-settings",
     keywords: ["prompt", "config"],
     available: () => jobId() !== undefined,
-    run: () => void reuse(),
+    run: reuse,
   });
 
   return null;

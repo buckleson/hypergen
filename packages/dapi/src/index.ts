@@ -14,7 +14,7 @@ export type { AnyTool, ToolName, ToolByName, ToolInput, ToolArgs, ToolOutput, To
 export { Time, NonNegativeTime, TIME_FORMS } from "./time";
 export type { TimeInput } from "./time";
 
-export { DapiError, isDapiError } from "./errors";
+export { DapiError, fromWireError, isDapiError, missingKey } from "./errors";
 export type { DapiErrorCode } from "./errors";
 
 export { MAX_FRAMES_PER_SHEET, Bytes } from "./schemas";
@@ -29,6 +29,21 @@ export { ISSUE_LOG_TAIL } from "./tools/report";
 export { LOG_TAIL, LOG_MESSAGE_MAX } from "./tools/logs";
 export { FONT_LIMIT } from "./tools/fonts";
 export { generatedPath } from "./tools/generate";
+export { HYPERGEN_MODELS, MODEL_IDS, REQUEST_FIELDS, toFalInput } from "./models";
+export type {
+  FalCall,
+  GenerateRequest as ModelRequest,
+  HypergenModel,
+  Job,
+  JobAsset,
+  ModelId,
+  ModelKind,
+  PromptMode,
+  Resolution,
+  Transcript,
+} from "./models";
+export { whisperToTranscript } from "./transcript";
+export type { WhisperChunk } from "./transcript";
 export {
   LOCAL_JOB_PREFIX,
   LOCAL_MODELS,
@@ -91,7 +106,7 @@ export type MediaListenResult = ToolResult<"listen">;
 export type GenerateRequest = ToolArgs<"generate">;
 export type GenerationResult = ToolResult<"job">;
 export type GenerationJob = ToolOutput<"job">;
-export type GenerationEstimate = Extract<ToolResult<"generate">, { credits: number }>;
+export type GenerationEstimate = Extract<ToolResult<"generate">, { etaSeconds: number }>;
 export type JobRequest = ToolArgs<"job">;
 export type FontsRequest = ToolArgs<"fonts">;
 export type ReportRequest = ToolArgs<"report">;

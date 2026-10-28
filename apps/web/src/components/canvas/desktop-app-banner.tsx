@@ -8,7 +8,6 @@ import { Icon } from "@/components/ui/icon";
 import { useEditorApi } from "@/dapi";
 import { createStoredSignal } from "@/lib/store";
 import { desktopAppDownloadLabel, downloadDesktopApp } from "@/lib/desktop-app";
-import { track } from "@/lib/analytics";
 import { store } from "@/init";
 import { cx } from "@/lib/cva";
 import { useLayout } from "@/context/layout";
@@ -26,10 +25,7 @@ export function DesktopAppBanner() {
     store.define("canvas.desktop-app-banner-dismissed", false),
   );
 
-  const handleDismiss = () => {
-    track("desktop_app_banner_dismissed", { source: "canvas_banner" });
-    setDismissed(true);
-  };
+  const handleDismiss = () => setDismissed(true);
 
   const handleDownload = () => downloadDesktopApp("canvas_banner");
 

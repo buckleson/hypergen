@@ -13,7 +13,7 @@ import type { EditorSession } from "../session";
  * `generatedPath`) or under the model's own names when that is null; or to a
  * path on disk the server writes (null: a fresh directory under the temp
  * dir). Settled when the job starts, so a bad `output` fails before any
- * credits are spent or any frame is worked on.
+ * generation runs or any frame is worked on.
  */
 export type Destination = { kind: "library"; path: string | null } | { kind: "disk"; path: string | null };
 

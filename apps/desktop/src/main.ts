@@ -15,7 +15,7 @@ import { DapiServer } from "./dapi/server";
 import { agentChatEndpoint, configureAgentChat, deleteProjectChats, stopAgentChat } from "./agent-chat";
 import { cliStatus, installCli, refreshCliShim, uninstallCli } from "./cli-install";
 import { applyMcp, healMcpRegistrations, mcpStatus } from "./mcp-install";
-import { configureAnalytics, countCanvasEdits, startAnalytics, track } from "./analytics";
+import { registerProviderHandlers } from "./providers";
 import { setupAppMenu } from "./menu";
 import { clipboardPaths } from "./clipboard";
 import { installedEditors, openInEditor } from "./editors";
@@ -54,12 +54,10 @@ import {
   writeManifest,
   writeProject,
 } from "./projects";
-import type { DeepLinkChannel } from "./main-channels";
 import type { LogEntry } from "@hypergen/dapi";
 
 const DEV_URL = "http://localhost:5173";
 const WINDOW_IDLE_MS = 10 * 60 * 1000;
-const AUTH_PROTOCOL = "hypergen";
 const MACOS_CORNER_RADIUS = 18;
 const MACOS_BACKDROP = { blur: 80, red: 0.07, green: 0.07, blue: 0.07, alpha: 0.9 };
 // Window Controls Overlay on Windows: as tall as the renderer's `h-10` drag
@@ -157,10 +155,6 @@ const tray = new AppTray({
   hide: () => windows.hide(),
 });
 
-// Deep links that arrived before the renderer could take them, keyed by the
-// channel they belong to so auth and checkout never drain each other's link.
-const pendingDeepLinks = new Map<DeepLinkChannel, string>();
-
 // Renderer console mirror, served to the CLI via LOGS_GET. Lives in main so
 // it survives reloads and captures everything the devtools console shows
 // (page logs, worker logs, uncaught errors) without touching the web bundle.
@@ -190,7 +184,6 @@ const dapi = new DapiServer({
     hold: () => windows.hold(),
     lastProject: () => lastProject,
   },
-  onToolCall: (props) => track("tool_called", props),
 });
 
 function pushLog(level: LogEntry["level"], message: string, source: string) {
@@ -210,48 +203,8 @@ function captureConsole(window: BrowserWindow) {
   });
 }
 
-function findProtocolUrl(argv: string[]): string | null {
-  return argv.find((arg) => arg.startsWith(`${AUTH_PROTOCOL}://`)) ?? null;
-}
-
 function isHiddenLaunch(argv: string[]): boolean {
   return argv.includes("--hidden");
-}
-
-// hypergen://auth/callback → auth, hypergen://checkout/callback → checkout.
-function deepLinkChannel(url: string): DeepLinkChannel | null {
-  let host: string;
-  try {
-    host = new URL(url).hostname;
-  } catch {
-    return null;
-  }
-
-  if (host === "auth") return MAIN_CHANNELS.AUTH_CALLBACK;
-  if (host === "checkout") return MAIN_CHANNELS.CHECKOUT_CALLBACK;
-  return null;
-}
-
-function deliverDeepLink(url: string) {
-  const channel = deepLinkChannel(url);
-  if (!channel) return;
-
-  // A link that arrives before the page can receive it is parked rather than
-  // pushed: the renderer's subscription only exists once the component holding
-  // it mounts, which is well after did-finish-load. Parked links are handed
-  // over by the take* handlers below, which every consumer calls on mount.
-  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) {
-    pendingDeepLinks.set(channel, url);
-    return;
-  }
-
-  mainBridge.emit(mainWindow, channel, { url });
-}
-
-function takePendingDeepLink(channel: DeepLinkChannel): string | null {
-  const url = pendingDeepLinks.get(channel) ?? null;
-  pendingDeepLinks.delete(channel);
-  return url;
 }
 
 async function setFileInputFiles(selector: string, absolutePath: string) {
@@ -342,14 +295,6 @@ function createWindow(): BrowserWindow {
   return mainWindow;
 }
 
-if (process.defaultApp && process.argv.length >= 2) {
-  app.setAsDefaultProtocolClient(AUTH_PROTOCOL, process.execPath, [
-    join(process.cwd(), process.argv[1]!),
-  ]);
-} else {
-  app.setAsDefaultProtocolClient(AUTH_PROTOCOL);
-}
-
 if (squirrelLaunch) {
   // Update.exe is at work; handleSquirrelEvent quits the app when it is done.
 } else if (app.requestSingleInstanceLock()) {
@@ -358,32 +303,16 @@ if (squirrelLaunch) {
   }
 
   app.on("second-instance", (_event, argv) => {
-    const url = findProtocolUrl(argv);
-    if (url) {
-      deliverDeepLink(url);
-    }
     if (!isHiddenLaunch(argv)) {
       windows.show();
     }
-  });
-
-  app.on("open-url", (event, url) => {
-    event.preventDefault();
-    deliverDeepLink(url);
-    windows.show();
   });
 
   mainBridge.handle(MAIN_CHANNELS.APP_OPEN_EXTERNAL, ({ url }) => shell.openExternal(url));
   mainBridge.handle(MAIN_CHANNELS.APP_SHOW_IN_FOLDER, ({ path }) => shell.showItemInFolder(path));
   mainBridge.handle(MAIN_CHANNELS.APP_EDITORS_LIST, () => installedEditors());
   mainBridge.handle(MAIN_CHANNELS.APP_OPEN_IN_EDITOR, ({ id, dir }) => openInEditor(id, dir));
-  mainBridge.handle(MAIN_CHANNELS.ANALYTICS_CONFIGURE, (config) => configureAnalytics(config));
-  mainBridge.handle(MAIN_CHANNELS.AUTH_GET_PENDING_CALLBACK, () =>
-    takePendingDeepLink(MAIN_CHANNELS.AUTH_CALLBACK),
-  );
-  mainBridge.handle(MAIN_CHANNELS.CHECKOUT_GET_PENDING_CALLBACK, () =>
-    takePendingDeepLink(MAIN_CHANNELS.CHECKOUT_CALLBACK),
-  );
+  registerProviderHandlers(join(app.getPath("userData"), "keys.json"));
   mainBridge.handle(MAIN_CHANNELS.WINDOW_IS_FULLSCREEN, () => mainWindow?.isFullScreen() ?? false);
   mainBridge.handle(MAIN_CHANNELS.WINDOW_SET_COLOR_MODE, ({ mode }) => setColorMode(mode));
   mainBridge.handle(MAIN_CHANNELS.WINDOW_SET_BUSY, ({ busy }) => windows.setBusy(busy));
@@ -422,10 +351,7 @@ if (squirrelLaunch) {
   mainBridge.handle(MAIN_CHANNELS.PROJECTS_DUPLICATE, ({ dir }) => duplicateProject(dir));
   mainBridge.handle(MAIN_CHANNELS.PROJECTS_DELETE, ({ dir }) => deleteProject(dir).then(deleteProjectChats));
   mainBridge.handle(MAIN_CHANNELS.PROJECTS_COMPILE, ({ dir }) => compileProject(dir));
-  mainBridge.handle(MAIN_CHANNELS.PROJECTS_WRITE, ({ dir, edits }) => {
-    countCanvasEdits(edits.map((edit) => edit.kind));
-    return writeProject(dir, edits);
-  });
+  mainBridge.handle(MAIN_CHANNELS.PROJECTS_WRITE, ({ dir, edits }) => writeProject(dir, edits));
   mainBridge.handle(MAIN_CHANNELS.PROJECTS_WATCH, ({ dir }, event) => {
     lastProject = dir;
     tray.refresh();
@@ -523,9 +449,6 @@ if (squirrelLaunch) {
     session.defaultSession.setPermissionCheckHandler(() => true);
     session.defaultSession.setDevicePermissionHandler(() => true);
 
-    const url = findProtocolUrl(process.argv);
-    if (url) deliverDeepLink(url);
-
     dapi.start();
     // The chat's sessions get the MCP server by URL.
     dapi.mcpUrl().then((url) =>
@@ -537,7 +460,6 @@ if (squirrelLaunch) {
     );
     refreshCliShim();
     healMcpRegistrations();
-    startAnalytics(windows);
     tray.start();
 
     // Opened by a person (Finder, Dock, Start menu): show the editor

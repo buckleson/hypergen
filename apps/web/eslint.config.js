@@ -64,6 +64,8 @@ export default [
       "dist-ssr/**",
       "*.config.js",
       "*.config.ts",
+      // Source-level guard tests run by vitest, outside tsconfig.app.json.
+      "test/**",
     ],
   },
 ];

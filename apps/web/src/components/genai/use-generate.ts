@@ -7,7 +7,7 @@ import { Library } from "@hypergen/runtime";
 import { generate } from "@/engine/generate";
 import { outputOf, toRequest } from "./requests";
 
-import type { GenerateRequest } from "@diffusionstudio/api-contract";
+import type { ModelRequest } from "@hypergen/dapi";
 import type { GenerationConfig } from "./types";
 
 /**
@@ -25,7 +25,7 @@ export function useGenerate() {
     return generate(world, output, () => toRequest(library, config));
   };
 
-  const rerun = (request: GenerateRequest): Promise<void> => {
+  const rerun = (request: ModelRequest): Promise<void> => {
     const output = outputOf(request);
     return output ? generate(world, output, request) : Promise.resolve();
   };

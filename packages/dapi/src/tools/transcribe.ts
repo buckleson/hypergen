@@ -22,7 +22,7 @@ export const transcribe = defineTool({
   name: "transcribe",
   title: "Transcribe speech",
   description:
-    "Transcribe the speech in a video or audio file and write the timed transcript to a JSON file, `{ segments: [{ text, speaker?, words: [{ text, start, end }] }] }` with word-level times in seconds and speakers labelled A, B, … when told apart; returns the file's path and its segment and word counts. Search the file for the passage you need (grep, jq) rather than reading it whole: a long recording's word timings run to tens of thousands of tokens. Commonly useful for footage with speakers (talking head, interview), where the word times let you cut on a line. A transcript marks only speech; the gaps are not necessarily silent (music, score, applause).",
+    "Transcribe the speech in a video or audio file locally with Whisper, on this machine (no API key; the audio never leaves it), and write the timed transcript to a JSON file, `{ segments: [{ text, words: [{ text, start, end }] }] }` with word-level times in seconds; returns the file's path and its segment and word counts. Search the file for the passage you need (grep, jq) rather than reading it whole: a long recording's word timings run to tens of thousands of tokens. Commonly useful for footage with speakers (talking head, interview), where the word times let you cut on a line. A transcript marks only speech; the gaps are not necessarily silent (music, score, applause).",
   input: z.object({
     path: AssetPath,
     output: z.string().optional().describe("absolute path to write the transcript JSON to (default: a fresh file under the system temp dir)"),

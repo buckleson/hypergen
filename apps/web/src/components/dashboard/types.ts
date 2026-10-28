@@ -4,7 +4,7 @@
 
 import type { CollectionRecord } from "@/projects";
 
-export type DashboardView = "home" | "projects" | "drafts" | "templates" | "ai-credits" | "billing" | "account" | "settings" | "mcp" | "preferences" | "help";
+export type DashboardView = "home" | "projects" | "drafts" | "templates" | "settings" | "ai-providers" | "mcp" | "preferences" | "help";
 /** Which projects the projects view lists: all of them, the drafts, or one collection's. */
 export type ProjectScope =
   | { kind: "all" }

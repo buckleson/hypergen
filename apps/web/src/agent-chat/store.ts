@@ -28,7 +28,6 @@ import {
 import type { Transcript } from "@hypergen/agent-chat";
 
 import { store as settings } from "@/init";
-import { track } from "@/lib/analytics";
 import { createStoredSignal } from "@/lib/store";
 import { projectRoute } from "@/hooks/use-project-route";
 import type { ProjectInfo } from "@/projects";
@@ -302,13 +301,6 @@ export type SendOptions = {
 /** Sends a turn; resolves with the chat id as soon as the host accepted it. */
 export async function send(options: SendOptions): Promise<string> {
   const key = draftKey(options.projectId, options.chatId);
-  track("prompt_sent", {
-    new_chat: !options.chatId,
-    harness: options.model.harness,
-    model: options.model.model,
-    length: options.text.length,
-    attachments: options.attachments.length,
-  });
   const optimistic: Item = {
     id: `optimistic-${Date.now()}`,
     kind: "user",

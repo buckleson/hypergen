@@ -2,12 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Router, HashRouter, Route, useLocation } from '@solidjs/router';
+import { Router, HashRouter, Route } from '@solidjs/router';
 import { ColorModeProvider } from '@kobalte/core';
-import { Show, createEffect, createMemo, type JSX } from 'solid-js';
+import { createEffect, createMemo, onMount } from 'solid-js';
 import { Toaster } from "@/components/ui/sonner";
 
-import { AuthProvider, useAuth } from '@/context/auth';
 import { CommandsProvider } from '@/context/commands';
 import { CommandPalette, ReloadWindowCommand } from '@/components/commands';
 import { PersistRoute } from '@/lib/persist-route';
@@ -16,38 +15,14 @@ import { mainBridge } from "@/lib/ipc";
 import { MAIN_CHANNELS } from "@desktop/main-channels";
 import { EditorApi } from '@/dapi';
 import { renderOverlay } from '@/context/render';
-import { UpgradeDialog } from '@/components/upgrade-dialog';
-import { PurchaseSuccess } from '@/components/purchase-success';
 import { ScreenTooSmall } from '@/components/screen-too-small';
 import { UnsupportedBrowser } from '@/components/unsupported-browser';
 import { ProjectPage } from '@/pages/project';
-import { LoginPage } from '@/pages/login';
-import { AuthCallbackPage } from '@/pages/auth-callback';
 import { NotFoundPage } from '@/pages/not-found';
 import { DashboardPage } from '@/pages/dashboard';
 
-function AuthGate(props: { children: JSX.Element }) {
-  const auth = useAuth();
-
-  return (
-    <Show when={!auth.isLoading()}>
-      <Show when={auth.isAuthenticated()}>
-        {props.children}
-      </Show>
-      <Show when={!auth.isAuthenticated()}>
-        <LoginPage />
-      </Show>
-    </Show>
-  );
-}
-
 function BootSplash() {
-  const auth = useAuth();
-
-  createEffect(() => {
-    if (auth.isLoading()) return;
-    document.getElementById('boot-splash')?.remove();
-  });
+  onMount(() => document.getElementById('boot-splash')?.remove());
 
   return null;
 }
@@ -79,14 +54,11 @@ function ReportRendering() {
 }
 
 function EnvironmentOverlays() {
-  const location = useLocation();
-  const onCheckoutPage = () => location.pathname.startsWith('/checkout');
-
   return (
-    <Show when={!onCheckoutPage()}>
+    <>
       <ScreenTooSmall />
       <UnsupportedBrowser />
-    </Show>
+    </>
   );
 }
 
@@ -96,17 +68,13 @@ function App() {
     <RouterComponent
       root={(props) => (
         <ColorModeProvider initialColorMode="dark">
-          <AuthProvider>
-            <CommandsProvider>
-              {props.children}
-              <CommandPalette />
-              <ReloadWindowCommand />
-              <BootSplash />
-              <UpgradeDialog />
-              <PurchaseSuccess />
-              <EditorApi />
-            </CommandsProvider>
-          </AuthProvider>
+          <CommandsProvider>
+            {props.children}
+            <CommandPalette />
+            <ReloadWindowCommand />
+            <BootSplash />
+            <EditorApi />
+          </CommandsProvider>
           <Toaster />
           <EnvironmentOverlays />
           <PersistRoute />
@@ -115,9 +83,8 @@ function App() {
         </ColorModeProvider>
       )}
     >
-      <Route path="/auth/callback" component={AuthCallbackPage} />
-      <Route path="/" component={() => <AuthGate><DashboardPage /></AuthGate>} />
-      <Route path="/projects/*ref" component={() => <AuthGate><ProjectPage /></AuthGate>} />
+      <Route path="/" component={DashboardPage} />
+      <Route path="/projects/*ref" component={ProjectPage} />
       <Route path="*404" component={NotFoundPage} />
     </RouterComponent>
   );

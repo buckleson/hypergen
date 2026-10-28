@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/context-menu";
 import { desktopAppDownloadLabel, downloadDesktopApp } from "@/lib/desktop-app";
 import { createStoredSignal } from "@/lib/store";
-import { track } from "@/lib/analytics";
 import { store } from "@/init";
 
 /**
@@ -29,10 +28,7 @@ export function DashboardGetDesktopApp() {
     store.define("dashboard.desktop-app-promo-hidden", false),
   );
 
-  const handleHide = () => {
-    track("desktop_app_banner_dismissed", { source: "dashboard_footer" });
-    setHidden(true);
-  };
+  const handleHide = () => setHidden(true);
 
   return (
     <Show when={!isDesktop && !hidden()}>

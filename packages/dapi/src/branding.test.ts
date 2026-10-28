@@ -4,8 +4,7 @@
 
 // Branding guard for the tool catalog, the dapi/jsx package metadata and the
 // tool reference docs: every user- or agent-visible string says Hypergen, and
-// the only surviving "diffusion"/"dapi" spellings are the package name
-// `@hypergen/dapi` and the `@diffusionstudio/api-contract` dependency.
+// the only surviving "dapi" spelling is the package name `@hypergen/dapi`.
 
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -27,9 +26,8 @@ const LEGACY = /diffusion|\bdapi\b/i;
 const VENDOR = /\bltx\b|lightricks/i;
 const OLD_BRAND = /diffusion studio|diffusionstudio\.com|\bdapi\b/i;
 
-// Strip what the criteria keep: the package name and the api-contract dependency.
-const ALLOWED = [/@hypergen\/dapi/g, /@diffusionstudio\/api-contract/g];
-const scrub = (text: string) => ALLOWED.reduce((acc, re) => acc.replace(re, ""), text);
+// Strip what the criteria keep: the package name.
+const scrub = (text: string) => text.replace(/@hypergen\/dapi/g, "");
 
 /** Lines of `text` that still match `re` once the allowed spellings are removed. */
 const leaks = (text: string, re: RegExp) =>
@@ -73,21 +71,20 @@ describe("T14 catalog tool descriptions", () => {
     expect(read(here, "tools", "export.ts")).toMatch(/\/\/.*`hypergen\.export\.<id>`/);
   });
 
-  it("generate and job no longer mention Diffusion Studio but say the Hypergen API", () => {
+  it("generate runs in Hypergen on fal.ai with the user's own key; neither generate nor job mentions Diffusion", () => {
     for (const name of ["generate", "job"] as const) {
       expect(toolByName(name).description, name).not.toMatch(/diffusion/i);
     }
-    expect(toolByName("generate").description).toContain("the Hypergen API");
+    const description = toolByName("generate").description;
+    expect(description).toContain("Hypergen");
+    expect(description).toContain("fal.ai with the user's own fal.ai API key");
   });
 
-  it("generate.ts keeps the api-contract import and nothing else legacy", () => {
-    const source = read(here, "tools", "generate.ts");
-    expect(source).toMatch(/from "@diffusionstudio\/api-contract"/);
-    const raw = source.split(/\r?\n/).filter((line) => LEGACY.test(line));
-    expect(raw.every((line) => line.includes("@diffusionstudio/api-contract")), raw.join("\n")).toBe(true);
+  it("generate.ts no longer imports the api-contract", () => {
+    expect(read(here, "tools", "generate.ts")).not.toMatch(/api-contract/);
   });
 
-  it.each(["export.ts", "report.ts", "generate.ts"])("%s greps clean apart from the api-contract import", (file) => {
+  it.each(["export.ts", "report.ts", "generate.ts"])("%s greps clean", (file) => {
     expect(leaks(read(here, "tools", file), LEGACY)).toEqual([]);
   });
 
@@ -106,9 +103,9 @@ describe("T14 catalog tool descriptions", () => {
 describe("T15 dapi package metadata", () => {
   const pkg = json(dapiDir, "package.json");
 
-  it("keeps its package name and the api-contract dependency", () => {
+  it("keeps its package name and has no api-contract dependency", () => {
     expect(pkg.name).toBe("@hypergen/dapi");
-    expect(pkg.dependencies).toHaveProperty("@diffusionstudio/api-contract");
+    expect(pkg.dependencies).not.toHaveProperty("@diffusionstudio/api-contract");
   });
 
   it("describes itself as Hypergen's catalog, not Diffusion Studio's", () => {
@@ -138,7 +135,7 @@ describe("T15 dapi package metadata", () => {
     expect(MCP_URL).toBe("http://127.0.0.1:3274/mcp");
   });
 
-  it("package.json greps clean apart from the package name and api-contract", () => {
+  it("package.json greps clean apart from the package name", () => {
     expect(leaks(read(dapiDir, "package.json"), LEGACY)).toEqual([]);
   });
 });

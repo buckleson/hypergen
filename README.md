@@ -52,7 +52,7 @@ The builds are not code-signed yet:
 ## Connect your agent
 
 1. Open Hypergen.
-2. Open **MCP & CLI** in the sidebar. Under **Agents**, turn on the switch next to your agent. Hypergen adds its `hypergen` MCP server to that agent's configuration.
+2. Open **Settings → MCP & CLI**. Under **Agents**, turn on the switch next to your agent. Hypergen adds its `hypergen` MCP server to that agent's configuration.
 3. Restart the agent. It shows the `hypergen` tools (`mcp__hypergen__*`).
 4. Ask for the video you want, in plain language.
 
@@ -159,7 +159,6 @@ npm run brand        # regenerate icons and images from scripts/brand
 | `packages/jsx` | The composition elements and types |
 | `packages/assets` | The project asset library |
 | `packages/encoder` | Video, audio and image encoding |
-| `packages/dapi` | The agent tool catalog shared by the MCP server and the CLI |
 | `packages/agent-chat` | The chat panel host for Claude Code and Codex |
 | `packages/sam2` | Local SAM 2.1 segmentation |
 
@@ -173,4 +172,4 @@ The `.workspace/` folder holds the project plans, the decision records, the hand
 
 ## Credits
 
-Secured by **HyperOx** · Powered by **[Buckleson](https://buckleson.com)** · Managed by **[Pavi](https://pavi.tech)**
+Secured by HyperOx · Powered by [Buckleson](https://buckleson.com) · Managed by [Pavi](https://pavi.tech)

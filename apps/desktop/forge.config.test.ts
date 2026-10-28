@@ -60,8 +60,8 @@ describe("forge packagerConfig", () => {
     expect(existsSync(meta["application-manifest"])).toBe(true);
   });
 
-  it("registers exactly the hypergen:// protocol", () => {
-    expect(config.packagerConfig.protocols).toEqual([{ name: "Hypergen", schemes: ["hypergen"] }]);
+  it("registers no URL scheme", () => {
+    expect(config.packagerConfig.protocols).toBeUndefined();
   });
 
   it("takes the app version from the root package.json", () => {

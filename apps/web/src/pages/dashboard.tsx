@@ -5,9 +5,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { Match, Show, Switch, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
 
-import { DashboardAccountView } from "@/components/dashboard/account-view";
-import { DashboardAiCreditsView } from "@/components/dashboard/ai-credits-view";
-import { DashboardBillingView } from "@/components/dashboard/billing-view";
+import { DashboardAiProvidersView } from "@/components/dashboard/ai-providers-view";
 import { DashboardSidebarCollections } from "@/components/dashboard/collections-nav";
 import { DashboardGetDesktopApp } from "@/components/dashboard/get-desktop-app";
 import { DashboardHelpView } from "@/components/dashboard/help-view";
@@ -43,10 +41,8 @@ const DASHBOARD_VIEWS: readonly DashboardView[] = [
   "projects",
   "drafts",
   "templates",
-  "ai-credits",
-  "billing",
-  "account",
   "settings",
+  "ai-providers",
   "mcp",
   "preferences",
   "help",
@@ -54,11 +50,9 @@ const DASHBOARD_VIEWS: readonly DashboardView[] = [
 
 /** The views reached through the settings navigation, not the dashboard one. */
 const SETTINGS_VIEWS: readonly DashboardView[] = [
-  "account",
   "settings",
+  "ai-providers",
   "mcp",
-  "ai-credits",
-  "billing",
   "help",
 ];
 
@@ -109,9 +103,9 @@ export function DashboardPage() {
     }
   });
 
-  const openProfile = () => {
+  const openSettings = () => {
     setSettingsNavOpen(true);
-    setView("account");
+    setView("settings");
   };
   const openAgentSetup = () => {
     setSettingsNavOpen(true);
@@ -168,17 +162,15 @@ export function DashboardPage() {
               <DashboardSidebarItem onClick={backToDashboard} icon="arrow-left" label="Back to dashboard" />
             </DashboardSidebarSection>
             <DashboardSidebarSection title="Settings">
-              <DashboardSidebarItem active={view() === "account"} onClick={() => setView("account")} icon="user" label="Account" />
               <DashboardSidebarItem active={view() === "settings"} onClick={() => setView("settings")} icon="settings" label="General" />
+              <DashboardSidebarItem active={view() === "ai-providers"} onClick={() => setView("ai-providers")} icon="ai-generate" label="AI providers" />
               <DashboardSidebarItem active={view() === "mcp"} onClick={() => setView("mcp")} icon="ai-mcp-cli" label="MCP & CLI" />
-              <DashboardSidebarItem active={view() === "ai-credits"} onClick={() => setView("ai-credits")} icon="ai-credits" label="AI credits" />
-              <DashboardSidebarItem active={view() === "billing"} onClick={() => setView("billing")} icon="billing" label="Billing" />
               <DashboardSidebarItem active={view() === "help"} onClick={() => setView("help")} icon="help" label="Help" />
             </DashboardSidebarSection>
           </Show>
         </DashboardSidebarNav>
         <Show when={!settingsNavOpen()}>
-          <DashboardSidebarUser onClick={openProfile} />
+          <DashboardSidebarUser onClick={openSettings} />
         </Show>
       </aside>
 
@@ -192,17 +184,11 @@ export function DashboardPage() {
           <Match when={view() === "projects" || view() === "drafts"}>
             <DashboardProjectsView scope={projectScope()} />
           </Match>
-          <Match when={view() === "ai-credits"}>
-            <DashboardAiCreditsView />
-          </Match>
-          <Match when={view() === "billing"}>
-            <DashboardBillingView />
-          </Match>
-          <Match when={view() === "account"}>
-            <DashboardAccountView />
-          </Match>
           <Match when={view() === "settings"}>
             <DashboardSettingsView />
+          </Match>
+          <Match when={view() === "ai-providers"}>
+            <DashboardAiProvidersView />
           </Match>
           <Match when={view() === "mcp"}>
             <DashboardMcpView />

@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { AssetPath } from "../schemas";
 
-/** A file a request names, as the API's requests do: `{ path }`. */
+/** A file a request names: `{ path }`. */
 export const FileRef = z.strictObject({ path: AssetPath });
 
 /**
@@ -15,6 +15,5 @@ export const FileRef = z.strictObject({ path: AssetPath });
  */
 export const requestFields = {
   output: z.string().optional(),
-  maxCredits: z.number().optional(),
   estimate: z.boolean().optional(),
 };

@@ -1,6 +1,6 @@
 # filmstrip
 
-Render a grid of thumbnails sampled across the timeline to a PNG (local render, no credits), each row stamped with an HH:MM:SS:FF ruler. A fast, token-efficient video track preview; narrow the window to zoom into a region of interest. Video only (use waveform for audio).
+Render a grid of thumbnails sampled across the timeline to a PNG (local render), each row stamped with an HH:MM:SS:FF ruler. A fast, token-efficient video track preview; narrow the window to zoom into a region of interest. Video only (use waveform for audio).
 
 | | |
 | --- | --- |

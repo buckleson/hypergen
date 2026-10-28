@@ -10,7 +10,7 @@ export const listen = defineTool({
   name: "listen",
   title: "Listen to audio",
   description:
-    "Prompt a multimodal model for a semantic analysis of an audio track and return its answer. Shines on audio semantics (the name of the music playing, who is speaking, the spoken content with second-granularity timestamps). Accepts an audio file or a video; of a video only the audio track is analyzed.",
+    "Prompt Gemini, with the user's own Gemini API key, for a semantic analysis of an audio track and return its answer. Shines on audio semantics (the name of the music playing, who is speaking, the spoken content with second-granularity timestamps). Accepts an audio file or a video; of a video only the audio track is analyzed, at most 20 MB of it per call (pass a shorter start/end window for more). Fails with MISSING_KEY until the user adds a Gemini API key in Hypergen > Settings > AI providers.",
   input: z
     .object({
       path: AssetPath,

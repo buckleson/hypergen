@@ -21,7 +21,6 @@
 import { Audio, ImagePaint, Rect, VideoPaint, authoredElement, renderAuthored } from '@hypergen/reconciler';
 import { AssetId, Cache, getCameraMatrix, getNextName, getParentEntity, Library, Paint, revealRect, Root, Selected, Size, Source } from '@hypergen/runtime';
 import { assetName } from '@hypergen/assets';
-import { TRPCClientError } from '@trpc/client';
 import { toast } from 'somoto';
 
 import { jobFailure, runJob } from '@/lib/jobs';
@@ -33,7 +32,7 @@ import { trackPlaceholder } from './placeholder';
 import { topMedia } from './media';
 
 import type { Asset, AssetLibrary } from '@hypergen/assets';
-import type { AssetRef, GenerateRequestInput, Job } from '@diffusionstudio/api-contract';
+import type { Job, ModelRequest } from '@hypergen/dapi';
 import type { Entity, World } from 'koota';
 import type { NodeMedia } from './media';
 import type { GenerationState, Placeholder } from './placeholder';
@@ -79,13 +78,13 @@ class Progress {
 
 /**
  * Generates what `request` asks for into empty geometries on the canvas (see
- * the module comment). `request` may take making — inputs to upload — so it
+ * the module comment). `request` may take making — inputs to read — so it
  * is made once the placeholders are there, from the moment of the prompt.
  */
 export async function generate(
 	world: World,
 	output: GenerationOutput,
-	request: GenerateRequestInput | (() => Promise<GenerateRequestInput>),
+	request: ModelRequest | (() => Promise<ModelRequest>),
 ): Promise<void> {
 	const library = world.get(Library);
 	const root = world.get(Root);
@@ -147,13 +146,13 @@ export async function generate(
 
 /**
  * Runs `request` over the media `media` shows (see the module comment);
- * `request` is handed the uploaded input.
+ * `request` is handed the input as a data: URI.
  */
 export async function transform(
 	world: World,
 	media: NodeMedia,
 	title: string,
-	request: (input: AssetRef) => GenerateRequestInput,
+	request: (input: string) => ModelRequest,
 ): Promise<void> {
 	const library = world.get(Library);
 	const input = library?.get(media.paint.get(AssetId)?.value ?? '');
@@ -185,10 +184,10 @@ export async function transform(
 }
 
 /** Uploads made this session, by library asset id: an input is sent once. */
-const uploads = new Map<string, Promise<AssetRef>>();
+const uploads = new Map<string, Promise<string>>();
 
-/** The ref a request names a library asset by, uploading its bytes when the API lacks them. */
-export function uploadAsset(library: AssetLibrary, asset: Asset): Promise<AssetRef> {
+/** A library asset as a request names it: a data: URI of its bytes. */
+export function uploadAsset(library: AssetLibrary, asset: Asset): Promise<string> {
 	let ref = uploads.get(asset.id);
 	if (!ref) {
 		ref = library.file(asset).then(uploadFile);
@@ -270,9 +269,8 @@ function overlay(world: World, node: Entity, paintSource: string | undefined, as
 	}));
 }
 
-/** Tells the user why a generation came to nothing — unless the upgrade dialog already does. */
+/** Tells the user why a generation came to nothing; a missing key says where to add it. */
 function report(title: string, error: unknown): void {
-	if (error instanceof TRPCClientError && error.data?.code === 'PAYMENT_REQUIRED') return;
 	console.error(`[generate] ${title}:`, error);
 	toast.error(title, { description: error instanceof Error ? error.message : String(error) });
 }

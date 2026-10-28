@@ -1,6 +1,6 @@
 # sam-2.1
 
-SAM 2.1 segments an object in a video and tracks it through the footage, making the mask file (`.mask`) a [`<mask src>`](../jsx/masks.md#mask-files) names — the file the editor's object mask tool makes. It runs in the app, on this machine's GPU: no account, no credits. Like every [local model](../models.md#local), its job is polled with [`job`](./job.md) and lasts only as long as the app.
+SAM 2.1 segments an object in a video and tracks it through the footage, making the mask file (`.mask`) a [`<mask src>`](../jsx/masks.md#mask-files) names — the file the editor's object mask tool makes. It runs in the app, on this machine's GPU, and needs no API key. Like every [local model](../models.md#local), its job is polled with [`job`](./job.md) and lasts only as long as the app.
 
 | | |
 | --- | --- |

@@ -5,10 +5,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogPortal } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
-import { useAuth } from "@/context/auth";
 import { cx } from "@/lib/cva";
-import { api } from "@/lib/api";
-import { FREE_CREDITS, planName } from "@/lib/checkout";
 import {
   For,
   Show,
@@ -23,7 +20,6 @@ import { createStore, reconcile } from "solid-js/store";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "somoto";
-import { track } from "@/lib/analytics";
 import { forgetProjectBundle } from "@/lib/db";
 import {
   askAboutMissingProject,
@@ -202,97 +198,6 @@ export function DashboardFormModal(props: DashboardFormModalProps) {
   );
 }
 
-type DashboardPlanDetailsProps = {
-  details: readonly {
-    label: string;
-    value: JSX.Element;
-  }[];
-};
-
-export function DashboardPlanDetails(props: DashboardPlanDetailsProps) {
-  return (
-    <div class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center md:gap-4">
-      <For each={props.details}>
-        {(detail, index) => (
-          <>
-            <DashboardLabelValue
-              label={detail.label}
-              value={detail.value}
-              labelClass="truncate"
-              valueClass="truncate"
-            />
-            <Show when={index() < props.details.length - 1}>
-              <div class="hidden h-8 w-px shrink-0 bg-border md:block" />
-            </Show>
-          </>
-        )}
-      </For>
-    </div>
-  );
-}
-
-export function DashboardFreePlanDetails() {
-  return (
-    <DashboardPlanDetails
-      details={[
-        { label: "Free", value: "$0.00" },
-        { label: "AI credits", value: `${FREE_CREDITS} trial credits \u00B7 One time only` },
-      ]}
-    />
-  );
-}
-
-const RENEWAL_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-});
-
-function formatCurrency(amountCents: number, currency: string) {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: currency.toUpperCase(),
-  }).format(amountCents / 100);
-}
-
-export function DashboardPaidPlanDetails() {
-  const auth = useAuth();
-  const [summary] = createResource(async () => {
-    try {
-      return await api.billing.subscription.query();
-    } catch (err) {
-      console.error("Failed to load the subscription", err);
-      return null;
-    }
-  });
-
-  const priceLabel = () => {
-    const s = summary();
-    if (!s) return "\u2014";
-    const suffix = s.billingPeriod === "year" ? "/yr" : "/mo";
-    return `${formatCurrency(s.amount, s.currency)}${suffix}`;
-  };
-
-  const creditsLabel = () =>
-    `${auth.creditLimit().toLocaleString()} credits/mo`;
-
-  const renewsLabel = () => {
-    const s = summary();
-    if (!s) return "\u2014";
-    return RENEWAL_DATE_FORMAT.format(new Date(s.currentPeriodEnd));
-  };
-
-  return (
-    <DashboardPlanDetails
-      details={[
-        { label: planName(auth.plan()), value: priceLabel() },
-        { label: "AI credits", value: creditsLabel() },
-        { label: "Renews", value: renewsLabel() },
-      ]}
-    />
-  );
-}
-
 type DashboardDividedStackProps = {
   class?: string;
   spacing?: "tight" | "loose";
@@ -325,40 +230,6 @@ export function DashboardDividedStack(props: DashboardDividedStackProps) {
           </>
         )}
       </For>
-    </div>
-  );
-}
-
-type DashboardPlanSummaryCardProps = {
-  action: JSX.Element;
-  children: JSX.Element;
-  class?: string;
-};
-
-export function DashboardPlanSummaryCard(props: DashboardPlanSummaryCardProps) {
-  return (
-    <DashboardSurfaceCard class={cx("flex flex-col gap-4", props.class)}>
-      <div class="flex flex-col gap-4 md:flex-row md:items-center">
-        {props.children}
-        {props.action}
-      </div>
-    </DashboardSurfaceCard>
-  );
-}
-
-type DashboardFeatureRowProps = {
-  label: string;
-};
-
-export function DashboardFeatureRow(props: DashboardFeatureRowProps) {
-  return (
-    <div class="flex items-center gap-2">
-      <span class="size-4 flex items-center justify-center text-primary overflow-clip">
-        <Icon name="confirm-check" />
-      </span>
-      <p class="text-muted-foreground text-xs">
-        {props.label}
-      </p>
     </div>
   );
 }
@@ -587,7 +458,6 @@ export async function createNewProject(collectionId?: string): Promise<ProjectIn
     return null;
   }
   const project = await createProject(collectionId);
-  track("project_created");
   return project;
 }
 
@@ -635,7 +505,6 @@ export async function openProjectFromList(project: ProjectInfo): Promise<Project
 export async function trashProject(project: ProjectInfo): Promise<void> {
   await deleteProject(project.dir);
   forgetProjectBundle(project.id);
-  track("project_deleted");
 }
 
 

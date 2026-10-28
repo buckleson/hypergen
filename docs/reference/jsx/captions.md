@@ -13,11 +13,10 @@
 
 ## Captioning a scene
 
-To caption what a scene plays — every voice in it, as mixed — transcribe the scene itself: pass `{ "scene": "<scene id>" }` as the `universal-3.5-pro` model's `audio` to [`generate`](../tools/generate.md), save the transcript into the library, and mount it.
+To caption a recording the scene plays, transcribe it with [`transcribe`](../tools/transcribe.md), which runs locally with Whisper, write the transcript next to the project, and mount it.
 
 ```bash
-hypergen generate universal-3.5-pro '{"audio":{"scene":"talk"}}' -o transcripts/talk.json
-hypergen job <id>    # until its status is succeeded
+hypergen transcribe a-roll/take-3.mp4 -o /Users/me/talk/transcripts/talk.json
 ```
 
 ```tsx
@@ -27,7 +26,7 @@ hypergen job <id>    # until its status is succeeded
 </scene>
 ```
 
-The scene's audible mix is rendered from its start to its end (the workarea is ignored), so the transcript's times are scene times and the `<captions>` lines up untrimmed — no `start` or `sourceIn` needed. Transcribe again after the edit changes what is heard or when (a cut, a moved clip, a muted track): the transcript is a snapshot of the mix, not a live view of it. A single recording rather than the whole scene takes `{ "path": … }` instead, and a transcript of a clip that starts later in the scene needs the clip's timing (see [Trimming](#trimming)).
+The transcript's times are the recording's own, so a clip that starts at the scene's start lines up untrimmed — no `start` or `sourceIn` needed — and a clip that starts later in the scene needs the clip's timing (see [Trimming](#trimming)). Transcribe again after the recording changes: the transcript is a snapshot, not a live view of it.
 
 ## Props
 

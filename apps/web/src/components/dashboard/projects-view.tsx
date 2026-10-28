@@ -31,7 +31,6 @@ import { parseTimestamp } from "./utils";
 import { DashboardSearchPanel } from "./search-bar";
 import { projectRoute, useReturnHere } from "@/hooks/use-project-route";
 import { Icon } from "../ui/icon";
-import { track } from "@/lib/analytics";
 import { isDesktop, openProjectFolder, pickProjectFolder, projectKey, type ProjectInfo } from "@/projects";
 
 import type { ProjectScope, ProjectSortOption } from "./types";
@@ -109,7 +108,6 @@ export function DashboardProjectsView(props: DashboardProjectsViewProps) {
   const openProject = async (project: ProjectInfo) => {
     const found = await openProjectFromList(project);
     if (!found) return;
-    track('project_opened');
     navigate(projectRoute(projectKey(found)), { state: returnHere() });
   };
 

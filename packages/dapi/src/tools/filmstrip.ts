@@ -21,7 +21,7 @@ export const filmstrip = defineTool({
   name: "filmstrip",
   title: "Filmstrip preview",
   description:
-    "Render a grid of thumbnails sampled across the timeline to a PNG (local render, no credits), each row stamped with an HH:MM:SS:FF ruler. A fast, token-efficient video track preview; narrow the window to zoom into a region of interest. Video only (use waveform for audio).",
+    "Render a grid of thumbnails sampled across the timeline to a PNG (local render), each row stamped with an HH:MM:SS:FF ruler. A fast, token-efficient video track preview; narrow the window to zoom into a region of interest. Video only (use waveform for audio).",
   input: z.object({ path: AssetPath, ...previewFields }).superRefine(checkWindow),
   output: z.looseObject({ path: z.string().describe("absolute path of the PNG") }),
   result: z.looseObject({ png: Bytes }),

@@ -33,7 +33,6 @@ const config: ForgeConfig = {
       FileDescription: 'Hypergen',
       'application-manifest': join(__dirname, 'assets', 'app.manifest'),
     },
-    protocols: [{ name: 'Hypergen', schemes: ['hypergen'] }],
     prune: false,
     ignore: (path) =>
       path !== '' &&

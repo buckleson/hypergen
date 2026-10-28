@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Static checks for the web app's storage namespaces, project-config comments,
-// dapi messages, download links, notices, export metadata, deep-link
-// placeholder and mask MIME type: all say hypergen, none carry an old
+// dapi messages, download links, notices, export metadata and
+// mask MIME type: all say hypergen, none carry an old
 // (diffusion, dspro, `dapi open`) or third-party name. Reads the files as text
 // through Vite's `?raw`; runs none of them.
 
@@ -24,7 +24,6 @@ import desktopAppSrc from './lib/desktop-app.ts?raw';
 import screenTooSmallSrc from './components/screen-too-small.tsx?raw';
 import unsupportedBrowserSrc from './components/unsupported-browser.tsx?raw';
 import renderSrc from './context/render.ts?raw';
-import devAuthSrc from './components/dev-auth-code-input.tsx?raw';
 import maskSrc from '../../../packages/assets/src/mask.ts?raw';
 
 const FILES: Record<string, string> = {
@@ -42,7 +41,6 @@ const FILES: Record<string, string> = {
   'components/screen-too-small.tsx': screenTooSmallSrc,
   'components/unsupported-browser.tsx': unsupportedBrowserSrc,
   'context/render.ts': renderSrc,
-  'components/dev-auth-code-input.tsx': devAuthSrc,
   'packages/assets/src/mask.ts': maskSrc,
 };
 
@@ -180,13 +178,9 @@ describe('T24 download links and environment notices', () => {
   });
 });
 
-describe('T25 export metadata, deep-link placeholder, mask MIME', () => {
+describe('T25 export metadata and mask MIME', () => {
   it('render.ts stamps `Made with Hypergen v${version}` into the export', () => {
     expect(renderSrc).toContain('comment: `Made with Hypergen v${version}`');
-  });
-
-  it("dev-auth-code-input placeholder is 'hypergen://... or raw code'", () => {
-    expect(devAuthSrc).toMatch(/placeholder=["']hypergen:\/\/\.\.\. or raw code["']/);
   });
 
   it("MASK_MIME_TYPE is 'application/x-hypergen-mask'", () => {

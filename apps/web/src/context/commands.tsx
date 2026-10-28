@@ -112,11 +112,6 @@ export type Command = CommandAction & {
   /** Whether it is offered right now; always, when left out. */
   available?(): boolean;
   /**
-   * What carrying it out over the selection costs, in credits: shown beside
-   * it in menus. Undefined while that isn't known, and for a command that is free.
-   */
-  credits?(): number | undefined;
-  /**
    * False keeps it out of the palette and its recents, for a command only a
    * menu or shortcut reaches, like the one that opens the palette itself.
    */

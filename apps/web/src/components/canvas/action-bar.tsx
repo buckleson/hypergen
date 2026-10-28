@@ -6,11 +6,10 @@
 // up while it works: what it applies to, and the way out. The pieces here are
 // what bars share; what goes between them is each bar's own.
 
-import { Match, Show, Switch, onCleanup, onMount } from "solid-js";
+import { Match, Switch, onCleanup, onMount } from "solid-js";
 import { useTrait, useWorld } from "@hypergen/koota-solid";
 import { Name } from "@hypergen/runtime";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getClipFallbackName } from "@/engine/timeline/style";
 import { cx } from "@/lib/cva";
@@ -97,18 +96,6 @@ function NodeName(props: { node: Entity }) {
   const world = useWorld();
   const name = useTrait(() => props.node, Name);
   return <span class="text-foreground">{name()?.value || getClipFallbackName(world, props.node)}</span>;
-}
-
-/** What confirming costs, once that is known. */
-export function ActionBarCredits(props: { credits: number | undefined }) {
-  return (
-    <Show when={props.credits !== undefined}>
-      <span class="flex items-center pr-2 text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-        <Icon name="ai-credits-small" />
-        {props.credits!.toLocaleString()}
-      </span>
-    </Show>
-  );
 }
 
 export function ActionBarCancel(props: { onCancel(): void }) {

@@ -2,45 +2,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { ModelId, Resolution } from "@diffusionstudio/api-contract";
+import type { ModelId, Resolution } from "@hypergen/dapi";
 
 /**
- * What each model of the API makes. Keyed by the contract's model ids, so a
- * model added to (or dropped from) the API fails the type check here first.
- * The modes are the prompt box's; the tools are run from the action bar, and
- * the text models (transcripts, analysis) never land on the canvas.
+ * What each model of the catalog makes. Keyed by its model ids, so a model
+ * added to (or dropped from) the catalog fails the type check here first.
+ * The modes are the prompt box's; the tools (background removal, upscaling)
+ * are run from the action bar and land as what they were run over.
  */
-export const MODEL_MODES: Record<ModelId, PromptMode | "TEXT"> = {
-  "gpt-image-2.5-sunburst": "IMAGE",
-  "nano-banana-2.1": "IMAGE",
-  "nano-banana-2": "IMAGE",
+export const MODEL_MODES: Record<ModelId, PromptMode> = {
   "nano-banana-pro": "IMAGE",
-  "seedream-5.0-pro": "IMAGE",
-  "grok-imagine-image-2.0": "IMAGE",
-  "krea-2-large": "IMAGE",
-  "flux-3-image": "IMAGE",
-  "flux-2-pro": "IMAGE",
   "flux-2-klein": "IMAGE",
-  "bria-rmbg-2.0": "IMAGE",
-  "seedvr-2": "IMAGE",
-  "kling-3-pro": "VIDEO",
-  "kling-o3-pro": "VIDEO",
-  "wan-3.0": "VIDEO",
-  "minimax-h3": "VIDEO",
-  "minimax-h3-max": "VIDEO",
-  "seedance-2.5": "VIDEO",
-  "flux-3-video": "VIDEO",
-  "grok-imagine-video-1.5": "VIDEO",
-  "veo-3.1": "VIDEO",
-  "veo-3.1-fast": "VIDEO",
-  "bytedance-upscaler": "VIDEO",
+  "bria-background-removal": "IMAGE",
+  "seedvr-image-upscale": "IMAGE",
+  "kling-v3-pro": "VIDEO",
+  "seedance-2.0-fast": "VIDEO",
+  "seedvr-video-upscale": "VIDEO",
   "elevenlabs-music": "AUDIO",
-  "elevenlabs-sfx": "AUDIO",
+  "elevenlabs-sfx-v2": "AUDIO",
   "elevenlabs-v3": "VOICE",
-  "elevenlabs-v4": "VOICE",
-  "gemini-3.8-flash-tts": "VOICE",
-  "universal-3.5-pro": "TEXT",
-  "qwen3.8-omni-flash": "TEXT",
 };
 
 export type PromptMode = "IMAGE" | "VIDEO" | "VOICE" | "AUDIO";
@@ -53,13 +33,6 @@ export const ASPECT_RATIO_DIMENSIONS: Record<string, { width: number; height: nu
   "4:3": { width: 1440, height: 1080 },
   "3:4": { width: 1080, height: 1440 },
 };
-
-export const PROMPT_INPUT_MODE_OPTIONS: { value: PromptMode; label: string; icon: string }[] = [
-  { value: "IMAGE", label: "Image", icon: "image" },
-  { value: "VIDEO", label: "Video", icon: "film-video-export" },
-  { value: "VOICE", label: "Voice", icon: "voice" },
-  { value: "AUDIO", label: "Audio", icon: "audio" },
-];
 
 /** The aspect ratios the prompt box offers; a model may take fewer. */
 export type AspectRatio = "16:9" | "9:16" | "1:1" | "4:3" | "3:4";
@@ -87,8 +60,6 @@ export const DEFAULT_RESOLUTION: Partial<Record<PromptMode, Resolution>> = { IMA
 
 /** A voice the prompt box offers, with a sample to preview it by. */
 export type VoiceOption = { value: string; label: string; thumbnail: string; description: string; previewUrl: string };
-
-const voiceThumbnail = (n: number) => new URL(`../../assets/images/voice-thumbnails/${n % 18}.png`, import.meta.url).href;
 
 export const ELEVENLABS_VOICE_OPTIONS: VoiceOption[] = [
   {
@@ -254,48 +225,6 @@ export const ELEVENLABS_VOICE_OPTIONS: VoiceOption[] = [
   },
 ];
 
-/** Gemini's prebuilt voices, with the samples Google AI Studio plays. */
-export const GEMINI_VOICE_OPTIONS: VoiceOption[] = (
-  [
-    ["Zephyr", "Bright, light, sunny."],
-    ["Puck", "Upbeat, cheeky, energetic."],
-    ["Charon", "Informative, measured newsreader."],
-    ["Kore", "Firm, confident, composed."],
-    ["Fenrir", "Excitable, animated, eager."],
-    ["Leda", "Youthful, fresh, expressive."],
-    ["Orus", "Firm, grounded, decisive."],
-    ["Aoede", "Breezy, airy, carefree."],
-    ["Callirrhoe", "Easy-going, relaxed, warm."],
-    ["Autonoe", "Bright, clear, upbeat narrator."],
-    ["Enceladus", "Breathy, hushed, intimate."],
-    ["Iapetus", "Clear, crisp, articulate."],
-    ["Umbriel", "Easy-going, friendly, laid-back."],
-    ["Algieba", "Smooth, deep, velvety."],
-    ["Despina", "Smooth, soft, polished."],
-    ["Erinome", "Clear, precise, poised."],
-    ["Algenib", "Gravelly, deep, rugged."],
-    ["Rasalgethi", "Informative, professional presenter."],
-    ["Laomedeia", "Upbeat, cheerful, animated."],
-    ["Achernar", "Soft, gentle, soothing."],
-    ["Alnilam", "Firm, strong, authoritative."],
-    ["Schedar", "Even, steady, balanced."],
-    ["Gacrux", "Mature, seasoned, assured."],
-    ["Pulcherrima", "Forward, bold, direct."],
-    ["Achird", "Friendly, approachable, kind."],
-    ["Zubenelgenubi", "Casual, conversational, chill."],
-    ["Vindemiatrix", "Gentle, calm, reassuring."],
-    ["Sadachbia", "Lively, spirited, dynamic."],
-    ["Sadaltager", "Knowledgeable, thoughtful educator."],
-    ["Sulafat", "Warm, caring, inviting."],
-  ] as const
-).map(([name, description], i) => ({
-  value: name,
-  label: name,
-  thumbnail: voiceThumbnail(i),
-  description,
-  previewUrl: `https://www.gstatic.com/aistudio/voices/samples/${name}.wav`,
-}));
-
 /**
  * A model the prompt box makes requests with, and the settings it takes: a
  * setting the model declares is offered (within the values given), one it
@@ -339,64 +268,10 @@ const image = { mode: "IMAGE", aspectRatios: ALL_ASPECT_RATIOS, counts: [1, 2, 3
 const video = { mode: "VIDEO" } satisfies Partial<ModelOption>;
 
 /**
- * Most relevant first, per mode: the order the model menu lists them in. Image
- * models follow the Artificial Analysis text-to-image leaderboard.
+ * Most relevant first, per mode: the order the model menu lists them in. The
+ * settings are what each model's fal endpoints take (see `HYPERGEN_MODELS`).
  */
 export const MODEL_OPTIONS: ModelOption[] = [
-  {
-    ...image,
-    id: "flux-2-klein",
-    name: "FLUX.2 Klein",
-    icon: "large-bfl",
-    description: "Low budget, high quality, fast.",
-    references: 4,
-    resolutions: ["1K"],
-  },
-  {
-    ...image,
-    id: "gpt-image-2.5-sunburst",
-    name: "GPT Image 2.5 Sunburst",
-    icon: "large-openai",
-    description: "Precise detail, strong text, true edits.",
-    references: 16,
-    resolutions: ["1K"],
-  },
-  // {
-  //   ...image,
-  //   id: "nano-banana-2.1",
-  //   name: "Nano Banana 2.1",
-  //   icon: "large-google",
-  //   description: "Google's newest, sharper edits at Flash cost.",
-  //   references: 14,
-  //   resolutions: ["1K", "2K", "4K"],
-  // },
-  {
-    ...image,
-    id: "grok-imagine-image-2.0",
-    name: "Grok Imagine 2.0",
-    icon: "large-grok",
-    description: "Fast, vivid, photoreal images.",
-    references: 3,
-    resolutions: ["1K", "2K"],
-  },
-  {
-    ...image,
-    id: "nano-banana-2",
-    name: "Nano Banana 2",
-    icon: "large-google",
-    description: "Fast, high quality, flexible edits.",
-    references: 14,
-    resolutions: ["1K", "2K", "4K"],
-  },
-  {
-    ...image,
-    id: "flux-3-image",
-    name: "FLUX.3 Image",
-    icon: "large-bfl",
-    description: "BFL's flagship, sharp up to 4K.",
-    references: 10,
-    resolutions: ["1K", "2K", "4K"],
-  },
   {
     ...image,
     id: "nano-banana-pro",
@@ -408,150 +283,32 @@ export const MODEL_OPTIONS: ModelOption[] = [
   },
   {
     ...image,
-    id: "seedream-5.0-pro",
-    name: "Seedream 5.0 Pro",
-    icon: "large-bytedance",
-    description: "Lifelike scenes, precise multi image edits.",
-    references: 14,
-    resolutions: ["1K", "2K"],
-  },
-  {
-    ...image,
-    id: "krea-2-large",
-    name: "Krea 2 Large",
-    icon: "large-krea",
-    description: "Raw, textured, artistic looks.",
-    references: 1,
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3"],
-    resolutions: ["1K"],
-  },
-  {
-    ...image,
-    id: "flux-2-pro",
-    name: "FLUX.2 Pro",
+    id: "flux-2-klein",
+    name: "FLUX.2 Klein",
     icon: "large-bfl",
-    description: "Frontier quality, consistent references.",
-    references: 8,
-    resolutions: ["1K"],
+    description: "Fast, high quality, flexible edits.",
+    references: 4,
   },
   {
     ...video,
-    id: "veo-3.1",
-    name: "Veo 3.1",
-    icon: "large-google",
-    description: "Realistic physics, complex scenes.",
-    frames: ["start", "end"],
-    durations: [4, 6, 8],
-    aspectRatios: ["16:9", "9:16"],
-    resolutions: ["720p", "1080p"],
-    resolutionDurations: { "1080p": [8] },
-  },
-  {
-    ...video,
-    id: "flux-3-video",
-    name: "FLUX.3 Video",
-    icon: "large-bfl",
-    description: "Sharp detail with native audio.",
-    frames: ["start", "end"],
-    durations: seconds(5, 20),
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
-    resolutions: ["720p", "1080p"],
-  },
-  {
-    ...video,
-    id: "seedance-2.5",
-    name: "Seedance 2.5",
+    id: "seedance-2.0-fast",
+    name: "Seedance 2.0 Fast",
     icon: "large-bytedance",
-    description: "Rich motion, lip-synced audio, up to 30s.",
+    description: "Rich motion with native audio, up to 15s.",
     frames: ["start", "end"],
-    durations: seconds(4, 30),
+    durations: seconds(4, 15),
     aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
     resolutions: ["480p", "720p"],
   },
   {
     ...video,
-    id: "veo-3.1-fast",
-    name: "Veo 3.1 Fast",
-    icon: "large-google",
-    description: "Same Veo engine, lower cost.",
-    frames: ["start", "end"],
-    durations: [4, 6, 8],
-    aspectRatios: ["16:9", "9:16"],
-    resolutions: ["720p", "1080p"],
-    resolutionDurations: { "1080p": [8] },
-  },
-  {
-    ...video,
-    id: "kling-o3-pro",
-    name: "Kling 3.0 Omni",
-    icon: "large-kling",
-    description: "Multi-modal reasoning, strong scenes.",
-    frames: ["start"],
-    durations: seconds(3, 15),
-    resolutions: ["1080p"],
-  },
-  {
-    ...video,
-    id: "wan-3.0",
-    name: "Wan 3.0",
-    icon: "large-wan",
-    description: "Expressive motion, clips up to 30s.",
-    frames: ["start"],
-    durations: seconds(2, 30),
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
-    resolutions: ["480p", "720p", "1080p"],
-  },
-  {
-    ...video,
-    id: "minimax-h3",
-    name: "MiniMax H3",
-    icon: "large-minimax",
-    description: "Native 2K with built-in audio.",
-    frames: ["start", "end"],
-    durations: seconds(5, 15),
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
-    resolutions: ["2K"],
-  },
-  {
-    ...video,
-    id: "minimax-h3-max",
-    name: "MiniMax H3 Max",
-    icon: "large-minimax",
-    description: "Faster, cheaper H3 with native audio.",
-    frames: ["start", "end"],
-    durations: seconds(5, 15),
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
-    resolutions: ["480p", "720p"],
-  },
-  {
-    ...video,
-    id: "kling-3-pro",
-    name: "Kling 3.0",
+    id: "kling-v3-pro",
+    name: "Kling 3.0 Pro",
     icon: "large-kling",
     description: "Cinematic motion with built-in audio.",
     frames: ["start", "end"],
     durations: seconds(3, 15),
     aspectRatios: ["16:9", "9:16", "1:1"],
-    resolutions: ["720p"],
-  },
-  {
-    ...video,
-    id: "grok-imagine-video-1.5",
-    name: "Grok Imagine Video 1.5",
-    icon: "large-grok",
-    description: "Quick clips from text or a frame.",
-    frames: ["start"],
-    durations: seconds(1, 15),
-    aspectRatios: ["16:9", "9:16", "1:1", "4:3", "3:4"],
-    resolutions: ["480p", "720p", "1080p"],
-  },
-  {
-    id: "elevenlabs-v4",
-    mode: "VOICE",
-    name: "ElevenLabs v4",
-    icon: "large-elevenlabs",
-    description: "Lifelike speech, up to 10,000 characters.",
-    voices: ELEVENLABS_VOICE_OPTIONS,
   },
   {
     id: "elevenlabs-v3",
@@ -562,14 +319,6 @@ export const MODEL_OPTIONS: ModelOption[] = [
     voices: ELEVENLABS_VOICE_OPTIONS,
   },
   {
-    id: "gemini-3.8-flash-tts",
-    mode: "VOICE",
-    name: "Gemini 3.8 Flash TTS",
-    icon: "large-google",
-    description: "Natural speech, style it in the prompt.",
-    voices: GEMINI_VOICE_OPTIONS,
-  },
-  {
     id: "elevenlabs-music",
     mode: "AUDIO",
     name: "ElevenLabs Music",
@@ -578,21 +327,31 @@ export const MODEL_OPTIONS: ModelOption[] = [
     durationRange: { min: 3, max: 600, default: 30, presets: [30, 60, 120, 180] },
   },
   {
-    id: "elevenlabs-sfx",
+    id: "elevenlabs-sfx-v2",
     mode: "AUDIO",
     name: "ElevenLabs SFX",
     icon: "large-elevenlabs",
-    description: "Sound effects up to 30s, seamless looping.",
+    description: "Sound effects up to 22s.",
   },
 ];
 
-/** The model each mode starts with: the cheap one, not the most relevant. */
+/** The model each mode starts with: the fast one, not the most relevant. */
 const DEFAULT_MODELS: Record<PromptMode, ModelId> = {
   IMAGE: "flux-2-klein",
-  VIDEO: "seedance-2.5",
-  VOICE: "gemini-3.8-flash-tts",
+  VIDEO: "seedance-2.0-fast",
+  VOICE: "elevenlabs-v3",
   AUDIO: "elevenlabs-music",
 };
+
+/** The modes the prompt box offers: those the catalog has a model for. */
+export const PROMPT_INPUT_MODE_OPTIONS: { value: PromptMode; label: string; icon: string }[] = (
+  [
+    { value: "IMAGE", label: "Image", icon: "image" },
+    { value: "VIDEO", label: "Video", icon: "film-video-export" },
+    { value: "VOICE", label: "Voice", icon: "voice" },
+    { value: "AUDIO", label: "Audio", icon: "audio" },
+  ] as const
+).filter((option) => MODEL_OPTIONS.some((model) => model.mode === option.value));
 
 /** The models the prompt box offers in `mode`. */
 export const modelOptions = (mode: PromptMode) => MODEL_OPTIONS.filter((option) => option.mode === mode);
@@ -600,7 +359,7 @@ export const modelOptions = (mode: PromptMode) => MODEL_OPTIONS.filter((option) 
 /** The model the prompt box starts `mode` with. */
 export const defaultModelOption = (mode: PromptMode) => modelOption(DEFAULT_MODELS[mode])!;
 
-/** The prompt box's option for `id`; undefined for a model it doesn't make requests with (tools, text). */
+/** The prompt box's option for `id`; undefined for a model it doesn't make requests with (tools). */
 export const modelOption = (id: ModelId) => MODEL_OPTIONS.find((option) => option.id === id);
 
 /** The durations `option` takes at `resolution`: fewer for a resolution only some durations allow. */

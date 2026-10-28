@@ -11,7 +11,6 @@ import { localModels } from "./models";
 
 import type { World } from "koota";
 import type { Accessor } from "solid-js";
-import type { JobErrorCode } from "@diffusionstudio/api-contract";
 import type { GenerateRequest, GenerationEstimate, GenerationResult, LocalModelId } from "@hypergen/dapi";
 import type { ToolContext } from "../handler";
 import type { Destination } from "../lib/outputs";
@@ -22,7 +21,7 @@ type Status = "queued" | "running" | "succeeded" | "failed" | "canceled";
 
 type JobFile = GenerationResult["job"]["assets"][number];
 
-/** A job of a local model, in the API's `Job` shape, with `progress` and `details` of its own. */
+/** A job of a local model, in the `Job` shape, with `details` of its own. */
 type LocalJob = {
   id: string;
   model: LocalModelId;
@@ -30,13 +29,12 @@ type LocalJob = {
   status: Status;
   phase: string | null;
   progress: number | null;
-  credits: 0;
   etaSeconds: number;
   etaRemainingSeconds: number | null;
   name: string | null;
   assets: JobFile[];
   details: Record<string, unknown>;
-  error: { code: JobErrorCode; message: string } | null;
+  error: { code: string; message: string } | null;
   createdAt: string;
   startedAt: string | null;
   completedAt: string | null;
@@ -69,7 +67,7 @@ export async function startLocalJob(args: GenerateRequest, target: Destination, 
       throw new DapiError("invalid-input", z.prettifyError(parsed.error));
     }
     const plan = await localModels[model].prepare(parsed.data, ctx);
-    return { credits: 0, etaSeconds: round(plan.etaSeconds) };
+    return { etaSeconds: round(plan.etaSeconds) };
   }
 
   const model = args.model as LocalModelId;
@@ -87,7 +85,6 @@ export async function startLocalJob(args: GenerateRequest, target: Destination, 
       status: "queued",
       phase: "queued",
       progress: null,
-      credits: 0,
       etaSeconds: round(plan.etaSeconds),
       etaRemainingSeconds: null,
       name: null,
@@ -213,8 +210,8 @@ async function save(entry: Entry, files: LocalFile[], current: Accessor<EditorSe
   return saved;
 }
 
-/** The request as the job reports it, as the API's jobs do: the model's fields, not the tool's. */
-function modelFields({ output: _output, maxCredits: _maxCredits, estimate: _estimate, ...fields }: Record<string, unknown>): Record<string, unknown> {
+/** The request as the job reports it: the model's fields, not the tool's. */
+function modelFields({ output: _output, estimate: _estimate, ...fields }: Record<string, unknown>): Record<string, unknown> {
   return fields;
 }
 

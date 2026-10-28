@@ -10,7 +10,6 @@ import {
   ActionBar,
   ActionBarCancel,
   ActionBarConfirm,
-  ActionBarCredits,
   ActionBarTarget,
 } from "@/components/canvas/action-bar";
 
@@ -25,10 +24,10 @@ type TransformBarProps = {
   empty: string;
 };
 
-/** A transform's bar: the selected media it runs over and what that costs, run on Confirm. */
+/** A transform's bar: the selected media it runs over, run on Confirm. */
 export function TransformBar(props: TransformBarProps) {
   const { close } = useCommands();
-  const { targets, run, price } = useTransforms();
+  const { targets, run } = useTransforms();
 
   const nodes = createMemo(() => targets(props.type).map((entry) => entry.node), [], { equals: sameEntities });
 
@@ -40,7 +39,6 @@ export function TransformBar(props: TransformBarProps) {
   return (
     <ActionBar>
       <ActionBarTarget nodes={nodes()} verb={props.verb} empty={props.empty} />
-      <ActionBarCredits credits={price(props.type)} />
       <Separator orientation="vertical" class="min-h-5" />
       <ActionBarCancel onCancel={close} />
       <ActionBarConfirm disabled={nodes().length === 0} onConfirm={confirm} hint={props.verb} />

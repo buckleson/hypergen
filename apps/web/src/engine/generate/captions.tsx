@@ -6,7 +6,8 @@
  * Auto-captions: the scene's audible mix, encoded and transcribed, mounted as
  * the scene's `<captions>`. A scene has no geometry to stand in with — it is
  * the frame everything else sits in — so the wait is shown as the blue
- * shimmer around it instead of a pulse; only a failure is told in a toast.
+ * shimmer around it instead of a pulse; the first run's model download and
+ * a failure are told in a toast.
  */
 
 import { Captions } from '@hypergen/reconciler';
@@ -14,8 +15,7 @@ import { Caption, getEntityTree, Library, Shimmering } from '@hypergen/runtime';
 import { assetName } from '@hypergen/assets';
 import { toast } from 'somoto';
 
-import { jobFailure, runJob } from '@/lib/jobs';
-import { uploadFile } from '@/lib/uploads';
+import { transcribe } from '@/lib/whisper';
 
 import { getDocumentEditor } from '../editor';
 import { encodeSceneAudio, hasAudio } from '../scene-audio';
@@ -50,24 +50,22 @@ export async function generateCaptions(world: World, scene: Entity, dir?: string
 	}
 
 	const release = shimmer(world, scene);
+	let download: string | number | undefined;
 	getDocumentEditor(world).deselect(scene);
 
 	try {
-		const audio = await uploadFile(await encodeSceneAudio(world, scene, dir));
-		const job = await runJob({ model: 'universal-3.5-pro', audio }, () => {});
-		if (job.status !== 'succeeded') throw new Error(jobFailure(job));
-
-		const [file] = job.assets;
-		if (!file) throw new Error('The transcription returned nothing.');
-		const response = await fetch(file.url);
-		if (!response.ok) throw new Error(`Could not download the transcript (${response.status})`);
-		const transcript = await response.json() as { words: unknown[] }[];
+		const transcript = await transcribe(await encodeSceneAudio(world, scene, dir), {
+			onProgress: (progress) => {
+				const message = `Downloading the speech model… ${Math.round(progress * 100)}%`;
+				download = toast.loading(message, { id: download });
+			},
+		});
 		if (!transcript.some((segment) => segment.words.length > 0)) {
 			throw new Error('No speech detected. The audio does not appear to contain recognizable speech.');
 		}
 
 		const blob = new Blob([JSON.stringify(transcript)], { type: 'application/json' });
-		const asset = library.update(await library.store(blob, { name: captionsName(library) }), { job: job.id });
+		const asset = await library.store(blob, { name: captionsName(library) });
 
 		const editor = getDocumentEditor(world);
 		const existing = getEntityTree(world, scene).find((entity) => entity !== scene && entity.has(Caption));
@@ -82,6 +80,7 @@ export async function generateCaptions(world: World, scene: Entity, dir?: string
 		console.error(`[generate] ${TITLE}:`, error);
 		toast.error(TITLE, { description: error instanceof Error ? error.message : String(error) });
 	} finally {
+		if (download !== undefined) toast.dismiss(download);
 		release?.();
 	}
 }

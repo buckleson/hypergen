@@ -9,7 +9,7 @@ import { basename, dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { generatedPath } from "@hypergen/dapi";
+import { generatedPath, isDapiError } from "@hypergen/dapi";
 
 import type { GenerationResult, TimecodedImage, ToolArgs, ToolName, ToolOutput, ToolResult } from "@hypergen/dapi";
 
@@ -203,5 +203,7 @@ export function toCallToolResult({ output, images }: Presented): CallToolResult 
 
 /** A failure the agent reads as a sentence, not a protocol error. */
 export function toErrorResult(error: unknown): CallToolResult {
-  return { isError: true, content: [{ type: "text", text: (error as Error).message }] };
+  const message = (error as Error).message;
+  const text = isDapiError(error) && error.code === "MISSING_KEY" ? `MISSING_KEY: ${message}` : message;
+  return { isError: true, content: [{ type: "text", text }] };
 }

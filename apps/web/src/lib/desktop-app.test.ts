@@ -3,15 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // The desktop-app promo: which installer each platform gets, the label it
-// shows, and the Hypergen notice where there is no build. The toast and the
-// analytics are faked; navigator and document are stubbed. No network.
+// shows, and the Hypergen notice where there is no build. The toast is faked;
+// navigator and document are stubbed. No network.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const toast = vi.fn();
-const track = vi.fn();
 vi.mock('somoto', () => ({ toast }));
-vi.mock('@/lib/analytics', () => ({ track }));
 
 const { desktopAppPlatform, desktopAppPlatformLabel, desktopAppDownloadLabel, downloadDesktopApp } = await import(
   './desktop-app'
@@ -42,7 +40,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   toast.mockReset();
-  track.mockReset();
 });
 
 describe('desktopAppPlatform', () => {
@@ -92,25 +89,18 @@ describe('downloadDesktopApp', () => {
     expect(anchors[0].click).toHaveBeenCalledOnce();
     expect(anchors[0].remove).toHaveBeenCalledOnce();
     expect(toast).not.toHaveBeenCalled();
-    expect(track).toHaveBeenCalledWith('desktop_app_download', { source: 'main_menu', supported: true, platform: 'macos' });
   });
 
   it('hands Windows the Hypergen x64 setup exe from the hypergen releases', () => {
     stubBrowser('Win32');
     downloadDesktopApp('dashboard_footer');
     expect(anchors.map((a) => a.href)).toEqual([`${RELEASES}Hypergen-x64-Setup.exe`]);
-    expect(track).toHaveBeenCalledWith('desktop_app_download', {
-      source: 'dashboard_footer',
-      supported: true,
-      platform: 'windows',
-    });
   });
 
   it('starts no download elsewhere and explains with a Hypergen notice', () => {
     stubBrowser('Linux x86_64');
     downloadDesktopApp('canvas_banner');
     expect(anchors).toEqual([]);
-    expect(track).toHaveBeenCalledWith('desktop_app_download', { source: 'canvas_banner', supported: false, platform: 'other' });
     expect(toast).toHaveBeenCalledOnce();
     const [title, options] = toast.mock.calls[0] as [string, { description: string }];
     expect(title).toBe('Available for macOS and Windows');

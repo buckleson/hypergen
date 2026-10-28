@@ -14,6 +14,8 @@ import type { SourceEdit, WriteResult } from "./edit-types";
 import type { AgentId } from "./mcp-config";
 import type { EditorId, EditorInfo } from "./editors";
 import type { MissingProjectChoice, SaveAction } from "./projects";
+import type { KeyStatus, KeyTestResult, Provider } from "./providers/keys";
+import type { FalPollResult } from "./providers/fal";
 
 export const MAIN_WIRE = {
   REQUEST: "main:request",
@@ -34,9 +36,6 @@ export const MAIN_CHANNELS = {
   APP_SHOW_IN_FOLDER: "app:show-in-folder",
   APP_EDITORS_LIST: "app:editors-list",
   APP_OPEN_IN_EDITOR: "app:open-in-editor",
-  ANALYTICS_CONFIGURE: "analytics:configure",
-  AUTH_GET_PENDING_CALLBACK: "auth:get-pending-callback",
-  CHECKOUT_GET_PENDING_CALLBACK: "checkout:get-pending-callback",
   WINDOW_IS_FULLSCREEN: "window:is-fullscreen",
   WINDOW_SET_COLOR_MODE: "window:set-color-mode",
   WINDOW_CAPTURE: "window:capture",
@@ -80,10 +79,16 @@ export const MAIN_CHANNELS = {
   CLI_STATUS: "cli:status",
   CLI_INSTALL: "cli:install",
   CLI_UNINSTALL: "cli:uninstall",
+  PROVIDERS_KEYS_STATUS: "providers:keys-status",
+  PROVIDERS_KEYS_SET: "providers:keys-set",
+  PROVIDERS_KEYS_REMOVE: "providers:keys-remove",
+  PROVIDERS_KEYS_TEST: "providers:keys-test",
+  PROVIDERS_FAL_SUBMIT: "providers:fal-submit",
+  PROVIDERS_FAL_POLL: "providers:fal-poll",
+  PROVIDERS_FAL_CANCEL: "providers:fal-cancel",
+  PROVIDERS_GEMINI_GENERATE: "providers:gemini-generate",
 
   // Main→Renderer events
-  AUTH_CALLBACK: "auth:callback",
-  CHECKOUT_CALLBACK: "checkout:callback",
   WINDOW_FULLSCREEN_CHANGE: "window:fullscreen-change",
   PROJECTS_CHANGED: "projects:changed",
 } as const;
@@ -126,6 +131,7 @@ export type { SourceEdit, WriteResult };
 export type { AgentId };
 export type { EditorId, EditorInfo };
 export type { MissingProjectChoice };
+export type { KeyStatus, KeyTestResult, Provider, FalPollResult };
 
 // One agent the settings page lists: whether it is set up on this machine,
 // whether its config already carries the app's MCP entry, and — for the
@@ -181,28 +187,25 @@ export type CliUninstallResult =
 
 export type MainChannel = (typeof MAIN_CHANNELS)[keyof typeof MAIN_CHANNELS];
 
-// Events fed by a `hypergen://` deep link. Main routes each link to exactly
-// one of these by its host, so auth and checkout never consume each other's.
-export type DeepLinkChannel =
-  typeof MAIN_CHANNELS.AUTH_CALLBACK | typeof MAIN_CHANNELS.CHECKOUT_CALLBACK;
-
 export type MainRequestMap = {
   [MAIN_CHANNELS.APP_OPEN_EXTERNAL]: {
     request: { url: string };
     response: void;
   };
-  // Where main sends events and as whom: on launch and every auth change.
-  [MAIN_CHANNELS.ANALYTICS_CONFIGURE]: {
-    request: { apiUrl: string; token: string | null };
-    response: void;
+  // Which providers have a saved key. Keys themselves never leave main.
+  [MAIN_CHANNELS.PROVIDERS_KEYS_STATUS]: { request: void; response: KeyStatus };
+  [MAIN_CHANNELS.PROVIDERS_KEYS_SET]: { request: { provider: Provider; key: string }; response: void };
+  [MAIN_CHANNELS.PROVIDERS_KEYS_REMOVE]: { request: { provider: Provider }; response: void };
+  [MAIN_CHANNELS.PROVIDERS_KEYS_TEST]: { request: { provider: Provider }; response: KeyTestResult };
+  [MAIN_CHANNELS.PROVIDERS_FAL_SUBMIT]: {
+    request: { endpoint: string; input: Record<string, unknown> };
+    response: { requestId: string };
   };
-  [MAIN_CHANNELS.AUTH_GET_PENDING_CALLBACK]: {
-    request: void;
-    response: string | null;
-  };
-  [MAIN_CHANNELS.CHECKOUT_GET_PENDING_CALLBACK]: {
-    request: void;
-    response: string | null;
+  [MAIN_CHANNELS.PROVIDERS_FAL_POLL]: { request: { requestId: string }; response: FalPollResult };
+  [MAIN_CHANNELS.PROVIDERS_FAL_CANCEL]: { request: { requestId: string }; response: void };
+  [MAIN_CHANNELS.PROVIDERS_GEMINI_GENERATE]: {
+    request: { prompt: string; media: { mimeType: string; data: Uint8Array } };
+    response: { text: string };
   };
   [MAIN_CHANNELS.WINDOW_IS_FULLSCREEN]: { request: void; response: boolean };
   [MAIN_CHANNELS.WINDOW_SET_COLOR_MODE]: { request: { mode: "light" | "dark" }; response: void };
@@ -379,8 +382,6 @@ export type FsStat = { size: number; mtime: number };
 export type MainRequestChannel = keyof MainRequestMap;
 
 export type MainEventMap = {
-  [MAIN_CHANNELS.AUTH_CALLBACK]: { url: string };
-  [MAIN_CHANNELS.CHECKOUT_CALLBACK]: { url: string };
   [MAIN_CHANNELS.WINDOW_FULLSCREEN_CHANGE]: { fullscreen: boolean };
   // A file inside a watched project folder changed (path relative to `dir`).
   [MAIN_CHANNELS.PROJECTS_CHANGED]: { dir: string; path: string };

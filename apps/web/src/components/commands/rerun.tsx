@@ -12,7 +12,6 @@ import {
   ActionBar,
   ActionBarCancel,
   ActionBarConfirm,
-  ActionBarCredits,
   ActionBarTarget,
 } from "@/components/canvas/action-bar";
 
@@ -39,7 +38,7 @@ function RerunBar() {
   const { firstJob } = useGenerationRecords();
   const { rerun } = useGenerate();
 
-  // The node whose job `firstJob` is, once that is fetched.
+  // The node whose job `firstJob` is.
   const generated = createMemo(() => media().find((entry) => entry.asset?.job !== undefined)?.node);
 
   const confirm = () => {
@@ -56,7 +55,6 @@ function RerunBar() {
         verb="Rerun"
         empty="Select a generated image or video"
       />
-      <ActionBarCredits credits={firstJob()?.credits} />
       <Separator orientation="vertical" class="min-h-5" />
       <ActionBarCancel onCancel={close} />
       <ActionBarConfirm disabled={!firstJob()} onConfirm={confirm} hint="Rerun" />

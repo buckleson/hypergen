@@ -13,7 +13,7 @@ import { AUDIO_SIZE } from "@/engine/insert-asset";
 import { ASPECT_RATIO_DIMENSIONS, DEFAULT_RESOLUTION, MODEL_MODES, defaultModelOption, durationsAt, modelOption } from "./config";
 
 import type { AssetLibrary } from "@hypergen/assets";
-import type { AssetRef, GenerateRequest, GenerateRequestInput, ModelId, Resolution } from "@diffusionstudio/api-contract";
+import type { ModelId, ModelRequest } from "@hypergen/dapi";
 import type { GenerationOutput } from "@/engine/generate";
 import type { AspectRatio, PromptMode } from "./config";
 import type { GenerationConfig } from "./types";
@@ -30,13 +30,12 @@ const DEFAULT_SIZE = ASPECT_RATIO_DIMENSIONS["16:9"]!;
 
 /**
  * What a request puts on the canvas, read off the request itself — so a past
- * job (`job.request`) is placed the way the prompt that made it was. Text
- * models have nothing to place, and neither have models the API has retired
- * (a past job's `seedream-4.5`): they can't be run again.
+ * job (`job.request`) is placed the way the prompt that made it was. A model
+ * not in the catalog has nothing to place: it can't be run again.
  */
 export function outputOf(request: { model: ModelId; count?: number; aspectRatio?: string }): GenerationOutput | undefined {
-  const mode = MODEL_MODES[request.model] as PromptMode | "TEXT" | undefined;
-  if (!mode || mode === "TEXT") return undefined;
+  const mode = MODEL_MODES[request.model] as PromptMode | undefined;
+  if (!mode) return undefined;
 
   return {
     kind: mode === "IMAGE" ? "image" : mode === "VIDEO" ? "video" : "audio",
@@ -49,7 +48,7 @@ export function outputOf(request: { model: ModelId; count?: number; aspectRatio?
 }
 
 /** The library assets `ids` name, uploaded for a model to read; ids no longer in the library are dropped. */
-function refs(library: AssetLibrary, ids: (string | undefined)[]): Promise<(AssetRef | undefined)[]> {
+function refs(library: AssetLibrary, ids: (string | undefined)[]): Promise<(string | undefined)[]> {
   return Promise.all(ids.map((id) => {
     const asset = id ? library.get(id) : undefined;
     return asset ? uploadAsset(library, asset) : undefined;
@@ -75,7 +74,7 @@ function fitToRange(seconds: number | undefined, range: { min: number; max: numb
  * model allows is kept, one it allows other values of falls back to a
  * default, and one it doesn't take is dropped. Every config the prompt box
  * holds has been through here, so its requests are within the model's bounds.
- * The resolution is fitted first: it may narrow the durations (Veo's 1080p).
+ * The resolution is fitted first: it may narrow the durations.
  */
 export function fitToModel(config: GenerationConfig): GenerationConfig {
   const option = modelOption(config.model) ?? defaultModelOption(config.mode);
@@ -104,7 +103,7 @@ export function createDefaultConfig(mode: PromptMode, prompt = ""): GenerationCo
 }
 
 /** The request `config` makes, its library inputs uploaded. Settings the config leaves unset are left out. */
-export async function toRequest(library: AssetLibrary, config: GenerationConfig): Promise<GenerateRequestInput> {
+export async function toRequest(library: AssetLibrary, config: GenerationConfig): Promise<ModelRequest> {
   const { model, prompt, aspectRatio, count, duration, resolution, voice } = config;
   const [startFrame, endFrame, ...images] = await refs(library, [
     config.startFrameImageId,
@@ -112,8 +111,8 @@ export async function toRequest(library: AssetLibrary, config: GenerationConfig)
     ...(config.imageRefIds ?? []),
   ]);
   const uploaded = images.filter((ref) => ref !== undefined);
-  const request = { model, prompt, aspectRatio, count, duration, resolution, voice, startFrame, endFrame, images: uploaded.length ? uploaded : undefined };
-  return Object.fromEntries(Object.entries(request).filter(([, value]) => value !== undefined)) as GenerateRequestInput;
+  const request: ModelRequest = { model, prompt, aspectRatio, count, duration, resolution, voice, startFrame, endFrame, images: uploaded.length ? uploaded : undefined };
+  return Object.fromEntries(Object.entries(request).filter(([, value]) => value !== undefined)) as unknown as ModelRequest;
 }
 
 /**
@@ -121,19 +120,17 @@ export async function toRequest(library: AssetLibrary, config: GenerationConfig)
  * Inputs are left out: the request names them by upload, not by library
  * asset. Undefined for a request the prompt box does not make (a tool).
  */
-export function toConfig(request: GenerateRequest): GenerationConfig | undefined {
+export function toConfig(request: ModelRequest): GenerationConfig | undefined {
   const option = modelOption(request.model);
-  if (!option || !("prompt" in request) || request.prompt === undefined) return undefined;
-  // The settings a request of the prompt box's models may carry; `fitToModel` checks them.
-  const settings = request as { aspectRatio?: string; count?: number; duration?: number; resolution?: Resolution; voice?: string };
+  if (!option || request.prompt === undefined) return undefined;
   return fitToModel({
     mode: option.mode,
     model: option.id,
     prompt: request.prompt,
-    aspectRatio: settings.aspectRatio as AspectRatio | undefined,
-    count: settings.count,
-    duration: settings.duration,
-    resolution: settings.resolution,
-    voice: settings.voice,
+    aspectRatio: request.aspectRatio as AspectRatio | undefined,
+    count: request.count,
+    duration: request.duration,
+    resolution: request.resolution,
+    voice: request.voice,
   });
 }

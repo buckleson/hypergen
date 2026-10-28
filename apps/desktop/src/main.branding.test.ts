@@ -35,10 +35,8 @@ describe("main.ts", () => {
     expect(main).toMatch(/repo:\s*"buckleson\/hypergen"/);
   });
 
-  it("uses the hypergen deep-link scheme", () => {
-    expect(main).toMatch(/const AUTH_PROTOCOL = "hypergen";/);
-    expect(main).toContain("hypergen://");
-    expect(main).toMatch(/hypergen CLI/);
+  it("has no auth protocol or deep-link delivery", () => {
+    expect(main).not.toMatch(/AUTH_PROTOCOL|deliverDeepLink|hypergen:\/\//);
   });
 
   it("has no upstream brand outside the allowed dapi identifiers", () => {
