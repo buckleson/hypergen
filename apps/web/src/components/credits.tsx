@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+import { For, Show } from "solid-js";
+
+/** Who stands behind Hypergen, shown in Help > About. */
+export const CREDITS = [
+  { role: "Secured by", name: "HyperOx", logo: "/credits/hyperox.png" },
+  { role: "Powered by", name: "Buckleson", logo: "/credits/buckleson.png", href: "https://buckleson.com" },
+  { role: "Managed by", name: "Pavi", logo: "/credits/pavi.png", href: "https://pavi.tech" },
+] as const;
+
+export function HypergenCredits() {
+  return (
+    <ul class="flex flex-col gap-3">
+      <For each={CREDITS}>
+        {(credit) => (
+          <li class="flex items-center gap-3 text-xs text-muted-foreground">
+            <img src={credit.logo} alt="" class="size-5 shrink-0 rounded-full" />
+            <span>
+              {credit.role}{" "}
+              <Show when={"href" in credit && credit.href} fallback={<span class="text-foreground">{credit.name}</span>}>
+                {(href) => (
+                  <a href={href()} target="_blank" rel="noreferrer" class="text-foreground underline-offset-2 hover:underline">
+                    {credit.name}
+                  </a>
+                )}
+              </Show>
+            </span>
+          </li>
+        )}
+      </For>
+    </ul>
+  );
+}

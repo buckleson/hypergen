@@ -202,6 +202,23 @@ def main():
     text(d, (646, 360), 'The AI video editor built for agents', 34, (170, 180, 198), 450, 'lm')
     gb.convert('RGB').save(os.path.join(ROOT, 'assets', 'banner.png'))
 
+    # --- credit logos (Help > About) -------------------------------------------
+    logos = os.path.join(os.path.dirname(__file__), 'credits')
+    credits = os.path.join(PUBLIC, 'credits')
+    os.makedirs(credits, exist_ok=True)
+    tile(64).save(os.path.join(credits, 'hyperox.png'))
+    for src, name in (('Bson_logo.jpg', 'buckleson.png'), ('Pavii-logo.png', 'pavi.png')):
+        path = os.path.join(logos, src)
+        if os.path.exists(path):
+            im = Image.open(path).convert('RGBA')
+            side = min(im.size)
+            im = im.crop(((im.width - side) // 2, (im.height - side) // 2, (im.width + side) // 2, (im.height + side) // 2))
+            im = im.resize((64, 64), Image.LANCZOS)
+            circle = Image.new('L', (64, 64), 0)
+            ImageDraw.Draw(circle).ellipse((0, 0, 63, 63), fill=255)
+            im.putalpha(circle)
+            im.save(os.path.join(credits, name))
+
     write(os.path.join(ICONS, 'hypergen-logo.svg'), svg_logo(25, 15))
     write(os.path.join(ICONS, 'hypergen-logo-large.svg'), svg_logo(25, 20))
     print('splash path (64 view, 44 tall):')
