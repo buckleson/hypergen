@@ -1,6 +1,6 @@
 {
   "name": "@hypergen/sam2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SAM 2.1 video object segmentation and tracking in the browser: ONNX Runtime on WebGPU, frames decoded with mediabunny. Weights are fetched from Hugging Face on first use and cached locally.",
   "license": "MPL-2.0",
   "type": "module",

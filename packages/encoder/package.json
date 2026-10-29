@@ -1,6 +1,6 @@
 {
   "name": "@hypergen/encoder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Offline video/audio/image encoding over @hypergen/runtime worlds via mediabunny. Needs a browser-grade context (HTMLCanvasElement, OfflineAudioContext, AudioWorklet, SharedArrayBuffer).",
   "license": "MPL-2.0",
   "type": "module",

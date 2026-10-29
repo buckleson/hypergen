@@ -1,6 +1,6 @@
 {
   "name": "@hypergen/runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Headless editor runtime: koota traits, world, actions, systems, media decoding, and capture. No DOM, no solid-js.",
   "license": "MPL-2.0",
   "type": "module",

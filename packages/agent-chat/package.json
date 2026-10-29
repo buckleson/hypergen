@@ -1,6 +1,6 @@
 {
   "name": "@hypergen/agent-chat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The editor's agent chat: a Node host that drives the user's Claude Code or Codex against a project over a WebSocket, and the browser-safe protocol, client and reducer the UI is a view over. Node code lives behind the `./host` export.",
   "license": "MPL-2.0",
   "type": "module",

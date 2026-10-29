@@ -1,6 +1,6 @@
 {
   "name": "@hypergen/koota-solid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Solid bindings for koota — a port of @koota/react, adapted to Solid's reactivity model.",
   "license": "MPL-2.0",
   "type": "module",
