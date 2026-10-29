@@ -225,3 +225,34 @@ Every agent reads the **latest entry** before starting. The orchestrator appends
   1. Push. Watch CI (Linux .deb fix, macOS ad-hoc signing).
   2. P7 website: needs the user's design links.
 - **Waiting on the user:** delete the 84 test drafts?; website design links; Firebase config (later).
+
+## 2026-10-29 — CI fully green
+- Run 40750032752 (`00a226c`): test ✓, make Windows ✓, macOS ✓, Linux ✓. Installers are CI artifacts. No release yet (release needs a `v*` tag).
+- **Next step:**
+  - P7 website (needs the design links).
+  - Optional: tag a first release (decide the version; 0.216.0 is inherited).
+
+## 2026-10-29 — Built-in promo skill + home prompt suggestions workflow green
+- **Goal:** Two independent packages on `hypergen` main (baseline 1,733 tests, check, lint green). No shared files. Commit nothing; the orchestrator commits.
+- **Done (files):**
+  - A, built-in skill "Promo and launch videos" (agent docs). Test `apps/desktop/src/dapi/docs.promo.test.ts`.
+  - B, better prompt suggestions on the home screen. Test `apps/web/test/web-ui-cleanup.test.ts` (new cases; the "no file references a deleted file" test now has a 30 s timeout).
+- **Tests:** green on the first run. No fix rounds.
+  - A: targeted 21/21; `src/dapi/` 132/132 (9 files); `hypergen-branding.test.ts` 50/50; `tsc --noEmit -p .` exit 0.
+  - B: targeted 68/68; web 623/623; `tsc -p tsconfig.app.json --noEmit` exit 0.
+  - Full desktop suite NOT run by the tester. The test-writer saw 1 of 592 fail once (test not captured), then pass twice. Possible flake.
+  - Repo-wide `npm test`, `npm run check`, `npm run lint` NOT run yet.
+- **Decisions:** none.
+- **Open issues:**
+  - Unknown intermittent desktop failure (1/592). Capture the test name if it recurs.
+  - B's timeout fix hides a slow test (file scan over the web tree). Watch its run time.
+- **Next step:**
+  1. Run repo-wide `npm test`, `npm run check`, `npm run lint` (expect about 1,760 tests: 1,733 + 21 desktop + 13 web).
+  2. Commit, push, watch CI.
+
+## 2026-10-29 — Release 0.1.1 (approved by the user)
+- **Done:**
+  - Built-in promo skill (`docs/skills/promo.md`) and the promo-first home suggestion (`5b17136`). Credit logos fix (`dd3cad7`). Version 0.1.1 (`2d7e775`).
+  - The PAVii promo v3, made in Hypergen with the skill, is at `E:/research-clones/pavii-launch/pavii-promo-v3.mp4`.
+- **Tests:** 1,771 pass. check clean. lint 0 errors.
+- **Waiting on the user:** pavi.tech → pavii.tech link fix?; delete 84 test drafts?; website design links; Firebase config.

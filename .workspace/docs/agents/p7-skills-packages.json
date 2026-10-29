@@ -1,0 +1,17 @@
+[
+ {"id": "A", "title": "Built-in skill: Promo and launch videos", "dependsOn": [],
+  "files": ["E:/research-clones/hypergen/docs/skills/promo.md (new)", "E:/research-clones/hypergen/docs/INSTRUCTIONS.md", "E:/research-clones/hypergen/docs/skills/editor.md", "E:/research-clones/hypergen/apps/desktop/src/dapi/docs.ts", "E:/research-clones/hypergen/apps/desktop/src/dapi/docs.test.ts"],
+  "acceptance": [
+   "Create docs/skills/promo.md from the reviewed draft E:/research-clones/docs/agents/promo-playbook-draft.md. Fix every link so it is relative to docs/skills/ (for example ../brand/video.md, ../reference/jsx/html.md, ../guides/motion/easings.md). Keep the content. Check each JSX tag and attribute in its snippets against docs/reference/jsx/*.md and fix anything that does not exist. Keep the closing attribution line.",
+   "docs/INSTRUCTIONS.md lists a third skill: `skills/promo.md` — Product promos, launch videos, explainers and motion graphics: structure, pacing, animated UI mockups, kinetic type, camera, easing. Use for any promo, launch, explainer, ad or motion-graphics video, including when the user only gives a website.",
+   "docs/skills/editor.md: in the Compositing or Best practices section, add one line telling agents to read ../skills/promo.md (or skills/promo.md, matching the file's link style) before building a promo, launch or motion-graphics video.",
+   "apps/desktop/src/dapi/docs.ts: if it has a fallback text or list that names the skill pages, add promo.md there too.",
+   "Tests: docs.test.ts (or a new focused test) asserts that every page INSTRUCTIONS.md names exists, that promo.md is listed, that every relative link in docs/skills/promo.md resolves to an existing file, and that promo.md contains no 'Diffusion' or 'dapi' text. `npx vitest run` in apps/desktop and in packages/dapi pass."],
+  "tools": "Read the draft; Grep docs/reference/jsx for tag names; Edit/Write; vitest"},
+ {"id": "B", "title": "Better prompt suggestions on the home screen", "dependsOn": [],
+  "files": ["E:/research-clones/hypergen/apps/web/src/components/dashboard/home-view.tsx", "E:/research-clones/hypergen/apps/web/test/web-ui-cleanup.test.ts"],
+  "acceptance": [
+   "home-view.tsx PROMPT_EXAMPLES starts with this outcome-focused promo prompt, which is the proven pattern: 'Create a polished, 30-second product promo video for my website. Use the website's branding and highlight the product's main benefit with animated UI mockups, concise on-screen text, and smooth transitions. End with a clear call to action.' Keep the existing three examples after it. No third-party URLs.",
+   "Tests: extend apps/web/test/web-ui-cleanup.test.ts so it checks the first example is the promo prompt and that no example contains http(s) URLs. `npm test -w @hypergen/web` exits 0 and `../../node_modules/.bin/tsc -p tsconfig.app.json --noEmit` in apps/web is clean."],
+  "tools": "Edit; vitest"}
+]

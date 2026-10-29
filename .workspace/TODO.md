@@ -17,7 +17,10 @@ Legend: [ ] todo · [~] in progress · [x] done · ⏸ waiting on you
 - [x] P6: audit fixes. External links open in the browser, Linux .deb packaging, macOS ad-hoc signing, demo prompts, dead files, agent docs accuracy.
   - [x] Workflow `wf_cc809282-4a4` green (A, B, C targeted tests and package suites pass).
   - [x] Repo-wide gate green (1,733 tests, check, lint); committed and pushed.
-- [ ] CI green on all three OS (Linux .deb fix is part of P6).
+- [x] CI green on all three OS (run 40750032752): test, Windows, macOS, Linux installers.
+- [~] Built-in "Promo and launch videos" skill + better home-screen prompt suggestions.
+  - [x] Workflow green (targeted and package suites, typecheck).
+  - [ ] Repo-wide gate (`npm test`, `check`, `lint`), commit, push, CI.
 
 ## Next
 - [ ] P7: marketing website (dark, glassmorphism, bento grid, animations). ⏸ Waiting for your design links.
