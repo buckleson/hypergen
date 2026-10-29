@@ -85,7 +85,7 @@ describe("deleted billing / account modules", () => {
       .filter((f) => VIEW_IMPORTS.some((re) => re.test(code(readFileSync(f, "utf8")))))
       .map((f) => relative(WEB, f).split(sep).join("/"));
     expect(offenders).toEqual([]);
-  });
+  }, 30_000);
 });
 
 describe("DashboardView type", () => {

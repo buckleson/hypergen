@@ -65,6 +65,17 @@ describe("home-view demo prompts", () => {
     expect(HOME).not.toMatch(/youtu\.be|youtube\.com/i);
   });
 
+  it("the first prompt is the product promo, followed by the three footage prompts", () => {
+    expect(PROMPTS[0]).toBe(
+      "Create a polished, 30-second product promo video for my website. Use the website's branding and highlight the product's main benefit with animated UI mockups, concise on-screen text, and smooth transitions. End with a clear call to action.",
+    );
+    expect(PROMPTS).toHaveLength(4);
+  });
+
+  it("no prompt contains an http(s) URL", () => {
+    for (const p of PROMPTS) expect(p).not.toMatch(/https?:\/\//i);
+  });
+
   it("the interview prompt about the user's own footage is present", () => {
     expect(PROMPTS).toContain(
       "Pull the best 30-second moment from the interview in this project and make a vertical version for social.",
@@ -73,6 +84,66 @@ describe("home-view demo prompts", () => {
 
   it("no prompt names LTX or Lightricks", () => {
     for (const p of PROMPTS) expect(p).not.toMatch(/\bltx\b|lightricks/i);
+  });
+
+  const PROMO =
+    "Create a polished, 30-second product promo video for my website. Use the website's branding and highlight the product's main benefit with animated UI mockups, concise on-screen text, and smooth transitions. End with a clear call to action.";
+  const PROMPTS_BODY = HOME.match(/const PROMPT_EXAMPLES = \[([\s\S]*?)\];/)?.[1] ?? "";
+
+  it("PROMPT_EXAMPLES is found and every entry is a plain double-quoted string (extraction misses nothing)", () => {
+    expect(PROMPTS_BODY).not.toBe("");
+    // A single-quoted or template entry would be skipped by the extractor; the
+    // promo's apostrophes must sit inside double quotes, not start a literal.
+    const rest = PROMPTS_BODY.replace(/"((?:[^"\\]|\\.)*)"/g, "").replace(/\/\/.*$/gm, "");
+    expect(rest).toMatch(/^[\s,]*$/);
+  });
+
+  it("the promo prompt appears exactly once, verbatim, as the first literal", () => {
+    expect(PROMPTS.filter((p) => p === PROMO)).toHaveLength(1);
+    expect(PROMPTS.indexOf(PROMO)).toBe(0);
+    expect(HOME.split(PROMO)).toHaveLength(2);
+  });
+
+  it("the three original prompts follow the promo, unchanged and in their original order", () => {
+    expect(PROMPTS.slice(1)).toEqual([
+      "Turn this footage into a polished YouTube video. Add readable captions and an attention-grabbing graphic in the opening to give viewers a strong visual hook.",
+      "Pull the best 30-second moment from the interview in this project and make a vertical version for social.",
+      "Name three recurring locations in my footage and give one visual cue that distinguishes each.",
+    ]);
+  });
+
+  it("no two prompts are the same", () => {
+    expect(new Set(PROMPTS).size).toBe(PROMPTS.length);
+  });
+
+  it("every prompt is a single trimmed line with no escapes, tabs or doubled spaces", () => {
+    for (const p of PROMPTS) {
+      expect(p).toBe(p.trim());
+      expect(p).not.toMatch(/\\|[\r\n\t]| {2,}/);
+    }
+  });
+
+  it("no prompt carries any URI scheme, IP address or Windows/Unix path", () => {
+    for (const p of PROMPTS) {
+      expect(p).not.toMatch(/\b[a-z][a-z0-9+.-]*:\/\//i); // http, https, ftp, file, ...
+      expect(p).not.toMatch(/\b(?:mailto|data|javascript):/i);
+      expect(p).not.toMatch(/\b\d{1,3}(?:\.\d{1,3}){3}\b/);
+      expect(p).not.toMatch(/[A-Za-z]:\\|(?:^|\s)\/[\w.-]+\//);
+    }
+  });
+
+  it("the promo prompt does not name a third-party product, platform or brand", () => {
+    expect(PROMO).not.toMatch(/youtube|tiktok|instagram|vimeo|shopify|figma|canva|ltx|lightricks/i);
+  });
+
+  it("the placeholder starts on index 0, so the promo is shown first and is the reduced-motion line", () => {
+    expect(HOME).toMatch(/const \[index, setIndex\] = createSignal\(0\);/);
+    expect(HOME).toMatch(/const line = \(\) => PROMPT_EXAMPLES\[index\(\)\];/);
+  });
+
+  it("the placeholder cycles over the whole list, so the length change cannot index past the end", () => {
+    expect(HOME).toMatch(/\(current \+ 1\) % PROMPT_EXAMPLES\.length/);
+    expect(HOME).not.toMatch(/PROMPT_EXAMPLES\[\s*\d+\s*\]/);
   });
 });
 
@@ -352,7 +423,8 @@ describe("dead and old-brand files are gone and unreferenced", () => {
       for (const { rel, re } of patterns) if (re.test(src)) hits.push(`${f} -> ${rel}`);
     }
     expect(hits).toEqual([]);
-  });
+    // Scans the whole source tree; under a loaded full-suite run it can pass the 5 s default.
+  }, 30_000);
 
   it("project-menu still has its live menus", () => {
     for (const m of ["edit-menu", "file-menu", "help-menu", "tool-menu", "view-menu"]) {

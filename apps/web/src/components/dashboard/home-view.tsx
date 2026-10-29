@@ -87,6 +87,7 @@ const MENU_PROJECTS = 8;
 
 /** The edits the placeholder cycles through, one whole line at a time. */
 const PROMPT_EXAMPLES = [
+  "Create a polished, 30-second product promo video for my website. Use the website's branding and highlight the product's main benefit with animated UI mockups, concise on-screen text, and smooth transitions. End with a clear call to action.",
   "Turn this footage into a polished YouTube video. Add readable captions and an attention-grabbing graphic in the opening to give viewers a strong visual hook.",
   "Pull the best 30-second moment from the interview in this project and make a vertical version for social.",
   "Name three recurring locations in my footage and give one visual cue that distinguishes each.",

@@ -49,6 +49,7 @@ How to confirm a change actually produced what you intended. A clean save does n
 - To cut an object out of footage, or confine an effect to it, track it with `generate`'s local `sam-2.1` model (preview the prompt first, see [sam-2.1](../reference/tools/segment.md)) and name the mask file in a `<mask>` under the clip's `<effect>`. The track runs as a job: keep working, and poll `job` until it has succeeded before naming the mask.
 - For motion graphics, overlays and UI-heavy graphics, the `<html>` tag driven by a paused [anime.js](https://animejs.com) timeline
 - Before animating anything, read the [easings reference](../guides/motion/easings.md) and choose easings deliberately — default or linear easing is what makes motion read as a slideshow.
+- Before building a promo, launch or motion-graphics video, read the [promo playbook](promo.md) and follow it.
 - For tasks that don't need an editing UI, keep the app in the background: from a shell, `hypergen open -b <dir>` launches it that way. Over MCP the app is already running, and `open` only opens the folder.
 - Only render (export) the result when prompted.
 - Start with a fresh project.

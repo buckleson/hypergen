@@ -6,3 +6,4 @@ Before starting on the work itself, read the skill page that covers it, and foll
 
 - `skills/editor.md` (the default) — Understand and edit footage with Hypergen: analyze video/audio/images and compose video compositions. Use for any media analysis or video editing task.
 - `skills/watch.md` — Watch and understand footage with Hypergen: answer questions about a video or audio file, summarize it, find scenes and moments, pull quotes, and describe what happens and when. Use whenever the user asks what's in a piece of footage, wants a summary or recap, wants to locate a moment, or needs a claim about a video or audio file checked.
+- `skills/promo.md` — Product promos, launch videos, explainers and motion graphics: structure, pacing, animated UI mockups, kinetic type, camera, easing. Use for any promo, launch, explainer, ad or motion-graphics video, including when the user only gives a website.

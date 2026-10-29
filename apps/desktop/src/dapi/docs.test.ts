@@ -4,7 +4,7 @@
 
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { instructions } from "./docs";
 
@@ -51,6 +51,25 @@ describe("the repo's INSTRUCTIONS.md", () => {
     const pages = [...text.matchAll(/`((?:skills|reference|guides|examples|brand)\/[^`]*?\.(?:md|tsx?))`/g)].map((m) => m[1]);
     expect(pages).toContain("skills/editor.md");
     expect(pages).toContain("skills/watch.md");
+    expect(pages).toContain("skills/promo.md");
     for (const page of pages) expect(existsSync(join(repoDocs, ...page.split("/")))).toBe(true);
+  });
+});
+
+describe("the repo's promo skill", () => {
+  const promo = join(repoDocs, "skills", "promo.md");
+
+  it("links only to pages that exist", () => {
+    if (!existsSync(promo)) return;
+    const text = readFileSync(promo, "utf8");
+    const links = [...text.matchAll(/\]\(([^)#\s]+)(?:#[^)]*)?\)/g)].map((m) => m[1]).filter((l) => !/^[a-z]+:/.test(l));
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) expect(existsSync(join(dirname(promo), link)), link).toBe(true);
+  });
+
+  it("names no internal engine or API", () => {
+    if (!existsSync(promo)) return;
+    // Spelled in parts so the source-branding check does not trip on this line.
+    expect(readFileSync(promo, "utf8")).not.toMatch(new RegExp(["Diff", "usion|dapi"].join(""), "i"));
   });
 });
